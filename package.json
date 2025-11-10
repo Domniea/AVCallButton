@@ -1,5 +1,5 @@
 {
-  "name": "AVCallButton",
+  "name": "avcallbutton",
   "private": true,
   "scripts": {
     "build": "turbo run build",

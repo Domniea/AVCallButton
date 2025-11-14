@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 3.3.0",
+    "appVersionSource": "remote",
+    "promptToConfigurePushNotifications": false
+  },
+  "build": {
+    "development": {
+      "channel": "develop",
+      "distribution": "internal",
+      "developmentClient": true,
+      "env": {
+        "APP_ENV": "development",
+        "FIREBASE_ENV": "dev"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "channel": "production",
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "APP_ENV": "production",
+        "FIREBASE_ENV": "prod"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

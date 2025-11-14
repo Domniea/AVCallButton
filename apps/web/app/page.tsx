@@ -4,7 +4,7 @@ export default function Home() {
   console.log('home')
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <h1 style={{color:'red'}}>test</h1>
+      <h1 style={{color:'red'}}>AV Call Button</h1>
       {/* <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <Image
           className="dark:invert"

@@ -15,23 +15,18 @@ end
 platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 # -------------------------------------------------------
-# REMOVE global modular headers (BREAKS Expo autolinking)
-# -------------------------------------------------------
-# use_modular_headers!   ❌ REMOVE THIS LINE
-
-# -------------------------------------------------------
 # Modular headers ONLY for Firebase pods
 # -------------------------------------------------------
 $FirebaseHeaderSettings = {
-  'GoogleUtilities' => :modular_headers,
-  'FirebaseCore' => :modular_headers,
-  'FirebaseCoreInternal' => :modular_headers,
-  'FirebaseCoreExtension' => :modular_headers,
-  'FirebaseInstallations' => :modular_headers,
-  'FirebaseSessions' => :modular_headers,
-  'GoogleDataTransport' => :modular_headers,
-  'nanopb' => :modular_headers,
-  'FirebaseAnalytics' => :modular_headers
+  'GoogleUtilities'          => :modular_headers,
+  'FirebaseCore'             => :modular_headers,
+  'FirebaseCoreInternal'     => :modular_headers,
+  'FirebaseCoreExtension'    => :modular_headers,
+  'FirebaseInstallations'    => :modular_headers,
+  'FirebaseSessions'         => :modular_headers,
+  'GoogleDataTransport'      => :modular_headers,
+  'nanopb'                   => :modular_headers,
+  'FirebaseAnalytics'        => :modular_headers
 }
 
 # -------------------------------------------------------
@@ -76,7 +71,7 @@ target 'AVCallButtonDev' do
   end
 
   # -------------------------------------------------------
-  # Post-install — required for Expo + Firebase + M1/M2 Macs
+  # Post-install — required for Expo + Firebase + Apple Silicon
   # -------------------------------------------------------
   post_install do |installer|
     react_native_post_install(
@@ -88,7 +83,7 @@ target 'AVCallButtonDev' do
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # Fix arm64 simulator builds on Apple Silicon
+        # Fix arm64 simulator builds on M1/M2/M3 Macs
         config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       end
     end

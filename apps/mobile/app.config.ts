@@ -128,9 +128,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       url: "https://u.expo.dev/b7cd66fa-aadd-43f7-a2fc-04824e60cd46"
     },
 
-    runtimeVersion: {
-      policy: "appVersion"
-    },
+    runtimeVersion: "1.0.0",
 
     web: {
       favicon: "./assets/favicon.png"

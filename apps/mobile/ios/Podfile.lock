@@ -2746,13 +2746,16 @@ DEPENDENCIES:
   - "FBLazyVector (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/Libraries/FBLazyVector`)"
   - FirebaseAnalytics
   - FirebaseCore
+  - FirebaseCoreExtension
   - FirebaseCoreInternal
   - FirebaseInstallations
   - FirebaseSessions
   - "fmt (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/third-party-podspecs/fmt.podspec`)"
   - "glog (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/third-party-podspecs/glog.podspec`)"
+  - GoogleDataTransport
   - GoogleUtilities
   - "hermes-engine (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)"
+  - nanopb
   - "RCT-Folly (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)"
   - "RCTDeprecation (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)"
   - "RCTRequired (from `../../../node_modules/.pnpm/react-native@0.81.5_@babel+core@7.28.5_@types+react@19.2.2_react@19.1.0/node_modules/react-native/Libraries/Required`)"
@@ -3132,6 +3135,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 728df40394d49f3f471688747cf558158b3a3bd1
 
-PODFILE CHECKSUM: ca99d3289091a046cd992f7aa6d16828c60f376f
+PODFILE CHECKSUM: 827cc5d32b3e730fd85c47e40e173bcafade7442
 
 COCOAPODS: 1.16.2

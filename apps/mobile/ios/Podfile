@@ -15,16 +15,22 @@ end
 platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 
 # -------------------------------------------------------
-# REQUIRED for Firebase Swift modules (GoogleUtilities)
+# REMOVE global modular headers (BREAKS Expo autolinking)
 # -------------------------------------------------------
-use_modular_headers!
+# use_modular_headers!   ❌ REMOVE THIS LINE
 
+# -------------------------------------------------------
+# Modular headers ONLY for Firebase pods
+# -------------------------------------------------------
 $FirebaseHeaderSettings = {
   'GoogleUtilities' => :modular_headers,
   'FirebaseCore' => :modular_headers,
   'FirebaseCoreInternal' => :modular_headers,
+  'FirebaseCoreExtension' => :modular_headers,
   'FirebaseInstallations' => :modular_headers,
   'FirebaseSessions' => :modular_headers,
+  'GoogleDataTransport' => :modular_headers,
+  'nanopb' => :modular_headers,
   'FirebaseAnalytics' => :modular_headers
 }
 

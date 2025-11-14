@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "622762667528",
+    "project_id": "avcallbutton-dev",
+    "storage_bucket": "avcallbutton-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622762667528:android:c0bde80c327a8395d36bbd",
+        "android_client_info": {
+          "package_name": "com.domniea.avcallbutton.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApSE2oJVP13R07QSVIna3qDZ0S55MTanU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

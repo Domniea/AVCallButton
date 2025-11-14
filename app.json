@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "ee758bf6-98a1-4e22-9fda-0f0e8a862eaf"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.avcallbutton.dev",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

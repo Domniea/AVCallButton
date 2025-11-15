@@ -1,5 +1,5 @@
 {
   "extends": "../../packages/typescript-config/react-native.json",
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "react-native.config.js", "metro.config.js"],
   "exclude": ["node_modules"]
 }

@@ -2,20 +2,30 @@
   "name": "mobile",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "dev": "expo start",
-    "start:dev": "APP_ENV=development expo start",
-    "start:prod": "APP_ENV=production expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
-    "lint": "eslint . --max-warnings=0",
-    "check-types": "tsc --noEmit"
-  },
+"scripts": {
+  "dev": "expo start --dev-client",
+  "start:dev": "APP_ENV=development expo start --dev-client",
+  "start:prod": "APP_ENV=production expo start --dev-client",
+  "ios": "expo run:ios",
+  "android": "expo run:android",
+  "web": "expo start --web",
+  "prebuild:dev": "APP_ENV=development expo prebuild --clean",
+  "prebuild:prod": "APP_ENV=production expo prebuild --clean",
+  "reset": "expo start --dev-client --clear",
+  "lint": "eslint . --max-warnings=0",
+  "check-types": "tsc --noEmit"
+},
   "dependencies": {
     "@react-native-firebase/analytics": "^23.5.0",
     "@react-native-firebase/app": "^23.5.0",
+    "@react-native-firebase/auth": "^23.5.0",
+    "@react-native-firebase/crashlytics": "^23.5.0",
+    "@react-native-firebase/firestore": "^23.5.0",
+    "@react-native-firebase/messaging": "^23.5.0",
+    "@react-native-firebase/remote-config": "^23.5.0",
+    "@react-native-firebase/storage": "^23.5.0",
     "expo": "~54.0.23",
+    "expo-build-properties": "^1.0.9",
     "expo-dev-client": "~6.0.17",
     "expo-status-bar": "~3.0.8",
     "expo-updates": "~29.0.12",
@@ -24,6 +34,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@types/node": "^24.10.1",
     "@types/react": "^19.2.4"
   }
 }

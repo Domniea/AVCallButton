@@ -33,6 +33,8 @@ export const config = [
     rules: {
       ...pluginReactHooks.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
+       "no-undef": "off",
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
 ];

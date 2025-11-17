@@ -6,6 +6,7 @@
     "ios:16e": "pnpm ios --simulator 'iPhone 16e'",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "ios:17": "npx react-native run-ios --simulator='iPhone 17 Pro Max (26.0)'",
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest"

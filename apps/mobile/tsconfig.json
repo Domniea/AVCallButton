@@ -1,20 +1,10 @@
 {
-  "extends": "../../packages/typescript-config/react-native.json",
+  "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "metro.config.cjs",
-    "react-native.config.js"
-  ],
-  "exclude": [
-  "node_modules",
-  "Pods",
-  "metro.config.js",
-  "metro.config.cjs"
-  ]
+  "include": ["src"]
 }

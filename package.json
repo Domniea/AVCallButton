@@ -3,10 +3,10 @@
   "private": true,
   "packageManager": "yarn@1.22.22",
   "workspaces": [
-  "apps/*",
-  "packages/ui",
-  "packages/eslint-config",
-  "packages/typescript-config"
+    "apps/*",
+    "packages/ui",
+    "packages/eslint-config",
+    "packages/typescript-config"
   ],
   "scripts": {
     "dev": "turbo run dev --parallel",
@@ -16,6 +16,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "babel-plugin-module-resolver": "^5.0.2",
     "prettier": "^3.1.1",
     "turbo": "^2.6.0",
     "typescript": "^5.2.2"

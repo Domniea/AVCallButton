@@ -2,12 +2,18 @@
   "name": "avcallbutton",
   "private": true,
   "packageManager": "yarn@1.22.22",
+
+  "react-native": {
+    "appWorkingDirectory": "apps/mobile"
+  },
+
   "workspaces": [
     "apps/*",
     "packages/ui",
     "packages/eslint-config",
     "packages/typescript-config"
   ],
+
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
@@ -15,6 +21,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "check-types": "turbo run check-types"
   },
+
   "devDependencies": {
     "babel-plugin-module-resolver": "^5.0.2",
     "prettier": "^3.1.1",

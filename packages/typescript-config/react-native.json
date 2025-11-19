@@ -7,6 +7,8 @@
     "allowJs": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "types": ["react", "react-native", "node"]
   },
   "include": ["**/*.ts", "**/*.tsx"]

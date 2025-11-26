@@ -42,7 +42,8 @@ export const tokens = {
   },
 
   fonts: {
-    heading: { value: "ApexMk2-BoldExtended" },
-    body:    { value: "ApexM2" },
+    heading: { value: "System" },
+    body:    { value: "System" },
+    mono:    { value: "monospace" },
   },
 };

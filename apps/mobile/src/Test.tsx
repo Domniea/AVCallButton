@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, View } from "react-native";
-// import { Box } from "native-base";
+import { Box, Button, Center, Input } from "native-base";
 
 export default function Test() {
   return (
-    <View style={{flex: 1}}>
-      <Text>Hello from UI</Text>
-    </View>
+    <Box style={{flex: 1, justifyContent: 'center'}}>
+      <Button >Hello from UI</Button>
+    </Box>
   );
 }

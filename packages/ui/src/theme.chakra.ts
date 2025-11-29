@@ -1,18 +1,9 @@
-import { createSystem, defineConfig } from "@chakra-ui/react";
-import { tokens } from "./tokens";
-
+import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
+import { webTokens } from "./tokens/web"
 const config = defineConfig({
   theme: {
-    tokens: {
-      colors: tokens.colors,
-      radii: tokens.radii,
-      spacing: tokens.spacing,
-      fonts: {
-        heading: tokens.fonts.heading,
-        body: tokens.fonts.body,
-      },
-    },
-  },
-});
+    ...webTokens,
+  }
+})
 
-export const chakraTheme = createSystem(config);
+export const system = createSystem(defaultConfig, config)

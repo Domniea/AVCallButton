@@ -1,21 +1,42 @@
+// import { theme as nbTheme } from "native-base";
+// import type { ITheme } from "native-base";
+// import { mobileTokens } from "./tokens/mobile";
+
+// export const nativeTheme: ITheme = {
+//   ...nbTheme,
+//   colors: mobileTokens.colors,
+//   space: mobileTokens.spacing,
+//   radii: mobileTokens.radii,
+//   shadows: mobileTokens.shadows,
+//   fontSizes: mobileTokens.fontSizes,
+//   fonts: {
+//     heading: mobileTokens.fonts.heading,
+//     body: mobileTokens.fonts.body,
+//     mono: mobileTokens.fonts.mono,
+//   },
+// };
+
+
 import { theme as nbTheme } from "native-base";
 import type { ITheme } from "native-base";
-import { tokens } from "./tokens";
-import { convertTokensToNativeBase } from "./convertTokens";
-
-// Build overrides from your design tokens
-const overrides = {
-  colors: convertTokensToNativeBase(tokens.colors),
-  radii: convertTokensToNativeBase(tokens.radii),
-  space: convertTokensToNativeBase(tokens.spacing),
-  fonts: {
-    heading: tokens.fonts.heading.value,
-    body: tokens.fonts.body.value,
-    mono: tokens.fonts.mono.value,
-  } as any ,
-};
+import { mobileTokens } from "./tokens/mobile";
 
 export const nativeTheme: ITheme = {
   ...nbTheme,
-  ...overrides,
+
+  colors: mobileTokens.colors,
+  space: mobileTokens.spacing,
+  radii: mobileTokens.radii,
+  fontSizes: mobileTokens.fontSizes,
+
+  fonts: {
+    heading: mobileTokens.fonts.heading,
+    body: mobileTokens.fonts.body,
+    mono: mobileTokens.fonts.mono,
+  },
+  
+  shadows: {
+    ...nbTheme.shadows,
+    ...mobileTokens.shadows,
+  },
 };

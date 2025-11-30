@@ -1,4 +1,5 @@
 export const shadows = {
+  // Strong elevated card (ex: BaseCard, modals, buttons)
   card: {
     shadowColor: "#000",
     shadowOpacity: 0.14,
@@ -7,6 +8,7 @@ export const shadows = {
     elevation: 6,
   },
 
+  // Surface-level containers (ex: elevated panels, sheets)
   surface: {
     shadowColor: "#000",
     shadowOpacity: 0.10,
@@ -15,9 +17,21 @@ export const shadows = {
     elevation: 3,
   },
 
-  inset: {
-    // RN doesn't support inset shadows natively
+  // NativeBase requires this key to exist or merging fails
+  none: {
     shadowColor: "transparent",
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
+    elevation: 0,
+  },
+
+  // RN has no true inset shadows, but you should *define it safely*
+  inset: {
+    shadowColor: "transparent",
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
     elevation: 0,
   },
 };

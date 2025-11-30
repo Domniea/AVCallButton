@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, IButtonProps, Text } from "native-base";
+import { Box, Button, IButtonProps, Text } from "native-base";
 
 type ButtonVariant = "primary" | "secondary" | "tertiary";
 
@@ -21,6 +21,7 @@ const variants = {
     pressed: "button.primary.hover-bg",
     border: "transparent",
     borderWidth: 0,
+    shadow: "card",
   },
   secondary: {
     bg: "button.secondary.bg",
@@ -28,6 +29,7 @@ const variants = {
     pressed: "button.secondary.hover-bg",
     border: "button.secondary.border",
     borderWidth: 1,
+    shadow: "surface",
   },
   tertiary: {
     bg: "transparent",
@@ -35,14 +37,15 @@ const variants = {
     pressed: "button.tertiary.hover-bg",
     border: "transparent",
     borderWidth: 0,
+    shadow: "none",
   },
 };
 
 export const BaseButton: React.FC<BaseButtonProps> = ({
   title,
   variety = "primary",
-  btnHeight,           // optional override
-  btnWidth = "100%",   // default full width
+  btnHeight,
+  btnWidth = "100%",
   center,
   leftIcon,
   rightIcon,
@@ -51,39 +54,36 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
 }) => {
   const v = variants[variety];
 
-  const DEFAULT_TEXT_SIZE = "lg";
-  const DEFAULT_PY = 4;
-  const DEFAULT_PX = 6;
-
   return (
-    <Button
-      alignSelf={center ? "center" : undefined}
+    <Box
       width={btnWidth}
-      height={btnHeight}
-      bg={v.bg}
-      borderWidth={v.borderWidth}
-      borderColor={v.border}
+      alignSelf={center ? "center" : undefined}
+      shadow={v.shadow}     // ← shadow HERE, not on Button
       borderRadius="xl"
-      py={DEFAULT_PY}
-      px={DEFAULT_PX}
-      my='md'
-      _pressed={{ bg: v.pressed }}
-      leftIcon={leftIcon}
-      rightIcon={rightIcon}
-      {...rest}
     >
-      {children ? (
-        children
-      ) : (
-        <Text
-          color={v.fg}
-          fontFamily="heading"
-          fontSize={DEFAULT_TEXT_SIZE}
-          textAlign="center"
-        >
-          {title}
-        </Text>
-      )}
-    </Button>
+      <Button
+        width="100%"
+        height={btnHeight}
+        bg={v.bg}
+        borderWidth={v.borderWidth}
+        borderColor={v.border}
+        borderRadius="xl"
+        overflow="visible"
+        py="4"
+        px="6"
+        _pressed={{ bg: v.pressed }}
+        leftIcon={leftIcon}
+        rightIcon={rightIcon}
+        {...rest}
+      >
+        {children ? (
+          children
+        ) : (
+          <Text fontFamily="heading" color={v.fg} fontSize="xl" textAlign="center">
+            {title}
+          </Text>
+        )}
+      </Button>
+    </Box>
   );
 };

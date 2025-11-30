@@ -5,6 +5,7 @@ import { convertRadiiForChakra } from "../../convertTokens";
 import { fontSizes } from "./fontSizes";
 import { breakpoints } from "./breakpoints";
 import { webSpacing } from "./spacing";
+import { webShadows } from "./shadows";
 
 export const webTokens = {
   tokens: {
@@ -12,6 +13,23 @@ export const webTokens = {
     spacing: foundation.spacing,
     fonts: foundation.fonts,
     radii: convertRadiiForChakra(foundation.radii),
+  //   shadows: {
+  //       outline: { value: "0 4px 14px rgba(87,115,255,0.45)" },
+  //   },
+  //         card: {
+  //   value: {
+  //     _light: "0 4px 12px rgba(0,0,0,0.14)",
+  //     _dark: "0 4px 12px rgba(0,0,0,0.40)",
+  //   },
+  // }
+    shadows: {
+      card: {
+    value: {
+      _light: "0 4px 12px rgba(0,0,0,0.14)",
+      _dark: "0 4px 12px rgba(0,0,0,0.40)",
+    },
+  },
+    }
   },
 
   semanticTokens,
@@ -27,5 +45,7 @@ export const webTokens = {
   fontSizes: Object.fromEntries(
     Object.entries(fontSizes).map(([k, v]) => [k, v.value])
   ),
+
+    // shadows: webShadows, 
 };
 

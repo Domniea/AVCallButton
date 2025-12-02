@@ -13,27 +13,22 @@ export const webTokens = {
     spacing: foundation.spacing,
     fonts: foundation.fonts,
     radii: convertRadiiForChakra(foundation.radii),
-  //   shadows: {
-  //       outline: { value: "0 4px 14px rgba(87,115,255,0.45)" },
-  //   },
-  //         card: {
-  //   value: {
-  //     _light: "0 4px 12px rgba(0,0,0,0.14)",
-  //     _dark: "0 4px 12px rgba(0,0,0,0.40)",
-  //   },
-  // }
     shadows: {
-      card: {
-    value: {
-      _light: "0 4px 12px rgba(0,0,0,0.14)",
-      _dark: "0 4px 12px rgba(0,0,0,0.40)",
-    },
-  },
+        outline: { value: "0 4px 14px rgba(87,115,255,0.45)" },
     }
   },
 
-  semanticTokens,
-
+  // semanticTokens: {
+  //   shadows: {
+  //     card: {
+  //       value: {
+  //         _light: "0 4px 12px rgba(0,0,0,0.14)",
+  //         _dark: "0 4px 12px rgba(55,55,55.40)",
+  //   },
+  // },
+  //   }
+  // },
+semanticTokens,
   breakpoints: Object.fromEntries(
     Object.entries(breakpoints).map(([k, v]) => [k, v.value])
   ),

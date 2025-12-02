@@ -1,16 +1,237 @@
+// import { shadows } from "./foundation";
+
+// export const semanticTokens = {
+//   colors: {
+//     /* TEXT */
+//     text: {
+//       value: {
+//         _light: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.50}",
+//       },
+//     },
+
+//     "text-muted": {
+//       value: {
+//         base: "{colors.tertiary.400}",
+//         _dark: "{colors.tertiary.300}",
+//       },
+//     },
+
+//     /* BACKGROUNDS */
+//     bg: {
+//       value: {
+//         base: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.900}",
+//       },
+//     },
+
+//     "bg-muted": {
+//       value: {
+//         base: "{colors.tertiary.100}",
+//         _dark: "{colors.tertiary.800}",
+//       },
+//     },
+
+//     /* BORDERS */
+//     border: {
+//       value: {
+//         base: "{colors.secondary.300}",
+//         _dark: "{colors.secondary.700}",
+//       },
+//     },
+
+//     "border-muted": {
+//       value: {
+//         base: "{colors.secondary.100}",
+//         _dark: "{colors.secondary.800}",
+//       },
+//     },
+
+//     /* BUTTONS — PRIMARY */
+//     "button.primary.bg": {
+//       value: {
+//         base: "{colors.primary.500}",
+//         _dark: "{colors.primary.500}",
+//       },
+//     },
+
+//     "button.primary.fg": {
+//       value: {
+//         base: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.50}",
+//       },
+//     },
+
+//     "button.primary.hover-bg": {
+//       value: {
+//         base: "{colors.primary.600}",
+//         _dark: "{colors.primary.600}",
+//       },
+//     },
+
+//     /* BUTTONS — SECONDARY */
+//     "button.secondary.bg": {
+//       value: {
+//         base: "transparent",
+//         _dark: "transparent",
+//       },
+//     },
+
+//     "button.secondary.fg": {
+//       value: {
+//         base: "{colors.primary.500}",
+//         _dark: "{colors.accent.600}",
+//       },
+//     },
+
+//     "button.secondary.border": {
+//       value: {
+//         base: "{colors.primary.500}",
+//         _dark: "{colors.accent.600}",
+//       },
+//     },
+
+//     "button.secondary.hover-bg": {
+//       value: {
+//         base: "rgba(1,121,111,0.06)",
+//         _dark: "rgba(69,255,212,0.10)",
+//       },
+//     },
+
+//     /* BUTTONS — TERTIARY */
+//     "button.tertiary.fg": {
+//       value: {
+//         base: "{colors.primary.500}",
+//         _dark: "{colors.accent.600}",
+//       },
+//     },
+
+//     "button.tertiary.hover-bg": {
+//       value: {
+//         base: "rgba(1,121,111,0.08)",
+//         _dark: "rgba(69,255,212,0.08)",
+//       },
+//     },
+
+
+//    "button.primary.shadow": {
+//       value: {
+//         base: "{shadows.card}",
+//         _dark: "{shadows.card}"
+//       }
+//     },
+
+//     "button.secondary.shadow": {
+//       value: {
+//         base: "{shadows.surface}",
+//         _dark: "{shadows.surface}"
+//       }
+//     },
+
+//     "button.tertiary.shadow": {
+//       value: {
+//         base: "none",
+//         _dark: "none"
+//       }
+//     },
+
+
+
+//     /* INPUTS */
+//     "input.bg": {
+//       value: {
+//         base: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.900}",
+//       },
+//     },
+
+//     "input.fg": {
+//       value: {
+//         base: "{colors.tertiary.900}",
+//         _dark: "{colors.tertiary.50}",
+//       },
+//     },
+
+//     "input.border": {
+//       value: {
+//         base: "{colors.primary.500}",
+//         _dark: "{colors.primary.600}",
+//       },
+//     },
+
+//     "input.focus-border": {
+//       value: {
+//         base: "{colors.primary.400}",
+//         _dark: "{colors.accent.600}",
+//       },
+//     },
+
+//     "input.placeholder": {
+//       value: {
+//         base: "{colors.tertiary.400}",
+//         _dark: "{colors.tertiary.300}",
+//       },
+//     },
+
+//     /* SURFACES */
+//     surface: {
+//       value: {
+//         base: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.900}",
+//       },
+//     },
+
+//     "surface-elevated": {
+//       value: {
+//         base: "{colors.tertiary.100}",
+//         _dark: "{colors.tertiary.800}",
+//       },
+//     },
+
+//     /* CARDS */
+//     "card.bg": {
+//       value: {
+//         base: "{colors.tertiary.50}",
+//         _dark: "{colors.tertiary.900}",
+//       },
+//     },
+
+//     "card.border": {
+//       value: {
+//         base: "{colors.secondary.100}",
+//         _dark: "{colors.secondary.800}",
+//       },
+//     },
+
+//     "card.shadow": {
+//       value: {
+//         base: "{colors.glow.blue}",
+//         _dark: "{colors.glow.cyan}",
+//       },
+//     },
+//   },
+//   shadows: {
+//         cardShadow: {
+//         value: {
+//           _light: "0 4px 12px rgba(0,0,0,0.14",
+
+//     },
+//    },
+//   }
+// };
 export const semanticTokens = {
   colors: {
     /* TEXT */
     text: {
       value: {
-        base: "{colors.tertiary.900}",
+        _light: "{colors.primary.900}",
         _dark: "{colors.tertiary.50}",
       },
     },
 
-    "text-muted": {
+    textMuted: {
       value: {
-        base: "{colors.tertiary.400}",
+        _light: "{colors.tertiary.400}",
         _dark: "{colors.tertiary.300}",
       },
     },
@@ -18,14 +239,14 @@ export const semanticTokens = {
     /* BACKGROUNDS */
     bg: {
       value: {
-        base: "{colors.tertiary.50}",
+        _light: "{colors.tertiary.50}",
         _dark: "{colors.tertiary.900}",
       },
     },
 
-    "bg-muted": {
+    bgMuted: {
       value: {
-        base: "{colors.tertiary.100}",
+        _light: "{colors.tertiary.100}",
         _dark: "{colors.tertiary.800}",
       },
     },
@@ -33,140 +254,116 @@ export const semanticTokens = {
     /* BORDERS */
     border: {
       value: {
-        base: "{colors.secondary.300}",
+        _light: "{colors.secondary.300}",
+        _dark: "{colors.secondary.600}",
+      },
+    },
+
+    borderMuted: {
+      value: {
+        _light: "{colors.secondary.100}",
         _dark: "{colors.secondary.700}",
       },
     },
 
-    "border-muted": {
+    /* BUTTON — PRIMARY */
+    buttonPrimaryBg: {
       value: {
-        base: "{colors.secondary.100}",
-        _dark: "{colors.secondary.800}",
-      },
-    },
-
-    /* BUTTONS — PRIMARY */
-    "button.primary.bg": {
-      value: {
-        base: "{colors.primary.500}",
+        _light: "{colors.primary.500}",
         _dark: "{colors.primary.500}",
       },
     },
 
-    "button.primary.fg": {
+    buttonPrimaryFg: {
       value: {
-        base: "{colors.tertiary.50}",
+        _light: "{colors.tertiary.50}",
         _dark: "{colors.tertiary.50}",
       },
     },
 
-    "button.primary.hover-bg": {
+    buttonPrimaryHoverBg: {
       value: {
-        base: "{colors.primary.600}",
+        _light: "{colors.primary.600}",
         _dark: "{colors.primary.600}",
       },
     },
 
-    /* BUTTONS — SECONDARY */
-    "button.secondary.bg": {
+    /* BUTTON — SECONDARY */
+    buttonSecondaryBg: {
       value: {
-        base: "transparent",
+        _light: "transparent",
         _dark: "transparent",
       },
     },
 
-    "button.secondary.fg": {
+    buttonSecondaryFg: {
       value: {
-        base: "{colors.primary.500}",
+        _light: "{colors.primary.500}",
         _dark: "{colors.accent.600}",
       },
     },
 
-    "button.secondary.border": {
+    buttonSecondaryBorder: {
       value: {
-        base: "{colors.primary.500}",
+        _light: "{colors.primary.500}",
         _dark: "{colors.accent.600}",
       },
     },
 
-    "button.secondary.hover-bg": {
+    buttonSecondaryHoverBg: {
       value: {
-        base: "rgba(1,121,111,0.06)",
+        _light: "rgba(1,121,111,0.06)",
         _dark: "rgba(69,255,212,0.10)",
       },
     },
 
-    /* BUTTONS — TERTIARY */
-    "button.tertiary.fg": {
+    /* BUTTON — TERTIARY */
+    buttonTertiaryFg: {
       value: {
-        base: "{colors.primary.500}",
+        _light: "{colors.primary.500}",
         _dark: "{colors.accent.600}",
       },
     },
 
-    "button.tertiary.hover-bg": {
+    buttonTertiaryHoverBg: {
       value: {
-        base: "rgba(1,121,111,0.08)",
+        _light: "rgba(1,121,111,0.08)",
         _dark: "rgba(69,255,212,0.08)",
       },
     },
 
-
-   "button.primary.shadow": {
-      value: {
-        base: "{shadows.card}",
-        _dark: "{shadows.card}"
-      }
-    },
-
-    "button.secondary.shadow": {
-      value: {
-        base: "{shadows.surface}",
-        _dark: "{shadows.surface}"
-      }
-    },
-
-    "button.tertiary.shadow": {
-      value: {
-        base: "none",
-        _dark: "none"
-      }
-    },
-
-
-
     /* INPUTS */
-    "input.bg": {
+    inputBg: {
       value: {
-        base: "{colors.tertiary.50}",
+        _light: "{colors.tertiary.50}",
         _dark: "{colors.tertiary.900}",
       },
     },
 
-    "input.fg": {
+    inputFg: {
       value: {
-        base: "{colors.tertiary.900}",
+        _light: "{colors.tertiary.900}",
         _dark: "{colors.tertiary.50}",
       },
     },
 
-    "input.border": {
+    inputBorder: {
       value: {
-        base: "{colors.primary.500}",
+        _light: "{colors.primary.500}",
         _dark: "{colors.primary.600}",
       },
     },
 
-    "input.focus-border": {
+    inputFocusBorder: {
       value: {
-        base: "{colors.primary.400}",
+        _light: "{colors.primary.400}",
         _dark: "{colors.accent.600}",
       },
     },
 
-    "input.placeholder": {
+    inputPlaceholder: {
       value: {
-        base: "{colors.tertiary.400}",
+        _light: "{colors.tertiary.400}",
         _dark: "{colors.tertiary.300}",
       },
     },
@@ -174,37 +371,92 @@ export const semanticTokens = {
     /* SURFACES */
     surface: {
       value: {
-        base: "{colors.tertiary.50}",
+        _light: "{colors.tertiary.50}",
         _dark: "{colors.tertiary.900}",
       },
     },
 
-    "surface-elevated": {
+    surfaceElevated: {
       value: {
-        base: "{colors.tertiary.100}",
+        _light: "{colors.tertiary.100}",
         _dark: "{colors.tertiary.800}",
       },
     },
 
     /* CARDS */
-    "card.bg": {
+    cardBg: {
       value: {
-        base: "{colors.tertiary.50}",
+        _light: "{colors.tertiary.50}",
         _dark: "{colors.tertiary.900}",
       },
     },
 
-    "card.border": {
+    cardBorder: {
       value: {
-        base: "{colors.secondary.100}",
+        _light: "{colors.secondary.100}",
         _dark: "{colors.secondary.800}",
       },
     },
+  },
 
-    "card.shadow": {
+  /* SHADOWS */
+  shadows: {
+    /* CARD SHADOW */
+    card: {
       value: {
-        base: "{colors.glow.blue}",
-        _dark: "{colors.glow.cyan}",
+        _light: "0 4px 12px rgba(0,0,0,0.14)",
+        _dark: "0 4px 12px rgba(0,0,0,0.40)",
+      },
+    },
+
+    /* BUTTON SHADOWS */
+    buttonPrimary: {
+      value: {
+        _light: "0 4px 14px rgba(87,115,255,0.45)",
+        _dark: "0 4px 14px rgba(87,115,255,0.65)",
+      },
+    },
+
+    buttonSecondary: {
+      value: {
+        _light: "0 4px 12px rgba(0,0,0,0.18)",
+        _dark: "0 4px 12px rgba(0,0,0,0.45)",
+      },
+    },
+
+    buttonTertiary: {
+      value: {
+        _light: "0 0 0 rgba(0,0,0,0)",
+        _dark: "0 0 0 rgba(0,0,0,0)",
+      },
+    },
+
+    /* GENERAL USE */
+    surface: {
+      value: {
+        _light: "0 2px 8px rgba(0,0,0,0.10)",
+        _dark: "0 2px 8px rgba(0,0,0,0.32)",
+      },
+    },
+
+    inset: {
+      value: {
+        _light: "inset 0 2px 4px rgba(0,0,0,0.25)",
+        _dark: "inset 0 2px 4px rgba(0,0,0,0.45)",
+      },
+    },
+
+    subtle: {
+      value: {
+        _light: "0 1px 3px rgba(0,0,0,0.12)",
+        _dark: "0 1px 3px rgba(0,0,0,0.30)",
+      },
+    },
+
+    outer: {
+      value: {
+        _light: "0 6px 20px rgba(0,0,0,0.20)",
+        _dark: "0 6px 20px rgba(0,0,0,0.45)",
       },
     },
   },

@@ -8,9 +8,7 @@ export default function App() {
   console.log(nativeTheme)
   return (
     <NativeBaseProvider theme={nativeTheme}>
-
-        <Test />
-
+      <Test />
     </NativeBaseProvider>
   );
 }

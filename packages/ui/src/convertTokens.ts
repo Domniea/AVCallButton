@@ -1,87 +1,79 @@
-// export function convertTokens(obj: any) {
-//   if (!obj) return obj;
+// function resolveReference(ref: string, foundationColors: any) {
+//   if (!ref.startsWith("{") || !ref.endsWith("}")) return ref;
 
-//   if (obj.value !== undefined && typeof obj.value !== "object") {
-//     return obj.value;
+//   const path = ref.replace("{", "").replace("}", "").split(".");
+//   let current: any = foundationColors;
+
+//   for (const part of path.slice(1)) {
+//     if (!current[part]) return ref;
+//     current = current[part];
 //   }
 
+//   // return the `.value`
+//   return current.value ?? ref;
+// }
+// export function convertTokens(obj: any): any {
+//   if (!obj) return obj;
+
+//   if (obj.value !== undefined) return obj.value;
+
 //   if (typeof obj === "object") {
-//     const output: any = {};
+//     const out: any = {};
 //     for (const key in obj) {
-//       output[key] = convertTokens(obj[key]);
+//       out[key] = convertTokens(obj[key]);
 //     }
-//     return output;
+//     return out;
 //   }
 
 //   return obj;
 // }
 
-// // Pass foundationColors when calling convertSemanticTokens()
-// export function convertSemanticTokens(obj: any, foundationColors: any = {}): any {
+// export function convertSemanticTokens(
+//   semanticColors: any,
+//   foundationColors: any,
+// ) {
 //   const out: Record<string, string> = {};
 
-//   for (const key in obj) {
-//     const entry = obj[key];
+//   for (const key in semanticColors) {
+//     const token = semanticColors[key]?.value;
 
-//     // Must contain "value"
-//     if (!entry || !entry.value) continue;
+//     if (!token) continue;
 
-//     let base = entry.value.base ?? entry.value.default ?? entry.value;
-
-//     // Case: still nested object
-//     if (typeof base === "object") {
-//       base = base.base ?? null;
+//     if (typeof token === "object" && token.base) {
+//       out[key] = resolveReference(token.base, foundationColors);
+//       continue;
 //     }
 
-//     if (typeof base !== "string") continue;
-
-//     // Replace references like `{colors.primary.500}`
-//     if (base.startsWith("{") && base.endsWith("}")) {
-//       const path = base
-//         .replace("{", "")
-//         .replace("}", "")
-//         .split(".");
-
-//       let resolved: any = foundationColors;
-
-//       for (const p of path) {
-//         if (resolved[p]) {
-//           resolved = resolved[p];
-//         }
-//       }
-
-//       if (resolved?.value) {
-//         base = resolved.value;
-//       }
+//     if (typeof token === "string") {
+//       out[key] = resolveReference(token, foundationColors);
 //     }
-
-//     out[key] = base;
 //   }
 
 //   return out;
 // }
 
-// -------------------------------------------------------------
-// 1. Resolve {colors.primary.500} references
-// -------------------------------------------------------------
+
+// --------------------------------------------------
+// Resolve "{colors.primary.500}" → "#01796F"
+// --------------------------------------------------
 function resolveReference(ref: string, foundationColors: any) {
   if (!ref.startsWith("{") || !ref.endsWith("}")) return ref;
 
   const path = ref.replace("{", "").replace("}", "").split(".");
   let current: any = foundationColors;
 
+  // skip the "colors" prefix
   for (const part of path.slice(1)) {
     if (!current[part]) return ref;
     current = current[part];
   }
 
-  // return the `.value`
   return current.value ?? ref;
 }
 
-// -------------------------------------------------------------
-// 2. Convert foundation tokens (keep `.value`)
-// -------------------------------------------------------------
+// --------------------------------------------------
+// Convert base tokens: colors, spacing, radii, etc.
+// --------------------------------------------------
 export function convertTokens(obj: any): any {
   if (!obj) return obj;
 
@@ -98,29 +90,43 @@ export function convertTokens(obj: any): any {
   return obj;
 }
 
+// --------------------------------------------------
+// Convert NEW semantic token format
+//
+// { text: { value: { _light: "{colors.primary.900}", _dark: "{colors.tertiary.50}" } } }
+//
+// → {
+//     text: "#002624",
+//     textDark: "#F2F2F2"
+//   }
+// --------------------------------------------------
 export function convertSemanticTokens(
-  semanticColors: any,
-  foundationColors: any,
+  semanticSection: any,          // semanticTokens.colors or semanticTokens.shadows
+  foundationColors: any          // foundation.colors
 ) {
   const out: Record<string, string> = {};
 
-  for (const key in semanticColors) {
-    const token = semanticColors[key]?.value;
+  for (const key in semanticSection) {
+    const entry = semanticSection[key]?.value;
+    if (!entry || typeof entry !== "object") continue;
 
-    if (!token) continue;
-
-    if (typeof token === "object" && token.base) {
-      out[key] = resolveReference(token.base, foundationColors);
-      continue;
+    // convert light mode
+    if (entry._light) {
+      out[key] = resolveReference(entry._light, foundationColors);
     }
 
-    if (typeof token === "string") {
-      out[key] = resolveReference(token, foundationColors);
+    // convert dark mode
+    if (entry._dark) {
+      out[`${key}Dark`] = resolveReference(entry._dark, foundationColors);
     }
   }
 
   return out;
 }
+
+
+
+
 
 export function convertRadiiForChakra(radii: Record<string, { value: number }>) {
   return Object.fromEntries(

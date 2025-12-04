@@ -13,10 +13,6 @@ export const webTokens = {
     spacing: foundation.spacing,
     fonts: foundation.fonts,
     radii: convertRadiiForChakra(foundation.radii),
-    // shadows: {
-    //     outline: { value: "0 4px 14px rgba(87,115,255,0.45)" },
-    // }
-    shadows: webShadows
   },
 semanticTokens,
   breakpoints: Object.fromEntries(
@@ -30,7 +26,5 @@ semanticTokens,
   fontSizes: Object.fromEntries(
     Object.entries(fontSizes).map(([k, v]) => [k, v.value])
   ),
-
-    // shadows: webShadows, 
 };
 

@@ -1,6 +1,5 @@
 export const semanticTokens = {
   colors: {
-    /* TEXT */
     text: {
       value: {
         _light: "{colors.primary.900}",
@@ -10,16 +9,15 @@ export const semanticTokens = {
 
     textMuted: {
       value: {
-        _light: "{colors.tertiary.400}",
-        _dark: "{colors.tertiary.300}",
+        _light: "{colors.secondary.500}",
+        _dark: "{colors.secondary.300}",
       },
     },
 
-    /* BACKGROUNDS */
     bg: {
       value: {
         _light: "{colors.tertiary.50}",
-        _dark: "{colors.tertiary.900}",
+        _dark: "{colors.primary.900}",
       },
     },
 
@@ -30,22 +28,69 @@ export const semanticTokens = {
       },
     },
 
-    /* BORDERS */
-    border: {
+    surface: {
       value: {
-        _light: "{colors.secondary.300}",
+        _light: "{colors.light.surface}",
+        _dark: "{colors.tertiary.800}",
+      },
+    },
+
+    surfaceElevated: {
+      value: {
+        _light: "{colors.tertiary.100}",
+        _dark: "{colors.tertiary.700}",
+      },
+    },
+
+    cardBg: {
+      value: {
+        _light: "{colors.light.surface}",
         _dark: "{colors.secondary.600}",
       },
     },
 
-    borderMuted: {
+    cardBorder: {
       value: {
-        _light: "{colors.secondary.100}",
+        _light: "{colors.secondary.200}",
         _dark: "{colors.secondary.700}",
       },
     },
 
-    /* BUTTON — PRIMARY */
+    inputBg: {
+      value: {
+        _light: "{colors.light.surface}",
+        _dark: "{colors.tertiary.700}",
+      },
+    },
+
+    inputFg: {
+      value: {
+        _light: "{colors.tertiary.900}",
+        _dark: "{colors.tertiary.50}",
+      },
+    },
+
+    inputBorder: {
+      value: {
+        _light: "{colors.primary.500}",
+        _dark: "{colors.accent.600}",
+      },
+    },
+
+    inputFocusBorder: {
+      value: {
+        _light: "{colors.primary.400}",
+        _dark: "{colors.accent.600}",
+      },
+    },
+
+    inputPlaceholder: {
+      value: {
+        _light: "{colors.secondary.500}",
+        _dark: "{colors.secondary.400}",
+      },
+    },
+
     buttonPrimaryBg: {
       value: {
         _light: "{colors.primary.500}",
@@ -67,7 +112,6 @@ export const semanticTokens = {
       },
     },
 
-    /* BUTTON — SECONDARY */
     buttonSecondaryBg: {
       value: {
         _light: "transparent",
@@ -96,7 +140,6 @@ export const semanticTokens = {
       },
     },
 
-    /* BUTTON — TERTIARY */
     buttonTertiaryFg: {
       value: {
         _light: "{colors.primary.500}",
@@ -110,118 +153,27 @@ export const semanticTokens = {
         _dark: "rgba(69,255,212,0.08)",
       },
     },
-
-    /* INPUTS */
-    inputBg: {
-      value: {
-        _light: "{colors.tertiary.50}",
-        _dark: "{colors.tertiary.900}",
-      },
-    },
-
-    inputFg: {
-      value: {
-        _light: "{colors.tertiary.900}",
-        _dark: "{colors.tertiary.50}",
-      },
-    },
-
-    inputBorder: {
-      value: {
-        _light: "{colors.primary.500}",
-        _dark: "{colors.primary.600}",
-      },
-    },
-
-    inputFocusBorder: {
-      value: {
-        _light: "{colors.primary.400}",
-        _dark: "{colors.accent.600}",
-      },
-    },
-
-    inputPlaceholder: {
-      value: {
-        _light: "{colors.tertiary.400}",
-        _dark: "{colors.tertiary.300}",
-      },
-    },
-
-    /* SURFACES */
-    surface: {
-      value: {
-        _light: "{colors.tertiary.50}",
-        _dark: "{colors.tertiary.900}",
-      },
-    },
-
-    surfaceElevated: {
-      value: {
-        _light: "{colors.tertiary.100}",
-        _dark: "{colors.tertiary.800}",
-      },
-    },
-
-    /* CARDS */
-    cardBg: {
-      value: {
-        _light: "{colors.tertiary.50}",
-        _dark: "{colors.tertiary.900}",
-      },
-    },
-
-    cardBorder: {
-      value: {
-        _light: "{colors.secondary.100}",
-        _dark: "{colors.secondary.800}",
-      },
-    },
   },
 
-  /* SHADOWS */
   shadows: {
-    /* CARD SHADOW */
     card: {
       value: {
-        _light: "0 4px 12px rgba(0,0,0,0.14)",
-        _dark: "0 4px 12px rgba(0,0,0,0.40)",
+        _light: "0 6px 18px rgba(0,0,0,0.15)",
+        _dark: "0 10px 30px rgba(0,0,0,0.60)",
       },
     },
 
-    /* BUTTON SHADOWS */
-    buttonPrimary: {
-      value: {
-        _light: "0 4px 14px rgba(87,115,255,0.45)",
-        _dark: "0 4px 14px rgba(87,115,255,0.65)",
-      },
-    },
-
-    buttonSecondary: {
-      value: {
-        _light: "0 4px 12px rgba(0,0,0,0.18)",
-        _dark: "0 4px 12px rgba(0,0,0,0.45)",
-      },
-    },
-
-    buttonTertiary: {
-      value: {
-        _light: "0 0 0 rgba(0,0,0,0)",
-        _dark: "0 0 0 rgba(0,0,0,0)",
-      },
-    },
-
-    /* GENERAL USE */
     surface: {
       value: {
         _light: "0 2px 8px rgba(0,0,0,0.10)",
-        _dark: "0 2px 8px rgba(0,0,0,0.32)",
+        _dark: "0 4px 16px rgba(0,0,0,0.45)",
       },
     },
 
     inset: {
       value: {
-        _light: "inset 0 2px 4px rgba(0,0,0,0.25)",
-        _dark: "inset 0 2px 4px rgba(0,0,0,0.45)",
+        _light: "inset 0 2px 4px rgba(0,0,0,0.20)",
+        _dark: "inset 0 2px 4px rgba(0,0,0,0.40)",
       },
     },
 
@@ -234,8 +186,38 @@ export const semanticTokens = {
 
     outer: {
       value: {
-        _light: "0 6px 20px rgba(0,0,0,0.20)",
-        _dark: "0 6px 20px rgba(0,0,0,0.45)",
+        _light: "0 8px 24px rgba(0,0,0,0.18)",
+        _dark: "0 8px 24px rgba(0,0,0,0.50)",
+      },
+    },
+
+    /* NEW REQUIRED SHADOWS */
+buttonPrimaryShadow: {
+  value: {
+    _light: "0 3px 10px rgba(0,0,0,0.22)",
+    _dark:  "0 4px 14px rgba(0,0,0,0.55), 0 0 8px rgba(69,255,212,0.35)",
+  },
+},
+
+
+    buttonSecondaryShadow: {
+      value: {
+        _light: "0 3px 10px rgba(0,0,0,0.18)",
+        _dark: "0 3px 12px rgba(0,0,0,0.40)",
+      },
+    },
+
+    buttonTertiaryShadow: {
+      value: {
+        _light: "0 0 0 rgba(0,0,0,0)",
+        _dark: "0 0 0 rgba(0,0,0,0)",
+      },
+    },
+
+    inputShadow: {
+      value: {
+        _light: "inset 0 1px 2px rgba(0,0,0,0.12)",
+        _dark: "inset 0 1px 2px rgba(0,0,0,0.35)",
       },
     },
   },

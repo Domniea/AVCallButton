@@ -3,7 +3,8 @@ import { webTokens } from "./tokens/web"
 const config = defineConfig({
   theme: {
     ...webTokens,
-  }
+  },
+  
 })
 
 export const system = createSystem(defaultConfig, config)

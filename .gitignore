@@ -42,3 +42,8 @@ yarn-error.*
 
 # build outputs
 build/
+
+#nextjs
+.next/
+.vercel
+.env*.local

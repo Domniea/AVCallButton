@@ -1,64 +1,22 @@
 export const shadows = {
+  // === CARD ===
   card: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    elevation: 10,
   },
+
   cardDark: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.40,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.60,
+    shadowRadius: 30,
+    elevation: 20,
   },
 
-  buttonPrimary: {
-    shadowColor: "rgba(87,115,255,1)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
-    elevation: 6,
-  },
-  buttonPrimaryDark: {
-    shadowColor: "rgba(87,115,255,1)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.65,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-
-  buttonSecondary: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  buttonSecondaryDark: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 12,
-    elevation: 7,
-  },
-
-  buttonTertiary: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  buttonTertiaryDark: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-
+  // === SURFACE ===
   surface: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -66,14 +24,16 @@ export const shadows = {
     shadowRadius: 8,
     elevation: 3,
   },
+
   surfaceDark: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.32,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 8,
   },
 
+  // === SUBTLE ===
   subtle: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -81,6 +41,7 @@ export const shadows = {
     shadowRadius: 3,
     elevation: 2,
   },
+
   subtleDark: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -89,21 +50,75 @@ export const shadows = {
     elevation: 3,
   },
 
+  // === OUTER ===
   outer: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.20,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  outerDark: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 13,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
   },
 
+  outerDark: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.50,
+    shadowRadius: 24,
+    elevation: 16,
+  },
+
+  // === BUTTON PRIMARY ===
+  buttonPrimary: {
+    shadowColor: "#5773FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 6,
+  },
+
+  buttonPrimaryDark: {
+    shadowColor: "#5773FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.65,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+
+  // === BUTTON SECONDARY ===
+  // buttonSecondary: {
+  //   shadowColor: "#000000",
+  //   shadowOffset: { width: 0, height: 4 },
+  //   shadowOpacity: 0.18,
+  //   shadowRadius: 12,
+  //   elevation: 5,
+  // },
+
+  // buttonSecondaryDark: {
+  //   shadowColor: "#000000",
+  //   shadowOffset: { width: 0, height: 4 },
+  //   shadowOpacity: 0.45,
+  //   shadowRadius: 12,
+  //   elevation: 7,
+  // },
+
+  // // === BUTTON TERTIARY ===
+  // buttonTertiary: {
+  //   shadowColor: "transparent",
+  //   shadowOffset: { width: 0, height: 0 },
+  //   shadowOpacity: 0,
+  //   shadowRadius: 0,
+  //   elevation: 0,
+  // },
+
+  // buttonTertiaryDark: {
+  //   shadowColor: "transparent",
+  //   shadowOffset: { width: 0, height: 0 },
+  //   shadowOpacity: 0,
+  //   shadowRadius: 0,
+  //   elevation: 0,
+  // },
+
+  // === INSET ===
   inset: {
     shadowColor: "transparent",
     shadowOffset: { width: 0, height: 0 },
@@ -111,6 +126,7 @@ export const shadows = {
     shadowRadius: 0,
     elevation: 0,
   },
+
   insetDark: {
     shadowColor: "transparent",
     shadowOffset: { width: 0, height: 0 },
@@ -118,10 +134,7 @@ export const shadows = {
     shadowRadius: 0,
     elevation: 0,
   },
-
-  //
-  // === REQUIRED BY NATIVEBASE ===
-  //
+  
   none: {
     shadowColor: "transparent",
     shadowOffset: { width: 0, height: 0 },
@@ -130,3 +143,5 @@ export const shadows = {
     elevation: 0,
   },
 };
+
+

@@ -1,5 +1,15 @@
 {
   "extends": "../../packages/typescript-config/nextjs.json",
+  
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["./src/components/*"],
+      "@ui/*": ["../../packages/ui/src/*"]
+    }
+  },
+
   "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts"],
   "exclude": ["node_modules"]
 }

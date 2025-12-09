@@ -45,7 +45,7 @@ export const semanticTokens = {
     cardBg: {
       value: {
         _light: "{colors.light.surface}",
-        _dark: "{colors.secondary.600}",
+        _dark: "{colors.tertiary.600}",
       },
     },
 
@@ -112,6 +112,13 @@ export const semanticTokens = {
       },
     },
 
+    buttonPrimaryPressedBg: {
+      value: {
+        _light: "{colors.primary.700}",
+        _dark: "{colors.primary.700}",
+      },
+    },
+
     buttonSecondaryBg: {
       value: {
         _light: "transparent",
@@ -135,8 +142,15 @@ export const semanticTokens = {
 
     buttonSecondaryHoverBg: {
       value: {
-        _light: "rgba(1,121,111,0.06)",
-        _dark: "rgba(69,255,212,0.10)",
+        _light: "{colors.overlay.black.100}",
+        _dark: "{colors.overlay.white.100}",
+      },
+    },
+
+    buttonSecondaryPressedBg: {
+      value: {
+        _light: "{colors.overlay.black.200}",
+        _dark: "{colors.overlay.white.200}",
       },
     },
 
@@ -149,76 +163,88 @@ export const semanticTokens = {
 
     buttonTertiaryHoverBg: {
       value: {
-        _light: "rgba(1,121,111,0.08)",
-        _dark: "rgba(69,255,212,0.08)",
+        _light: "{colors.overlay.black.100}",
+        _dark: "{colors.overlay.white.100}",
+      },
+    },
+
+    buttonTertiaryPressedBg: {
+      value: {
+        _light: "{colors.overlay.black.200}",
+        _dark: "{colors.overlay.white.200}",
       },
     },
   },
 
   shadows: {
-    card: {
-      value: {
-        _light: "0 6px 18px rgba(0,0,0,0.15)",
-        _dark: "0 10px 30px rgba(0,0,0,0.60)",
-      },
-    },
-
-    surface: {
-      value: {
-        _light: "0 2px 8px rgba(0,0,0,0.10)",
-        _dark: "0 4px 16px rgba(0,0,0,0.45)",
-      },
-    },
-
-    inset: {
-      value: {
-        _light: "inset 0 2px 4px rgba(0,0,0,0.20)",
-        _dark: "inset 0 2px 4px rgba(0,0,0,0.40)",
-      },
-    },
-
-    subtle: {
-      value: {
-        _light: "0 1px 3px rgba(0,0,0,0.12)",
-        _dark: "0 1px 3px rgba(0,0,0,0.30)",
-      },
-    },
-
-    outer: {
-      value: {
-        _light: "0 8px 24px rgba(0,0,0,0.18)",
-        _dark: "0 8px 24px rgba(0,0,0,0.50)",
-      },
-    },
-
-    /* NEW REQUIRED SHADOWS */
-buttonPrimaryShadow: {
-  value: {
-    _light: "0 3px 10px rgba(0,0,0,0.22)",
-    _dark:  "0 4px 14px rgba(0,0,0,0.55), 0 0 8px rgba(69,255,212,0.35)",
-  },
-},
-
-
-    buttonSecondaryShadow: {
-      value: {
-        _light: "0 3px 10px rgba(0,0,0,0.18)",
-        _dark: "0 3px 12px rgba(0,0,0,0.40)",
-      },
-    },
-
-    buttonTertiaryShadow: {
-      value: {
-        _light: "0 0 0 rgba(0,0,0,0)",
-        _dark: "0 0 0 rgba(0,0,0,0)",
-      },
-    },
-
-    inputShadow: {
-      value: {
-        _light: "inset 0 1px 2px rgba(0,0,0,0.12)",
-        _dark: "inset 0 1px 2px rgba(0,0,0,0.35)",
-      },
+  card: {
+    value: {
+      _light: "0 6px 18px {colors.overlay.black.300}",
+      _dark: "0 10px 30px {colors.overlay.black.600}",
     },
   },
+
+  cardDark: {
+    value: {
+      _light: "0 6px 18px {colors.overlay.black.300}",
+      _dark: "0 10px 30px {colors.overlay.black.600}",
+    },
+  },
+
+  surface: {
+    value: {
+      _light: "0 2px 8px {colors.overlay.black.200}",
+      _dark: "0 4px 16px {colors.overlay.black.500}",
+    },
+  },
+
+  surfaceDark: {
+    value: {
+      _light: "0 2px 8px {colors.overlay.black.200}",
+      _dark: "0 4px 16px {colors.overlay.black.500}",
+    },
+  },
+
+  surfaceElevated: {
+    value: {
+      _light: "0 8px 24px {colors.overlay.black.300}",
+      _dark: "0 8px 24px {colors.overlay.black.600}",
+    },
+  },
+
+  surfaceElevatedDark: {
+    value: {
+      _light: "0 8px 24px {colors.overlay.black.300}",
+      _dark: "0 8px 24px {colors.overlay.black.600}",
+    },
+  },
+
+  subtle: {
+    value: {
+      _light: "0 1px 3px {colors.overlay.black.200}",
+      _dark: "0 1px 3px {colors.overlay.black.500}",
+    },
+  },
+
+  subtleDark: {
+    value: {
+      _light: "0 1px 3px {colors.overlay.black.200}",
+      _dark: "0 1px 3px {colors.overlay.black.500}",
+    },
+  },
+
+  outer: {
+    value: {
+      _light: "0 8px 24px {colors.overlay.black.300}",
+      _dark: "0 8px 24px {colors.overlay.black.600}",
+    },
+  },
+
+  outerDark: {
+    value: {
+      _light: "0 8px 24px {colors.overlay.black.300}",
+      _dark: "0 8px 24px {colors.overlay.black.600}",
+    },
+  },
+  }
 };

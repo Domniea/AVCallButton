@@ -47,4 +47,29 @@ export const colors = {
     cyan: { value: "#00C8FF40" },
     blue: { value: "#0096FF26" },
   },
+
+  light: {
+    surface: { value: "#FFFFFF" },
+  },
+
+  overlay: {
+    black: {
+      50:  { value: "rgba(0,0,0,0.04)" },
+      100: { value: "rgba(0,0,0,0.06)" },
+      200: { value: "rgba(0,0,0,0.10)" },
+      300: { value: "rgba(0,0,0,0.14)" },
+      400: { value: "rgba(0,0,0,0.22)" },
+      500: { value: "rgba(0,0,0,0.32)" },
+      600: { value: "rgba(0,0,0,0.45)" },
+    },
+    white: {
+      50:  { value: "rgba(255,255,255,0.04)" },
+      100: { value: "rgba(255,255,255,0.06)" },
+      200: { value: "rgba(255,255,255,0.10)" },
+      300: { value: "rgba(255,255,255,0.14)" },
+      400: { value: "rgba(255,255,255,0.22)" },
+      500: { value: "rgba(255,255,255,0.32)" },
+      600: { value: "rgba(255,255,255,0.45)" },
+    },
+  },
 };

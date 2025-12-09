@@ -5,7 +5,6 @@ import { StyleSheet, View } from "react-native";
 import Test from "./src/Test";
 
 export default function App() {
-  console.log(nativeTheme)
   return (
     <NativeBaseProvider theme={nativeTheme}>
       <Test />

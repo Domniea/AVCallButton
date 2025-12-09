@@ -6,13 +6,11 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 
 const config = getDefaultConfig(projectRoot);
 
-// Stub out react-dom for React Native
 config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,
   "react-dom": path.join(__dirname, "react-native-stubs/react-dom.js"),
 };
 
-// Monorepo support
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.join(projectRoot, "node_modules"),

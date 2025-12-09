@@ -1,4 +1,3 @@
-// NEW mobile spacing scale — tuned for React Native
 export const mobileSpacing = {
   "0": 0,
   "0.5": 2,
@@ -16,7 +15,6 @@ export const mobileSpacing = {
   "9": 36,
   "10": 40,
 
-  // semantic sizes for your design system
   xs: 6,
   sm: 10,
   md: 14,

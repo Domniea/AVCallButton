@@ -1,6 +1,0 @@
-{
-  "rootDirectory": "apps/web",
-  "installCommand": "yarn install --cwd apps/web",
-  "buildCommand": "yarn build",
-  "framework": "nextjs"
-}

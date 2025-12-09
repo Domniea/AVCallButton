@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "references": [
+    { "path": "../../packages/ui" }
+  ],
+  "compilerOptions": {
+    "jsx": "react-native",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "include": ["."]
+}

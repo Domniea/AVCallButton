@@ -1,18 +1,33 @@
 {
   "name": "mobile",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
+  "private": true,
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "expo start --dev-client --clear",
+    "ios": "expo start --dev-client --ios --simulator 'iPhone 17 Pro Max'",
+    "android": "expo start --dev-client --android",
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~54.0.23",
+    "@av/ui": "1.0.0",
+    "expo": "~54.0.24",
+    "expo-dev-client": "^6.0.18",
     "expo-status-bar": "~3.0.8",
+    "native-base": "3.4.28",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-reanimated": "4.0.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-svg": "15.12.1",
+    "react-native-worklets": "0.4.0"
   },
-  "private": true
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "typescript": "~5.9.2"
+  }
 }

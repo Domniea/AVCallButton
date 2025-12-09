@@ -1,21 +1,49 @@
 {
-  "name": "AVCallButton",
+  "name": "avcallbutton",
   "private": true,
+  "packageManager": "yarn@1.22.22",
+
+"workspaces": {
+  "packages": [
+    "apps/*",
+    "packages/*"
+  ],
+"nohoist": [
+  "**/@av/ui",
+  "**/@av/ui/**"
+]
+},
+
+
+  "react-native": {
+    "appWorkingDirectory": "apps/mobile"
+  },
+
   "scripts": {
+    "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "clean": "turbo run clean"
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "check-types": "turbo run check-types"
   },
+
+  "dependencies": {
+    "@chakra-ui/next-js": "^2.4.2",
+    "@chakra-ui/react": "^3.29.0",
+    "@chakra-ui/styled-system": "^2.12.0",
+    "@chakra-ui/theme-tools": "^2.2.6",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@react-native-community/hooks": "^100.1.0",
+    "framer-motion": "^12.23.24",
+    "native-base": "^3.4.28",
+    "react-native-worklets": "0.4.0"
+  },
+
   "devDependencies": {
-    "prettier": "^3.6.2",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "prettier": "^3.1.1",
     "turbo": "^2.6.0",
-    "typescript": "5.9.2"
-  },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=18"
+    "typescript": "^5.2.2"
   }
 }

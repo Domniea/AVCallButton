@@ -35,12 +35,15 @@
     "native-base": "^3.4.28",
     "react-hook-form": "^7.68.0",
     "react-native-worklets": "0.4.0",
-    "zod": "^4.1.13"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "babel-plugin-module-resolver": "^5.0.2",
     "prettier": "^3.1.1",
     "turbo": "^2.6.0",
     "typescript": "^5.2.2"
+  },
+  "resolutions": {
+    "zod": "3.25.76"
   }
 }

@@ -1,74 +1,98 @@
 "use client";
 
 import React from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  Switch,
-  useColorMode,
-  useColorModeValue,
-} from "native-base";
+import { Box, VStack, Text, useColorMode, useColorModeValue, Switch, HStack } from "native-base";
 
 import { BaseInput } from "../components/BaseInput";
 import { BaseButton } from "../components/BaseButton";
+
+import { RHFInput } from "@av/forms/src/controllers/RHFInput";
+import { useAppForm } from "@av/forms/src/useAppForm"; 
+import { loginSchema, LoginSchema } from "@av/forms/src/schemas/login";
 import { BaseCard } from "../components/BaseCard";
 
 export default function TestScreen() {
   const { colorMode, toggleColorMode } = useColorMode();
+  const form = useAppForm(loginSchema, {
+    email: "",
+    password: "",
+  });
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = form;
+
+  const onSubmit = (values: LoginSchema) => {
+    console.log("Form submitted:", values);
+  };
 
   const bg = useColorModeValue("bg", "bgDark");
   const surface = useColorModeValue("surface", "surfaceDark");
-  const cardBg = useColorModeValue("cardBg", "cardBgDark");
   const textColor = useColorModeValue("text", "textDark");
 
+
   return (
-    <Box
-      flex={1}
-      bg={bg}
-      px="6"
-      py="6"
-      justifyContent="center"
-    >
-      <VStack
-        shadow="card"
-        bg={surface} 
-        borderRadius="xl"
-        p="8"
-        space="xl"
-        w="100%"
-        maxW="xl"
-        height="100%"
-        justifyContent="space-evenly"
-        alignSelf="center"
-      >
+    <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
+      <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
         
-        <BaseInput
+        <Text fontSize="2xl" fontWeight="bold" color={textColor} mb="4">
+          Login
+        </Text>
+
+        {/* Email */}
+        <RHFInput
+          control={control}
+          name="email"
           label="Email"
-          placeholder="email@example.com"
+          Component={BaseInput}
+          componentProps={{
+            placeholder: "Enter your email",
+            autoCapitalize: "none",
+          }}
         />
 
-      
-        <BaseInput
+        {/* Password */}
+        <RHFInput
+          control={control}
+          name="password"
           label="Password"
-          placeholder="••••••••"
+          Component={BaseInput}
+          componentProps={{
+            placeholder: "Enter your password",
+            type: "password",
+          }}
         />
 
-        <BaseButton title="Submit" variety="primary" />
-        <BaseButton title="Submit" variety="secondary" />
-        <BaseButton title="Submit" variety="tertiary" />
+        {/* Submit Button */}
+        <BaseButton
+          title="Submit"
+          onPress={handleSubmit(onSubmit)}
+          variety="primary"
+        />
 
-        <BaseCard title="Test Card Shadow" />
+        {/* Reset */}
+        <BaseButton
+          title="Reset"
+          variety="secondary"
+          onPress={() => reset()}
+        />
 
-        <HStack>
+           <HStack alignItems="center" justifyContent="space-between" pt="6">
           <Text fontSize="lg" color={textColor}>
-            {colorMode === "light" ? "Light" : "Dark"}
+            {colorMode === "light" ? "Light Mode" : "Dark Mode"}
           </Text>
 
-          <Switch isChecked={colorMode === "dark"} onToggle={toggleColorMode} />
-        </HStack>
+        <BaseCard variant="elevated" p="4">
 
+          <Switch
+            isChecked={colorMode === "dark"}
+            onToggle={toggleColorMode}
+          />
+          </BaseCard>
+        </HStack>
       </VStack>
     </Box>
   );

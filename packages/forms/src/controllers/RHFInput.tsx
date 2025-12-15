@@ -6,6 +6,11 @@ import {
   type Path,
 } from "react-hook-form";
 
+const isNative =
+  typeof navigator !== "undefined" && navigator.product === "ReactNative";
+
+const isWeb = !isNative;
+
 interface RHFInputProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
@@ -29,13 +34,18 @@ export function RHFInput<T extends FieldValues>({
         <Component
           label={label}
           value={field.value}
-          onChangeText={field.onChange}
-          onBlur={field.onBlur}
           error={error?.message}
+          onBlur={field.onBlur}
+          onChange={
+            isWeb
+              ? (e: React.ChangeEvent<HTMLInputElement>) =>
+                  field.onChange(e.target.value)
+              : undefined
+          }
+          onChangeText={isNative ? field.onChange : undefined}
           {...componentProps}
         />
       )}
     />
   );
 }
-

@@ -16,6 +16,7 @@ interface BaseButtonProps {
   rightIcon?: React.ReactNode;
   children?: React.ReactNode;
   onClick?: () => void;
+  type?: "button" | "submit" | "reset";
 }
 
 const variants = {

@@ -9,7 +9,7 @@ import { radii } from "../foundation/radii";
 import { fontFamilies } from "../foundation/typography";
 import {
   nativeFontConfig,
-  nativeFonts,
+  nativeFontFamilies,
   nativeFontWeights,
 } from "./typography";
 
@@ -22,7 +22,7 @@ export const mobileTokens = {
   spacing: convertTokens(mobileSpacing),
   radii: convertTokens(radii),
   fontConfig: nativeFontConfig,
-  fonts: nativeFonts,
+  fonts: nativeFontFamilies,
   fontWeights: nativeFontWeights,
   fontSizes,
   shadows,

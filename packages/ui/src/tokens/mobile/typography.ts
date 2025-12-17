@@ -21,9 +21,8 @@
 // export const nativeFontWeights = fontWeights;
 
 
-import { fontFamilies, fontWeights } 
-  from "@av/ui/src/tokens/foundation/typography";
-  
+import { fontFamilies, fontWeights } from "@av/ui/src/tokens/foundation/typography";
+
 export const nativeFontFamilies = {
   heading: fontFamilies.heading.value,
   body: fontFamilies.body.value,

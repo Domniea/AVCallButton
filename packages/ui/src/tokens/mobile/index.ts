@@ -6,7 +6,7 @@ import { fontSizes } from "./fontSizes";
 import { shadows } from "./shadows";
 import { mobileSpacing } from "./spacing";
 import { radii } from "../foundation/radii";
-import { fontFamilies } from "../foundation/typography";
+
 import {
   nativeFontConfig,
   nativeFontFamilies,

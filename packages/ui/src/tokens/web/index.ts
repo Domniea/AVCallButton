@@ -11,7 +11,7 @@ export const webTokens = {
   tokens: {
     colors: foundation.colors,
     spacing: foundation.spacing,
-    fonts: foundation.fonts,
+    fonts: foundation.fontFamilies,
     radii: convertRadiiForChakra(foundation.radii),
   },
 semanticTokens,

@@ -12,7 +12,23 @@ export const nativeTheme = extendTheme({
   colors: mobileTokens.colors,
   space: mobileTokens.spacing,
   radii: mobileTokens.radii,
-  fontSizes: mobileTokens.fontSizes,
+  fontConfig: {
+    "sans-serif": {
+      400: { normal: "sans-serif" },
+      500: { normal: "sans-serif-medium" },
+      600: { normal: "sans-serif-medium" },
+      700: { normal: "sans-serif-medium" },
+    },
+    monospace: {
+      400: { normal: "monospace" },
+    },
+  },
+  fontWeights: {
+    normal: "400",
+    medium: "500",
+    semibold: "600",
+    bold: "700",
+  },
 
   fonts: {
     heading: mobileTokens.fonts.heading,

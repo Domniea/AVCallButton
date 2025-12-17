@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, VStack, Text, useColorMode, useColorModeValue, Switch, HStack } from "native-base";
+import { Box, VStack, Text, useColorMode, useColorModeValue, Switch, HStack, Input } from "native-base";
 
 import { BaseInput } from "../components/BaseInput";
 import { BaseButton } from "../components/BaseButton";

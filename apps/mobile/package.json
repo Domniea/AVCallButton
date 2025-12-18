@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@av/ui": "1.0.0",
+    "@av/forms": "1.0.0",
+    "@av/store": "1.0.0",
     "expo": "~54.0.24",
     "expo-dev-client": "^6.0.18",
     "expo-status-bar": "~3.0.8",

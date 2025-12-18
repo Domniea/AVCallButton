@@ -13,6 +13,7 @@ export const webTokens = {
     spacing: foundation.spacing,
     fonts: foundation.fontFamilies,
     radii: convertRadiiForChakra(foundation.radii),
+    shadows: webShadows
   },
 semanticTokens,
   breakpoints: Object.fromEntries(

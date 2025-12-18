@@ -26,14 +26,16 @@ export function RHFInput<T extends FieldValues>({
   Component,
   componentProps = {},
 }: RHFInputProps<T>) {
+  
   return (
     <Controller
       control={control}
       name={name}
+      defaultValue={"" as any}
       render={({ field, fieldState: { error } }) => (
         <Component
           label={label}
-          value={field.value}
+          value={field.value ?? ""}
           error={error?.message}
           onBlur={field.onBlur}
           onChange={

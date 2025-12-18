@@ -37,20 +37,12 @@ export const BaseInput: React.FC<BaseInputProps> = ({
   type,
   ...rest
 }) => {
+  
   const bg = useColorModeValue(inputTokens.bg[0], inputTokens.bg[1]);
   const fg = useColorModeValue(inputTokens.fg[0], inputTokens.fg[1]);
-  const border = useColorModeValue(
-    inputTokens.border[0],
-    inputTokens.border[1],
-  );
-  const placeholder = useColorModeValue(
-    inputTokens.placeholder[0],
-    inputTokens.placeholder[1],
-  );
-  const focusBorder = useColorModeValue(
-    inputTokens.focusBorder[0],
-    inputTokens.focusBorder[1],
-  );
+  const border = useColorModeValue(inputTokens.border[0], inputTokens.border[1]);
+  const placeholder = useColorModeValue(inputTokens.placeholder[0], inputTokens.placeholder[1]);
+  const focusBorder = useColorModeValue(inputTokens.focusBorder[0], inputTokens.focusBorder[1]);
 
   const isError = Boolean(error);
 
@@ -75,16 +67,16 @@ export const BaseInput: React.FC<BaseInputProps> = ({
         fontSize="lg"
         py="3"
         px="4"
-        height={50}
+        height="50px"
         value={value ?? ""}
         onChangeText={onChangeText}
         onBlur={onBlur}
         type={isPassword && !show ? "password" : "text"}
-        // _focus={{
-        //   borderColor: isError ? "error.600" : focusBorder,
-        //   shadow: "input",
-        // }}
-        _focus={{ borderColor: isError ? "error.600" : focusBorder, }}
+        _focus={{
+          borderColor: isError ? "error.600" : focusBorder,
+          shadow: "input",
+        }}
+        
         InputRightElement={
           isPassword ? (
             <Pressable onPress={() => setShow((prev) => !prev)}>

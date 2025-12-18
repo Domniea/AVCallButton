@@ -38,6 +38,7 @@ export default function TestScreen() {
 
   return (
   <Box height="100vh" flex={1} bg="bg" px={6} py={10} display="flex" justifyContent="center">
+    <VStack width='100%' maxWidth="480px" height="100%" alignItems="center" justifyContent="center" gap={6}>
     <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
       <VStack
         bg="bg"
@@ -89,7 +90,10 @@ export default function TestScreen() {
           onClick={() => reset()}
         />
 
-        <HStack justifyContent="space-between" width="100%" pt={4}>
+      </VStack>
+    </form>
+
+      <HStack justifyContent="space-between" width="100%" pt={4}>
           <Flex top="10" right="10" gap="3" align="center">
             <Text fontSize="lg" color="text">
               {colorMode === "light" ? "Light" : "Dark"}
@@ -110,8 +114,7 @@ export default function TestScreen() {
             </Box>
           </Flex>
         </HStack>
-      </VStack>
-    </form>
+        </VStack>
   </Box>
 );
 }

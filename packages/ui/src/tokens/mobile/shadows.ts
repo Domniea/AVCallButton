@@ -64,7 +64,7 @@ export const shadows = {
   },
 
   buttonPrimary: {
-    shadowColor: "#5773FF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 14,
@@ -72,7 +72,7 @@ export const shadows = {
   },
 
   buttonPrimaryDark: {
-    shadowColor: "#5773FF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.65,
     shadowRadius: 14,

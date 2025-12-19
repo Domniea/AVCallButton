@@ -4,14 +4,12 @@ import { ReduxProvider } from "@av/store";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import Test from "./src/Test";
-import { ReduxTest } from "./src/ReduxTest";
 
 export default function App() {
   return (
     <NativeBaseProvider theme={nativeTheme}>
       <ReduxProvider>
-        {/* <Test /> */}
-        <ReduxTest/>
+        <Test />
       </ReduxProvider>
     </NativeBaseProvider>
   );

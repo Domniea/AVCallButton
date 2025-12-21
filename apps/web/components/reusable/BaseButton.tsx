@@ -11,6 +11,7 @@ interface BaseButtonProps {
   variety?: ButtonVariant;
   btnHeight?: number | string;
   btnWidth?: number | string;
+  margin?: number | string;
   center?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -54,6 +55,7 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
   btnWidth = "100%",
   btnHeight,
   center,
+  margin = '1',
   children,
   onClick,
   ...rest
@@ -80,6 +82,7 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
         borderRadius="xl"
         py={4}
         px={6}
+        m={margin}
         _hover={{ bg: v.hover }}
         _active={{ bg: v.hover }}
         onClick={onClick}

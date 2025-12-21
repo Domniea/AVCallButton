@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  Flex,
-} from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 
 import { useColorMode } from "@/components/ui/color-mode";
 import { BaseInput } from "../components/reusable/BaseInput";
@@ -29,7 +23,7 @@ export default function TestScreen() {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form;
 
   const onSubmit = (values: LoginSchema) => {
@@ -37,63 +31,77 @@ export default function TestScreen() {
   };
 
   return (
-  <Box height="100vh" flex={1} bg="bg" px={6} py={10} display="flex" justifyContent="center">
-    <VStack width='100%' maxWidth="480px" height="100%" alignItems="center" justifyContent="center" gap={6}>
-    <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+    <Box
+      height="100vh"
+      flex={1}
+      bg="bg"
+      px={6}
+      py={10}
+      display="flex"
+      justifyContent="center"
+    >
       <VStack
-        bg="bg"
-        borderRadius="xl"
-        p={8}
-        gap={8}
         width="100%"
         maxWidth="480px"
-        boxShadow="lg"
+        height="100%"
+        alignItems="center"
+        justifyContent="center"
+        gap={6}
       >
-        <Text fontSize="2xl" fontWeight="bold" color="text">
-          Login
-        </Text>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+          <VStack
+            bg="bg"
+            borderRadius="xl"
+            p={8}
+            gap={8}
+            width="100%"
+            maxWidth="480px"
+            boxShadow="lg"
+          >
+            <Text fontSize="2xl" fontWeight="bold" color="text">
+              Login
+            </Text>
 
-        <RHFInput
-          control={control}
-          name="email"
-          label="Email"
-          Component={BaseInput}
-          componentProps={{
-            placeholder: "Enter your email",
-            autoComplete: "email",
-            type: "text",
-          }}
-        />
+            <RHFInput
+              control={control}
+              name="email"
+              label="Email"
+              Component={BaseInput}
+              componentProps={{
+                placeholder: "Enter your email",
+                autoComplete: "email",
+                type: "text",
+              }}
+            />
 
-        <RHFInput
-          control={control}
-          name="password"
-          label="Password"
-          Component={BaseInput}
-          componentProps={{
-            placeholder: "Enter your password",
-            type: "password",
-            autoComplete: "current-password",
-          }}
-        />
+            <RHFInput
+              control={control}
+              name="password"
+              label="Password"
+              Component={BaseInput}
+              componentProps={{
+                placeholder: "Enter your password",
+                type: "password",
+                autoComplete: "current-password",
+              }}
+            />
 
-        <BaseButton
-          title={isSubmitting ? "Submitting..." : "Submit"}
-          variety="primary"
-          type="submit"
-        />
+            <BaseButton
+              title={isSubmitting ? "Submitting..." : "Submit"}
+              variety="primary"
+              type="submit"
+            />
 
-        <BaseButton
-          title="Reset"
-          variety="secondary"
-          type="button"
-          onClick={() => reset()}
-        />
+            <BaseButton
+              title="Reset"
+              variety="secondary"
+              type="button"
+              onClick={() => reset()}
+            />
+          </VStack>
+        </form>
 
-      </VStack>
-    </form>
-
-      <HStack justifyContent="space-between" width="100%" pt={4}>
+        <HStack justifyContent="space-between" width="100%" pt={4}>
           <Flex top="10" right="10" gap="3" align="center">
             <Text fontSize="lg" color="text">
               {colorMode === "light" ? "Light" : "Dark"}
@@ -108,13 +116,11 @@ export default function TestScreen() {
               py="1"
               shadow="sm"
             >
-              <Text color="text">
-                {colorMode === "light" ? "🌞" : "🌙"}
-              </Text>
+              <Text color="text">{colorMode === "light" ? "🌞" : "🌙"}</Text>
             </Box>
           </Flex>
         </HStack>
-        </VStack>
-  </Box>
-);
+      </VStack>
+    </Box>
+  );
 }

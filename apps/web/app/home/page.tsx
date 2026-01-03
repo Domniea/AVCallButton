@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, VStack, Text } from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,7 @@ import { logout } from "@av/aws";
 import { authUnauthenticated } from "@av/store/src/auth";
 
 export default function HomePage() {
-  const { colorMode } = useColorMode();
+  const { colorMode, toggleColorMode } = useColorMode();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -30,6 +30,9 @@ export default function HomePage() {
     } catch (err) {
       console.error("Logout failed:", err);
     }
+  };
+  const onResetPassword = () => {
+    router.push("/auth/reset");
   };
 
   return (
@@ -69,10 +72,10 @@ export default function HomePage() {
 
           {authStatus === "authenticated" && user && (
             <VStack gap={1}>
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color="text">
                 Logged in as
               </Text>
-              <Text fontSize="md" fontWeight="semibold">
+              <Text fontSize="md" color="text"fontWeight="semibold">
                 {user.email ?? user.id}
               </Text>
             </VStack>
@@ -85,11 +88,36 @@ export default function HomePage() {
           )}
 
           {authStatus === "authenticated" && (
+            <BaseButton variety="tertiary" onClick={onResetPassword}>
+              Reset Password
+            </BaseButton>
+          )}
+
+          {authStatus === "authenticated" && (
             <BaseButton variety="secondary" onClick={onLogout}>
               Logout
             </BaseButton>
           )}
         </VStack>
+        <HStack justifyContent="space-between" width="100%" pt={4}>
+          <Flex gap="3" align="center">
+            <Text fontSize="lg" color="text">
+              {colorMode === "light" ? "Light" : "Dark"}
+            </Text>
+
+            <Box
+              as="button"
+              onClick={toggleColorMode}
+              bg="surface"
+              borderRadius="full"
+              px="3"
+              py="1"
+              shadow="sm"
+            >
+              <Text color="text">{colorMode === "light" ? "🌞" : "🌙"}</Text>
+            </Box>
+          </Flex>
+        </HStack>
       </VStack>
     </Box>
   );

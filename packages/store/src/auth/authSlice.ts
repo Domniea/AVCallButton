@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-/**
- * This shape intentionally matches what Cognito / AWS will give us later
- */
 export type AuthUser = {
   id: string
   email?: string

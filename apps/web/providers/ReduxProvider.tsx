@@ -2,8 +2,8 @@
 
 import { Provider } from "react-redux";
 import { ReactNode, useEffect, useRef } from "react";
-import { createStore, AppStore } from "./store";
-import { bootstrapAuth } from "./bootstrap/authBootstrap";
+import { createStore, AppStore } from "@av/store";
+import { bootstrapAuthWeb } from "@av/store";
 
 export function ReduxProvider({ children }: { children: ReactNode }) {
   const storeRef = useRef<AppStore | null>(null);
@@ -16,11 +16,9 @@ export function ReduxProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!bootstrappedRef.current && storeRef.current) {
       bootstrappedRef.current = true;
-      bootstrapAuth(storeRef.current.dispatch);
+      bootstrapAuthWeb(storeRef.current.dispatch);
     }
   }, []);
 
-  return storeRef.current ? (
-    <Provider store={storeRef.current}>{children}</Provider>
-  ) : null;
+  return <Provider store={storeRef.current}>{children}</Provider>;
 }

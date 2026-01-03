@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ReduxProvider } from "@av/store";
-import { Provider } from "@/components/ui/provider";
+import ClientProviders from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,17 +20,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning className="chakra-theme">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxProvider>
-          <Provider>{children}</Provider>
-        </ReduxProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

@@ -2,13 +2,7 @@
 
 import React from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
-import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
-
-import { login } from "@av/aws";
-import { getCurrentUser } from "aws-amplify/auth";
-import { authAuthenticated } from "@av/store/src/auth";
-import type { AppDispatch } from "@av/store";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useColorMode } from "@/components/ui/color-mode";
 import { BaseInput } from "@/components/reusable/BaseInput";
@@ -17,44 +11,34 @@ import { BaseButton } from "@/components/reusable/BaseButton";
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
 import {
-  loginSchema,
-  type LoginSchema,
-} from "@av/forms/src/schemas/auth/login";
+  confirmEmailSchema,
+  type ConfirmEmailSchema,
+} from "@av/forms/src/schemas/auth/confirmEmail";
 
-export default function LoginPage() {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const dispatch = useDispatch<AppDispatch>();
+import { confirmSignup } from "@av/aws";
+
+export default function ConfirmSignupClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
 
-  const form = useAppForm(loginSchema, {
-    email: "",
-    password: "",
+  const { colorMode, toggleColorMode } = useColorMode();
+
+  const form = useAppForm(confirmEmailSchema, {
+    code: "",
   });
 
   const {
     control,
     handleSubmit,
-    reset,
     formState: { isSubmitting },
   } = form;
 
-  const onSubmit = async (values: LoginSchema) => {
-    try {
-      await login(values.email, values.password);
+  const onSubmit = async (values: ConfirmEmailSchema) => {
+    if (!email) return;
 
-      const user = await getCurrentUser();
-
-      dispatch(
-        authAuthenticated({
-          id: user.userId,
-          email: user.signInDetails?.loginId,
-        }),
-      );
-
-      router.replace("/home");
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
+    await confirmSignup(email, values.code);
+    router.push("/auth/login");
   };
 
   return (
@@ -82,47 +66,33 @@ export default function LoginPage() {
             p={8}
             gap={8}
             width="100%"
+            maxWidth="480px"
             boxShadow="lg"
           >
             <Text fontSize="2xl" fontWeight="bold" color="text">
-              Login
+              Confirm your email
+            </Text>
+
+            <Text fontSize="sm" color="muted">
+              Enter the 6-digit code sent to {email}
             </Text>
 
             <RHFInput
               control={control}
-              name="email"
-              label="Email"
+              name="code"
+              label="Confirmation Code"
               Component={BaseInput}
               componentProps={{
-                placeholder: "Enter your email",
-                autoComplete: "email",
-                type: "text",
-              }}
-            />
-
-            <RHFInput
-              control={control}
-              name="password"
-              label="Password"
-              Component={BaseInput}
-              componentProps={{
-                placeholder: "Enter your password",
-                type: "password",
-                autoComplete: "current-password",
+                placeholder: "123456",
+                inputMode: "numeric",
+                autoComplete: "one-time-code",
               }}
             />
 
             <BaseButton
-              title={isSubmitting ? "Logging in..." : "Login"}
+              title={isSubmitting ? "Confirming..." : "Confirm"}
               variety="primary"
               type="submit"
-            />
-
-            <BaseButton
-              title="Reset"
-              variety="secondary"
-              type="button"
-              onClick={() => reset()}
             />
           </VStack>
         </form>
@@ -142,7 +112,9 @@ export default function LoginPage() {
               py="1"
               shadow="sm"
             >
-              <Text color="text">{colorMode === "light" ? "🌞" : "🌙"}</Text>
+              <Text color="text">
+                {colorMode === "light" ? "🌞" : "🌙"}
+              </Text>
             </Box>
           </Flex>
         </HStack>

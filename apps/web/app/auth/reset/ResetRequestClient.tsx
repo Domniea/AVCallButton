@@ -2,30 +2,23 @@
 
 import React from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
+import { forgotPassword } from "@av/aws";
 import { useColorMode } from "@/components/ui/color-mode";
 import { BaseInput } from "@/components/reusable/BaseInput";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
-import {
-  confirmSchema,
-  type ConfirmSchema,
-} from "@av/forms/src/schemas/confirm";
+import { forgotPasswordSchema, type ForgotPasswordSchema } from "@av/forms/src/schemas/auth/forgotPassword";
 
-import { confirmSignup } from "@av/aws";
-
-export default function ConfirmClient() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
-
+export default function ResetRequestClient() {
   const { colorMode, toggleColorMode } = useColorMode();
+  const router = useRouter();
 
-  const form = useAppForm(confirmSchema, {
-    code: "",
+  const form = useAppForm(forgotPasswordSchema, {
+    email: "",
   });
 
   const {
@@ -34,17 +27,17 @@ export default function ConfirmClient() {
     formState: { isSubmitting },
   } = form;
 
-  const onSubmit = async (values: ConfirmSchema) => {
-    if (!email) return;
+  const onSubmit = async (values: ForgotPasswordSchema) => {
+    await forgotPassword(values.email);
 
-    await confirmSignup(email, values.code);
-    router.push("/auth/login");
+    router.push(
+      `/auth/reset/confirm?email=${encodeURIComponent(values.email)}`,
+    );
   };
 
   return (
     <Box
       height="100vh"
-      flex={1}
       bg="bg"
       px={6}
       py={10}
@@ -55,43 +48,32 @@ export default function ConfirmClient() {
         width="100%"
         maxWidth="480px"
         height="100%"
-        alignItems="center"
         justifyContent="center"
         gap={6}
       >
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-          <VStack
-            bg="bg"
-            borderRadius="xl"
-            p={8}
-            gap={8}
-            width="100%"
-            maxWidth="480px"
-            boxShadow="lg"
-          >
-            <Text fontSize="2xl" fontWeight="bold" color="text">
-              Confirm your email
+          <VStack bg="bg" borderRadius="xl" p={8} gap={8} boxShadow="lg">
+            <Text fontSize="2xl" fontWeight="bold">
+              Reset password
             </Text>
 
             <Text fontSize="sm" color="muted">
-              Enter the 6-digit code sent to {email}
+              Enter your email to receive a reset code
             </Text>
 
             <RHFInput
               control={control}
-              name="code"
-              label="Confirmation Code"
+              name="email"
+              label="Email"
               Component={BaseInput}
               componentProps={{
-                placeholder: "123456",
-                inputMode: "numeric",
-                autoComplete: "one-time-code",
+                autoComplete: "email",
+                placeholder: "you@example.com",
               }}
             />
 
             <BaseButton
-              title={isSubmitting ? "Confirming..." : "Confirm"}
-              variety="primary"
+              title={isSubmitting ? "Sending…" : "Send reset code"}
               type="submit"
             />
           </VStack>
@@ -99,7 +81,7 @@ export default function ConfirmClient() {
 
         <HStack justifyContent="space-between" width="100%" pt={4}>
           <Flex gap="3" align="center">
-            <Text fontSize="lg" color="text">
+            <Text fontSize="lg">
               {colorMode === "light" ? "Light" : "Dark"}
             </Text>
 
@@ -110,11 +92,8 @@ export default function ConfirmClient() {
               borderRadius="full"
               px="3"
               py="1"
-              shadow="sm"
             >
-              <Text color="text">
-                {colorMode === "light" ? "🌞" : "🌙"}
-              </Text>
+              {colorMode === "light" ? "🌞" : "🌙"}
             </Box>
           </Flex>
         </HStack>

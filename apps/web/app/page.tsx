@@ -5,12 +5,10 @@ import { Box, VStack, Text } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 
-import { useColorMode } from "@/components/ui/color-mode";
 import type { RootState } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
 export default function HomeEntryPage() {
-  const { colorMode } = useColorMode();
   const router = useRouter();
 
   const authStatus = useSelector(

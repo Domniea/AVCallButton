@@ -12,7 +12,7 @@ import { BaseButton } from "@/components/reusable/BaseButton";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
-import { signupSchema, type SignupSchema } from "@av/forms/src/schemas/signup";
+import { signupSchema, type SignupSchema } from "@av/forms/src/schemas/auth/signup";
 
 export default function SignupPage() {
   const router = useRouter();

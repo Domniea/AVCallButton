@@ -1,16 +1,16 @@
 import { Suspense } from "react";
 import { Box, Text } from "@chakra-ui/react";
-import ResetRequestClient from "./ResetRequestClient";
+import ResetConfirmClient from "./ResetConfirmClient";
 
-export default function ResetPage() {
+export default function ResetConfirmPage() {
   return (
-    <Suspense fallback={<ResetLoading />}>
-      <ResetRequestClient />
+    <Suspense fallback={<ConfirmLoading />}>
+      <ResetConfirmClient />
     </Suspense>
   );
 }
 
-function ResetLoading() {
+function ConfirmLoading() {
   return (
     <Box
       height="100vh"
@@ -19,7 +19,7 @@ function ResetLoading() {
       justifyContent="center"
       bg="bg"
     >
-      <Text color="muted">Preparing password reset…</Text>
+      <Text color="muted">Verifying reset code…</Text>
     </Box>
   );
 }

@@ -1,17 +1,17 @@
-import { NativeBaseProvider } from "native-base";
-import { nativeTheme } from "@av/ui";
-import { ReduxProvider } from "@av/store";
+import "react-native-get-random-values";
+
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import Test from "./src/Test";
+import Test from "./src/Login";
+import { ClientProviders } from "./providers/ClientProviders";
+import RootNavigator from "./src/navigation/RootNavigator";
+import { Root } from "@chakra-ui/react/dist/types/components/accordion/namespace";
 
 export default function App() {
   return (
-    <NativeBaseProvider theme={nativeTheme}>
-      <ReduxProvider>
-        <Test />
-      </ReduxProvider>
-    </NativeBaseProvider>
+    <ClientProviders>
+      <RootNavigator />
+    </ClientProviders>
   );
 }
 

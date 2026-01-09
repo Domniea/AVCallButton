@@ -1,5 +1,4 @@
 export const shadows = {
-  // === CARD ===
   card: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -16,7 +15,6 @@ export const shadows = {
     elevation: 20,
   },
 
-  // === SURFACE ===
   surface: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -33,7 +31,6 @@ export const shadows = {
     elevation: 8,
   },
 
-  // === SUBTLE ===
   subtle: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -50,7 +47,6 @@ export const shadows = {
     elevation: 3,
   },
 
-  // === OUTER ===
   outer: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -67,9 +63,8 @@ export const shadows = {
     elevation: 16,
   },
 
-  // === BUTTON PRIMARY ===
   buttonPrimary: {
-    shadowColor: "#5773FF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 14,
@@ -77,48 +72,13 @@ export const shadows = {
   },
 
   buttonPrimaryDark: {
-    shadowColor: "#5773FF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.65,
     shadowRadius: 14,
     elevation: 8,
   },
-
-  // === BUTTON SECONDARY ===
-  // buttonSecondary: {
-  //   shadowColor: "#000000",
-  //   shadowOffset: { width: 0, height: 4 },
-  //   shadowOpacity: 0.18,
-  //   shadowRadius: 12,
-  //   elevation: 5,
-  // },
-
-  // buttonSecondaryDark: {
-  //   shadowColor: "#000000",
-  //   shadowOffset: { width: 0, height: 4 },
-  //   shadowOpacity: 0.45,
-  //   shadowRadius: 12,
-  //   elevation: 7,
-  // },
-
-  // // === BUTTON TERTIARY ===
-  // buttonTertiary: {
-  //   shadowColor: "transparent",
-  //   shadowOffset: { width: 0, height: 0 },
-  //   shadowOpacity: 0,
-  //   shadowRadius: 0,
-  //   elevation: 0,
-  // },
-
-  // buttonTertiaryDark: {
-  //   shadowColor: "transparent",
-  //   shadowOffset: { width: 0, height: 0 },
-  //   shadowOpacity: 0,
-  //   shadowRadius: 0,
-  //   elevation: 0,
-  // },
-
-  // === INSET ===
+  
   inset: {
     shadowColor: "transparent",
     shadowOffset: { width: 0, height: 0 },

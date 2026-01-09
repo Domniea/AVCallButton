@@ -20,8 +20,8 @@ export const webShadows = {
   insetDark:  { value: "inset 0 1px 3px rgba(0,0,0,0.40)" },
 
   /* ——— BUTTON SHADOWS ——— */
-  buttonPrimary:     { value: "0 4px 14px rgba(1,121,111,0.40)" },
-  buttonPrimaryDark: { value: "0 4px 14px rgba(69,255,212,0.55)" },
+  buttonPrimary:     { value: "0 6px 18px rgba(0,0,0,0.15)" },
+  buttonPrimaryDark: { value: "0 10px 30px rgba(0,0,0,0.60)"  },
 
   buttonSecondary:     { value: "0 3px 10px rgba(0,0,0,0.18)" },
   buttonSecondaryDark: { value: "0 4px 14px rgba(0,0,0,0.45)" },

@@ -1,0 +1,11 @@
+{
+  "name": "@av/backend",
+  "private": true,
+  "scripts": {
+    "dev": "sst dev",
+    "deploy": "sst deploy"
+  },
+  "devDependencies": {
+    "sst": "^2.0.0"
+  }
+}

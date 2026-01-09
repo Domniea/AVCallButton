@@ -6,7 +6,12 @@ import { fontSizes } from "./fontSizes";
 import { shadows } from "./shadows";
 import { mobileSpacing } from "./spacing";
 import { radii } from "../foundation/radii";
-import { fonts } from "../foundation/fonts";
+
+import {
+  nativeFontConfig,
+  nativeFontFamilies,
+  nativeFontWeights,
+} from "./typography";
 
 export const mobileTokens = {
   colors: {
@@ -16,7 +21,9 @@ export const mobileTokens = {
 
   spacing: convertTokens(mobileSpacing),
   radii: convertTokens(radii),
-  fonts: convertTokens(fonts),
+  fontConfig: nativeFontConfig,
+  fonts: nativeFontFamilies,
+  fontWeights: nativeFontWeights,
   fontSizes,
   shadows,
 };

@@ -1,6 +1,6 @@
 export const colors = {
   primary: {
-    50:  { value: "#E0F5F3" },
+    50: { value: "#E0F5F3" },
     100: { value: "#B3E5DF" },
     200: { value: "#80D3C9" },
     300: { value: "#4DC0B2" },
@@ -13,7 +13,7 @@ export const colors = {
   },
 
   secondary: {
-    50:  { value: "#F0F4F9" },
+    50: { value: "#F0F4F9" },
     100: { value: "#DAE3ED" },
     200: { value: "#C4D2E3" },
     300: { value: "#A9B8CD" },
@@ -26,7 +26,7 @@ export const colors = {
   },
 
   tertiary: {
-    50:  { value: "#F2F2F2" },
+    50: { value: "#F2F2F2" },
     100: { value: "#DCDCDC" },
     200: { value: "#C6C6C6" },
     300: { value: "#AFAFAF" },
@@ -54,7 +54,7 @@ export const colors = {
 
   overlay: {
     black: {
-      50:  { value: "rgba(0,0,0,0.04)" },
+      50: { value: "rgba(0,0,0,0.04)" },
       100: { value: "rgba(0,0,0,0.06)" },
       200: { value: "rgba(0,0,0,0.10)" },
       300: { value: "rgba(0,0,0,0.14)" },
@@ -63,7 +63,7 @@ export const colors = {
       600: { value: "rgba(0,0,0,0.45)" },
     },
     white: {
-      50:  { value: "rgba(255,255,255,0.04)" },
+      50: { value: "rgba(255,255,255,0.04)" },
       100: { value: "rgba(255,255,255,0.06)" },
       200: { value: "rgba(255,255,255,0.10)" },
       300: { value: "rgba(255,255,255,0.14)" },

@@ -1,14 +1,17 @@
-import { NativeBaseProvider } from "native-base";
-import { nativeTheme } from "@av/ui";
+import 'react-native-gesture-handler'; 
+import "react-native-get-random-values";
+
 import React from "react";
-import { StyleSheet, View } from "react-native";
-import Test from "./src/Test";
+import { StyleSheet } from "react-native";
+import { ClientProviders } from "./providers/ClientProviders";
+import RootNavigator from "./src/navigation/RootNavigator";
+
 
 export default function App() {
   return (
-    <NativeBaseProvider theme={nativeTheme}>
-      <Test />
-    </NativeBaseProvider>
+    <ClientProviders>
+      <RootNavigator />
+    </ClientProviders>
   );
 }
 

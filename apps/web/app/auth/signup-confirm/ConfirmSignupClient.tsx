@@ -15,7 +15,7 @@ import {
   type ConfirmEmailSchema,
 } from "@av/forms/src/schemas/auth/confirmEmail";
 
-import { confirmSignup } from "@av/aws";
+import { confirmSignup } from "../../../../../packages/auth-client/src";
 
 export default function ConfirmSignupClient() {
   const router = useRouter();
@@ -112,9 +112,7 @@ export default function ConfirmSignupClient() {
               py="1"
               shadow="sm"
             >
-              <Text color="text">
-                {colorMode === "light" ? "🌞" : "🌙"}
-              </Text>
+              <Text color="text">{colorMode === "light" ? "🌞" : "🌙"}</Text>
             </Box>
           </Flex>
         </HStack>

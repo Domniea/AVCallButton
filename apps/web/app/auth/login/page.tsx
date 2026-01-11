@@ -5,7 +5,7 @@ import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
-import { login } from "@av/aws";
+import { login } from "../../../../../packages/auth-client/src";
 import { getCurrentUser } from "aws-amplify/auth";
 import { authAuthenticated } from "@av/store/src/auth";
 import type { AppDispatch } from "@av/store";

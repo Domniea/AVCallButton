@@ -16,7 +16,7 @@ import { BaseCard } from "../components/BaseCard";
 import type { AppDispatch, RootState } from "@av/store";
 import { authUnauthenticated } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
-import { logout } from "@av/aws";
+import { logout } from "packages/auth-client/src";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -31,7 +31,7 @@ export default function Home() {
       await logout();
     } finally {
       dispatch(authUnauthenticated());
-      navigator.navigate('landing' as never)
+      navigator.navigate("landing" as never);
     }
   };
 
@@ -69,11 +69,7 @@ export default function Home() {
         )}
 
         {/* Actions */}
-        <BaseButton
-          title="Logout"
-          variety="secondary"
-          onPress={onLogout}
-        />
+        <BaseButton title="Logout" variety="secondary" onPress={onLogout} />
 
         {/* Theme Toggle */}
         <HStack alignItems="center" justifyContent="space-between" pt="6">

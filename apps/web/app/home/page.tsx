@@ -9,7 +9,7 @@ import { useColorMode } from "@/components/ui/color-mode";
 import type { RootState, AppDispatch } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
-import { logout } from "@av/aws";
+import { logout } from "../../../../packages/auth-client/src";
 import { authUnauthenticated } from "@av/store/src/auth";
 
 export default function HomePage() {
@@ -75,7 +75,7 @@ export default function HomePage() {
               <Text fontSize="sm" color="text">
                 Logged in as
               </Text>
-              <Text fontSize="md" color="text"fontWeight="semibold">
+              <Text fontSize="md" color="text" fontWeight="semibold">
                 {user.email ?? user.id}
               </Text>
             </VStack>

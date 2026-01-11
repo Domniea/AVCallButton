@@ -4,14 +4,17 @@ import React from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
-import { forgotPassword } from "@av/aws";
+import { forgotPassword } from "../../../../../packages/auth-client/src";
 import { useColorMode } from "@/components/ui/color-mode";
 import { BaseInput } from "@/components/reusable/BaseInput";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
-import { forgotPasswordSchema, type ForgotPasswordSchema } from "@av/forms/src/schemas/auth/forgotPassword";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordSchema,
+} from "@av/forms/src/schemas/auth/forgotPassword";
 
 export default function ResetRequestClient() {
   const { colorMode, toggleColorMode } = useColorMode();

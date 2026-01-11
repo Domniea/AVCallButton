@@ -28,11 +28,11 @@ import {
   authLoading,
   authUnauthenticated,
 } from "@av/store/src/auth";
-import { logout } from "@av/aws";
+import { logout } from "packages/auth-client/src";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const { colorMode, toggleColorMode } = useColorMode();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -70,8 +70,7 @@ export default function Login() {
         }),
       );
 
-      navigation.navigate("home" as never)
-
+      navigation.navigate("home" as never);
     } catch (err) {
       console.error("Login failed", err);
       dispatch(authUnauthenticated());

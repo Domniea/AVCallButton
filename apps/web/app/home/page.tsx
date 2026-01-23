@@ -9,8 +9,7 @@ import { useColorMode } from "@/components/ui/color-mode";
 import type { RootState, AppDispatch } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
-import { logout } from "../../../../packages/auth-client/src";
-import { authUnauthenticated } from "@av/store/src/auth";
+import { logoutThunk } from "@av/store/src/auth";
 
 export default function HomePage() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -22,9 +21,7 @@ export default function HomePage() {
 
   const onLogout = async () => {
     try {
-      await logout();
-
-      dispatch(authUnauthenticated());
+      dispatch(logoutThunk());
 
       router.replace("/");
     } catch (err) {

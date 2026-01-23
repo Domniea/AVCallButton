@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { loginThunk, rehydrateAuthThunk } from './auth.thunks'
+import { loginThunk, rehydrateAuthThunk, logoutThunk } from './auth.thunks'
+import { logout } from '../../../auth-client/src/auth'
 
 export type AuthUser = {
   id: string
@@ -61,6 +62,15 @@ const authSlice = createSlice({
         state.status = 'authenticated'
       })
       .addCase(rehydrateAuthThunk.rejected, (state) => {
+        state.user = null
+        state.status = 'unauthenticated'
+      })
+
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.user = null
+        state.status = 'unauthenticated'
+      })
+      .addCase(logoutThunk.rejected, (state) => {
         state.user = null
         state.status = 'unauthenticated'
       })

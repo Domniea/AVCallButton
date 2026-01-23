@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { login as amplifyLogin } from "@av/auth-client";
+import { login as amplifyLogin, logout as amplifyLogout} from "@av/auth-client";
 import { getCurrentUser } from "aws-amplify/auth";
 import type { AuthUser } from "./authSlice";
 
@@ -12,7 +12,7 @@ export const loginThunk = createAsyncThunk<
     await amplifyLogin(email, password);
 
     const user = await getCurrentUser();
-    
+
     return {
       id: user.userId,
       email,
@@ -41,7 +41,20 @@ export const rehydrateAuthThunk = createAsyncThunk<
       id: user.userId,
       email
     };
-  } catch {
+  } catch (err){
     return rejectWithValue("No active session");
   }
 });
+
+export const logoutThunk = createAsyncThunk<
+  void,
+  void,
+  {rejectValue: string}
+  >("auth/logout", async () => {
+    try {
+      await amplifyLogout()
+    } catch (err) {
+      console.error( 'logout failed', err)
+      if(err) throw new Error( "Logout failed" )
+    }
+  })

@@ -1,56 +1,3 @@
-// import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
-// export type AuthUser = {
-//   id: string
-//   email?: string
-// }
-
-// export type AuthStatus =
-//   | 'idle'
-//   | 'loading'
-//   | 'authenticated'
-//   | 'unauthenticated'
-
-// type AuthState = {
-//   user: AuthUser | null
-//   status: AuthStatus,
-//   error: string |null
-// }
-
-// const initialState: AuthState = {
-//   user: null,
-//   status: 'idle',
-//   error: null,
-// }
-
-// const authSlice = createSlice({
-//   name: 'auth',
-//   initialState,
-//   reducers: {
-//     authLoading(state) {
-//       state.status = 'loading'
-//     },
-//     authAuthenticated(state, action: PayloadAction<AuthUser>) {
-//       state.user = action.payload
-//       state.status = 'authenticated'
-//     },
-//     authUnauthenticated(state) {
-//       state.user = null
-//       state.status = 'unauthenticated'
-//     },
-//   },
-// })
-
-// export const {
-//   authLoading,
-//   authAuthenticated,
-//   authUnauthenticated,
-// } = authSlice.actions
-
-// export const authReducer = authSlice.reducer
-
-
-
 import { createSlice } from '@reduxjs/toolkit'
 import { loginThunk, rehydrateAuthThunk } from './auth.thunks'
 
@@ -105,7 +52,7 @@ const authSlice = createSlice({
         state.status = 'unauthenticated'
         state.error = action.payload ?? 'Login failed'
       })
-      
+
       .addCase(rehydrateAuthThunk.pending, (state) => {
         state.status = 'loading'
       })

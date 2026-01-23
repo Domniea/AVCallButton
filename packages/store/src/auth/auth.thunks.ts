@@ -12,11 +12,7 @@ export const loginThunk = createAsyncThunk<
     await amplifyLogin(email, password);
 
     const user = await getCurrentUser();
-
-    // if (!email) {
-    //   throw new Error("Authenticated user missing email");
-    // }
-
+    
     return {
       id: user.userId,
       email,

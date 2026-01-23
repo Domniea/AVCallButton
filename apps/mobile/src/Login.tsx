@@ -23,7 +23,7 @@ import {
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import { authUnauthenticated } from "@av/store/src/auth";
+import { logoutThunk } from "@av/store/src/auth";
 import { logout } from "packages/auth-client/src";
 import { loginThunk } from "@av/store/src/auth";
 
@@ -58,12 +58,13 @@ export default function Login() {
       navigation.navigate("home" as never);
     } catch (err) {
       console.error("Login failed", err);
-      dispatch(authUnauthenticated());
+      dispatch(logoutThunk());
     }
   };
+  
   const onLogout = () => {
     logout();
-    dispatch(authUnauthenticated());
+    dispatch(logoutThunk());
   };
 
   const bg = useColorModeValue("bg", "bgDark");

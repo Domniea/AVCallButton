@@ -14,7 +14,7 @@ import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 
 import type { AppDispatch, RootState } from "@av/store";
-import { authUnauthenticated } from "@av/store/src/auth";
+import { logoutThunk } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
 import { logout } from "packages/auth-client/src";
 
@@ -32,7 +32,7 @@ export default function Home() {
     try {
       await logout();
     } finally {
-      dispatch(authUnauthenticated());
+      dispatch(logoutThunk());
       navigator.navigate("landing" as never);
     }
   };

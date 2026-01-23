@@ -5,9 +5,7 @@ import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
-import { login } from "../../../../../packages/auth-client/src";
-import { getCurrentUser } from "aws-amplify/auth";
-import { authAuthenticated } from "@av/store/src/auth";
+import { loginThunk } from "@av/store/src/auth";
 import type { AppDispatch } from "@av/store";
 
 import { useColorMode } from "@/components/ui/color-mode";
@@ -39,23 +37,19 @@ export default function LoginPage() {
   } = form;
 
   const onSubmit = async (values: LoginSchema) => {
-    try {
-      await login(values.email, values.password);
+  try {
+    await dispatch(
+      loginThunk({
+        email: values.email,
+        password: values.password,
+      })
+    ).unwrap();
 
-      const user = await getCurrentUser();
-
-      dispatch(
-        authAuthenticated({
-          id: user.userId,
-          email: user.signInDetails?.loginId,
-        }),
-      );
-
-      router.replace("/home");
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
-  };
+    router.replace("/home");
+  } catch (err) {
+    console.error("Login failed:", err);
+  }
+};
 
   return (
     <Box

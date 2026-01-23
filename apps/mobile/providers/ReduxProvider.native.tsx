@@ -1,9 +1,8 @@
-
 import { PropsWithChildren, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
 
 import { createStore } from "@av/store";
-import { bootstrapAuthNative } from "@av/store/src/bootstrapers/authBootstrap.native"
+import { bootstrapAuthNative } from "@av/store/src/bootstrappers/authBootstrap.native";
 
 const store = createStore();
 

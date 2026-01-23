@@ -1,7 +1,6 @@
 import { Role } from "./roles";
 
 export interface AuthUser {
-  id: string;        // Cognito `sub`
+  id: string;
   email?: string;
-  roles: Role[];
 }

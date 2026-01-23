@@ -1,4 +1,3 @@
-// packages/auth-core/src/server/cognitoJwt.ts
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { AuthUser } from "../user";
@@ -19,11 +18,10 @@ function getBearerToken(event: APIGatewayProxyEventV2): string | null {
 }
 
 function rolesFromClaims(claims: Record<string, unknown>): Role[] {
-  // If you use Cognito Groups later, they show up here:
+
   const groups = claims["cognito:groups"];
   const list = Array.isArray(groups) ? groups : [];
 
-  // Only allow known roles through (drops unknown strings)
   const allowed = new Set(Object.values(ROLES));
   return list.filter((x): x is Role => typeof x === "string" && allowed.has(x as any));
 }
@@ -56,7 +54,6 @@ export async function requireAuthUser(
     audience: env.clientId,
   });
 
-  // Minimal claims we care about now
   const id = typeof payload.sub === "string" ? payload.sub : undefined;
   if (!id) {
     const err = new Error("Token missing sub");
@@ -69,6 +66,5 @@ export async function requireAuthUser(
   return {
     id,
     email,
-    roles: rolesFromClaims(payload as any),
   };
 }

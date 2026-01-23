@@ -22,7 +22,6 @@ export default function Landing() {
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
 
-  // Optional auto-redirect if already logged in
   useEffect(() => {
     if (authStatus === "authenticated") {
       navigation.replace("home" as never);

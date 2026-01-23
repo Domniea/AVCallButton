@@ -28,7 +28,7 @@ import {
   authLoading,
   authUnauthenticated,
 } from "@av/store/src/auth";
-import { logout } from "packages/auth-client/src";
+import { login, logout } from "packages/auth-client/src";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,13 +53,7 @@ export default function Login() {
     try {
       dispatch(authLoading());
 
-      await signIn({
-        username: values.email,
-        password: values.password,
-        options: {
-          authFlowType: "USER_PASSWORD_AUTH",
-        },
-      });
+      await login(values.email, values.password);
 
       const user = await getCurrentUser();
 

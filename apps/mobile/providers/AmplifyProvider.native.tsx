@@ -1,7 +1,7 @@
 import "@aws-amplify/react-native";
 import { Amplify } from "aws-amplify";
 import { PropsWithChildren } from "react";
-import { cognitoConfig } from "packages/auth-client/src";
+import { cognitoConfig } from "@av/auth-client";
 
 let configured = false;
 

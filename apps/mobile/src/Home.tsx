@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   VStack,
@@ -17,6 +17,8 @@ import type { AppDispatch, RootState } from "@av/store";
 import { authUnauthenticated } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
 import { logout } from "packages/auth-client/src";
+
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,10 +42,25 @@ export default function Home() {
   const textColor = useColorModeValue("text", "textDark");
   const muted = useColorModeValue("muted", "mutedDark");
 
+useEffect(() => {
+  let mounted = true;
+
+  const loadSession = async () => {
+    const session = await fetchAuthSession();
+    if (!mounted) return;
+    console.log("ID TOKEN:", session.tokens?.idToken?.toString());
+  };
+
+  loadSession();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
+  
   return (
     <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
       <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
-        {/* Header */}
         <VStack space="1">
           <Text fontSize="2xl" fontWeight="bold" color={textColor}>
             Home

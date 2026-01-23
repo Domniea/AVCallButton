@@ -2,7 +2,7 @@ import { PropsWithChildren, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
 
 import { createStore } from "@av/store";
-import { bootstrapAuthNative } from "@av/store/src/bootstrappers/authBootstrap.native";
+import { rehydrateAuthThunk } from "@av/store/src/auth";
 
 const store = createStore();
 
@@ -12,7 +12,7 @@ export function ReduxProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!bootstrappedRef.current) {
       bootstrappedRef.current = true;
-      bootstrapAuthNative(store.dispatch);
+      store.dispatch(rehydrateAuthThunk());
     }
   }, []);
 

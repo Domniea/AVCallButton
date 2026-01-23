@@ -23,12 +23,9 @@ import {
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import {
-  authAuthenticated,
-  authLoading,
-  authUnauthenticated,
-} from "@av/store/src/auth";
-import { login, logout } from "packages/auth-client/src";
+import { authUnauthenticated } from "@av/store/src/auth";
+import { logout } from "packages/auth-client/src";
+import { loginThunk } from "@av/store/src/auth";
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,16 +48,10 @@ export default function Login() {
 
   const onSubmit = async (values: LoginSchema) => {
     try {
-      dispatch(authLoading());
-
-      await login(values.email, values.password);
-
-      const user = await getCurrentUser();
-
       dispatch(
-        authAuthenticated({
-          id: user.userId,
-          email: user.signInDetails?.loginId,
+        loginThunk({
+          password: values.password,
+          email: values.email
         }),
       );
 

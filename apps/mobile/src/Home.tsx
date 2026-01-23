@@ -42,21 +42,21 @@ export default function Home() {
   const textColor = useColorModeValue("text", "textDark");
   const muted = useColorModeValue("muted", "mutedDark");
 
-useEffect(() => {
-  let mounted = true;
+// useEffect(() => {
+//   let mounted = true;
 
-  const loadSession = async () => {
-    const session = await fetchAuthSession();
-    if (!mounted) return;
-    console.log("ID TOKEN:", session.tokens?.idToken?.toString());
-  };
+//   const loadSession = async () => {
+//     const session = await fetchAuthSession();
+//     if (!mounted) return;
+//     console.log("ID TOKEN:", session.tokens?.idToken?.toString());
+//   };
 
-  loadSession();
+//   loadSession();
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+//   return () => {
+//     mounted = false;
+//   };
+// }, []);
   
   return (
     <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">

@@ -46,3 +46,7 @@ build/
 # Turbo
 .turbo
 **/.turbo
+
+# SST
+services/backend/.sst/
+**/.sst/

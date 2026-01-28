@@ -2,6 +2,11 @@ import { StackContext, Api } from "sst/constructs";
 
 export function ApiStack({ stack }: StackContext) {
   const api = new Api(stack, "Api", {
+    cors: {
+      allowHeaders: ["Authorization", "Content-Type"],
+      allowMethods: ["GET", "OPTIONS"],
+      allowOrigins: ["http://localhost:3000"],
+    },
     defaults: {
       function: {
         environment: {

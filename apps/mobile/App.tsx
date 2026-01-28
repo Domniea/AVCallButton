@@ -3,7 +3,7 @@ import "react-native-get-random-values";
 
 import React from "react";
 import { StyleSheet } from "react-native";
-import { ClientProviders } from "./providers/ClientProviders";
+import { ClientProviders } from "./providers/ClientProvidersWrapper";
 import RootNavigator from "./src/navigation/RootNavigator";
 
 

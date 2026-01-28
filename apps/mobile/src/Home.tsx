@@ -16,7 +16,7 @@ import { BaseCard } from "../components/BaseCard";
 import type { AppDispatch, RootState } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
-import { logout } from "packages/auth-client/src";
+// import { logout } from "packages/auth-client/src";
 
 import { fetchAuthSession } from "aws-amplify/auth";
 
@@ -29,13 +29,13 @@ export default function Home() {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const onLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      dispatch(logoutThunk());
-      navigator.navigate("landing" as never);
-    }
-  };
+  try {
+    await dispatch(logoutThunk()).unwrap();
+    navigator.navigate("landing" as never);
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
 
   const bg = useColorModeValue("bg", "bgDark");
   const surface = useColorModeValue("surface", "surfaceDark");

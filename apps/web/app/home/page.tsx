@@ -19,15 +19,16 @@ export default function HomePage() {
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const onLogout = async () => {
-    try {
-      dispatch(logoutThunk());
-
-      router.replace("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+  console.log(user)
+  
+const onLogout = async () => {
+  try {
+    await dispatch(logoutThunk()).unwrap();
+    router.replace("/");
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
   const onResetPassword = () => {
     router.push("/auth/reset");
   };

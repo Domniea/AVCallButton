@@ -23,7 +23,7 @@ import {
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import { logoutThunk } from "@av/store/src/auth";
+import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
 import { logout } from "packages/auth-client/src";
 import { loginThunk } from "@av/store/src/auth";
 
@@ -48,12 +48,13 @@ export default function Login() {
 
   const onSubmit = async (values: LoginSchema) => {
     try {
-      dispatch(
-        loginThunk({
-          password: values.password,
-          email: values.email
-        }),
-      );
+      await dispatch(
+      loginThunk({
+        email: values.email,
+        password: values.password,
+      })
+    ).unwrap()
+    .then(() => dispatch(fetchMeThunk()));
 
       navigation.navigate("home" as never);
     } catch (err) {

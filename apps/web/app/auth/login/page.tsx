@@ -5,7 +5,7 @@ import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
-import { loginThunk } from "@av/store/src/auth";
+import { fetchMeThunk, loginThunk } from "@av/store/src/auth";
 import type { AppDispatch } from "@av/store";
 
 import { useColorMode } from "@/components/ui/color-mode";
@@ -27,7 +27,8 @@ export default function LoginPage() {
   const form = useAppForm(loginSchema, {
     email: "",
     password: "",
-  });
+  })
+    ;
 
   const {
     control,
@@ -43,7 +44,8 @@ export default function LoginPage() {
         email: values.email,
         password: values.password,
       })
-    ).unwrap();
+    ).unwrap()
+    .then(() => dispatch(fetchMeThunk()));
 
     router.replace("/home");
   } catch (err) {

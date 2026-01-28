@@ -1,5 +1,5 @@
-import { AuthUser } from "./user";
+import { AppUser } from "./user";
 
 export interface MeResponse {
-  user: AuthUser;
+  user: AppUser;
 }

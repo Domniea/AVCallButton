@@ -19,7 +19,7 @@ export default function HomePage() {
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  console.log(user)
+  console.log('USER', user)
   
 const onLogout = async () => {
   try {

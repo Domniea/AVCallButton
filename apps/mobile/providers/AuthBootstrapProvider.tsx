@@ -7,15 +7,17 @@ export function AuthBootstrapProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch<AppDispatch>();
   const status = useSelector((state: RootState) => state.auth.status);
 
-  useEffect(() => {
-    if (status !== "idle") return;
+ useEffect(() => {
+  if (status !== "idle") return;
 
-    dispatch(rehydrateAuthThunk()).then((res) => {
-      if (rehydrateAuthThunk.fulfilled.match(res)) {
-        dispatch(fetchMeThunk());
-      }
-    });
-  }, [status, dispatch]);
+  dispatch(rehydrateAuthThunk()).then((res) => {
+    if (rehydrateAuthThunk.fulfilled.match(res)) {
+      dispatch(fetchMeThunk());
+    }
+
+  });
+}, [status, dispatch]);
+
 
   return <>{children}</>;
 }

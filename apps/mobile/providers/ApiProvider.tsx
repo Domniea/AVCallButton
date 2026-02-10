@@ -7,7 +7,7 @@ export function ApiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const baseURL = Constants.expoConfig?.extra?.API_URL;
 
-    console.log(baseURL)
+    console.log('BASE URL', baseURL)
     if (!baseURL) {
       throw new Error("API_URL is not configured in Expo config");
     }

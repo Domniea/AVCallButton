@@ -7,7 +7,7 @@ export type MeResponse = {
 
 export async function fetchMe(token: string): Promise<MeResponse> {
   const api = getApiClient();
-
+  console.log('api client', api);
   const res = await api.get<MeResponse>("/me", {
     headers: {
       Authorization: `Bearer ${token}`,

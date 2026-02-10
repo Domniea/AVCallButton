@@ -7,7 +7,7 @@ const COGNITO_CLIENT_ID = "5632vu9ba8fksa9dibn07udh4l";
 
 export function ApiStack({ stack, app }: StackContext) {
   // const { table } = DatabaseStack({ stack, app });
-    const { table } = use(DatabaseStack);
+  const { table } = use(DatabaseStack);
 
   const api = new Api(stack, "Api", {
     cors: {
@@ -33,7 +33,7 @@ export function ApiStack({ stack, app }: StackContext) {
           COGNITO_REGION,
           COGNITO_USER_POOL_ID,
           COGNITO_CLIENT_ID,
-           APP_TABLE_NAME: table.tableName,
+          APP_TABLE_NAME: table.tableName,
         },
       },
     },

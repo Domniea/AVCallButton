@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@av/auth-core": "*",
+    "@aws-sdk/client-dynamodb": "^3.983.0",
+    "@aws-sdk/lib-dynamodb": "^3.983.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.0.1"
   },

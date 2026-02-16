@@ -1,31 +1,3 @@
-// import type {
-//   APIGatewayProxyHandlerV2WithJWTAuthorizer,
-// } from "aws-lambda";
-
-// export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
-//   event
-// ) => {
-//   const claims = event.requestContext.authorizer.jwt.claims;
-
-//   const userId = claims.sub;
-//   const email = claims.email;
-
-//   return {
-//     statusCode: 200,
-//     body: JSON.stringify({
-//       userId,
-//       email,
-//       workspaces: [
-//         {
-//           workspaceId: "temp-personal",
-//           name: "Personal Workspace",
-//           role: "owner",
-//         },
-//       ],
-//     }),
-//   };
-// };
-
 import type {
   APIGatewayProxyHandlerV2WithJWTAuthorizer,
 } from "aws-lambda";
@@ -36,7 +8,7 @@ import {
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 
-import { db, TABLE_NAME } from "./lib/db";
+import { db, TABLE_NAME } from "../lib/db";
 import crypto from "crypto";
 
 console.log("APP_TABLE_NAME:", process.env.APP_TABLE_NAME);
@@ -49,9 +21,6 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   const userPk = `USER#${userId}`;
 
-  /**
-   * 1️⃣ Get memberships for this user
-   */
   const membershipsResult = await db.send(
     new QueryCommand({
       TableName: TABLE_NAME,
@@ -65,13 +34,9 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
   let memberships = membershipsResult.Items ?? [];
 
-  /**
-   * 2️⃣ First login → create personal workspace
-   */
   if (memberships.length === 0) {
     const workspaceId = crypto.randomUUID();
 
-    // Create workspace DETAILS row
     await db.send(
       new PutCommand({
         TableName: TABLE_NAME,
@@ -86,7 +51,6 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       })
     );
 
-    // Create membership row (user → workspace)
     await db.send(
       new PutCommand({
         TableName: TABLE_NAME,
@@ -107,9 +71,6 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     ];
   }
 
-  /**
-   * 3️⃣ Load workspace details
-   */
   const workspaces = await Promise.all(
     memberships.map(async (membership) => {
       const result = await db.send(

@@ -6,7 +6,6 @@ const COGNITO_USER_POOL_ID = "us-east-2_2hWkc6GeE";
 const COGNITO_CLIENT_ID = "5632vu9ba8fksa9dibn07udh4l";
 
 export function ApiStack({ stack, app }: StackContext) {
-  // const { table } = DatabaseStack({ stack, app });
   const { table } = use(DatabaseStack);
 
   const api = new Api(stack, "Api", {
@@ -40,7 +39,9 @@ export function ApiStack({ stack, app }: StackContext) {
 
     routes: {
       "GET /me": "src/functions/me.handler",
-      "GET /workspaces": "src/functions/workspaces.handler",
+      "GET /workspaces": "src/functions/workspaces/list.handler",
+      "POST /workspaces": "src/functions/workspaces/create.handler",
+      "POST /workspaces/{id}/shows": "src/functions/shows/create.handler",
     },
   });
 

@@ -1,5 +1,6 @@
-import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { requireAuthIdentity } from "@av/auth-core";
+import type {
+  APIGatewayProxyHandlerV2WithJWTAuthorizer,
+} from "aws-lambda";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "http://localhost:3000",
@@ -7,35 +8,33 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET,OPTIONS",
 };
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  try {
-    const identity = await requireAuthIdentity(event, {
-      region: process.env.COGNITO_REGION!,
-      userPoolId: process.env.COGNITO_USER_POOL_ID!,
-      clientId: process.env.COGNITO_CLIENT_ID!,
-    });
+export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
+  async (event) => {
+    try {
+      const claims = event.requestContext.authorizer.jwt.claims;
 
-    return {
-      statusCode: 200,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: identity.sub,
-        email: identity.email,
-      }),
-    };
-  } catch (err: any) {
-    const statusCode = err.statusCode ?? 401;
+      const userId = claims.sub as string;
+      const email = claims.email as string;
 
-    return {
-      statusCode,
-      headers: {
-        ...CORS_HEADERS,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ error: "Unauthorized" }),
-    };
-  }
-};
+      return {
+        statusCode: 200,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: userId,
+          email,
+        }),
+      };
+    } catch (error) {
+      return {
+        statusCode: 401,
+        headers: {
+          ...CORS_HEADERS,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ error: "Unauthorized" }),
+      };
+    }
+  };

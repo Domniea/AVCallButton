@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Workspace {
+  id          String       @id @default(uuid())
+  name        String
+  type        String
+  createdAt   DateTime     @default(now())
+
+  memberships Membership[]
+  shows       Show[]
+}
+
+model Membership {
+  id          String    @id @default(uuid())
+
+  userId      String
+  workspaceId String
+
+  role        String
+  status      String    @default("active")
+  joinedAt    DateTime  @default(now())
+
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, workspaceId])
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Show {
+  id          String     @id @default(uuid())
+  name        String
+  status      String
+  location    String?
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime   @default(now())
+
+  workspaceId String
+workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  logs        Log[]
+  messages    Message[]
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([startTime])
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+
+  showId    String
+  show      Show     @relation(fields: [showId], references: [id])
+
+  @@index([showId])
+  @@index([createdAt])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  showId    String
+  userId    String
+
+  show      Show     @relation(fields: [showId], references: [id])
+
+  @@index([showId])
+  @@index([createdAt])
+}

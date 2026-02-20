@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "@av/auth-core": "*",
-    "@aws-sdk/client-dynamodb": "^3.983.0",
-    "@aws-sdk/lib-dynamodb": "^3.983.0",
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
-    "jwks-rsa": "^3.0.1"
+    "jwks-rsa": "^3.0.1",
+    "pg": "^8.18.0",
+    "prisma": "^7.4.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.16.0",
     "sst": "^2.43.0",
     "typescript": "^5.2.2"
   }

@@ -1,6 +1,5 @@
 import { App } from "sst/constructs";
 import { ApiStack } from "./stacks/ApiStack";
-import { DatabaseStack } from "./stacks/DatabaseStack";
 
 export default {
   config() {
@@ -10,7 +9,6 @@ export default {
     };
   },
   stacks(app: App) {
-    app.stack(DatabaseStack);
     app.stack(ApiStack);
   },
 };

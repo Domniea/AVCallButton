@@ -9,7 +9,7 @@ export function ApiStack({ stack, app }: StackContext) {
   const api = new Api(stack, "Api", {
     cors: {
       allowHeaders: ["Authorization", "Content-Type"],
-      allowMethods: ["GET", "OPTIONS"],
+      allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
       allowOrigins: ["http://localhost:3000"],
     },
 
@@ -42,11 +42,21 @@ export function ApiStack({ stack, app }: StackContext) {
     },
 
     routes: {
+      // Auth
       "GET /me": "src/functions/me.handler",
+
+      // Dashboard
+      "GET /dashboard": "src/functions/dashboard/list.handler",
+    
+      // Workspaces
       "GET /workspaces": "src/functions/workspaces/list.handler",
       "POST /workspaces/org": "src/functions/workspaces/createOrg.handler",
-      "POST /workspaces/{id}/shows": "src/functions/shows/create.handler",
       "DELETE /workspaces/{id}": "src/functions/workspaces/delete.handler",
+    
+      // Shows
+      "GET /workspaces/{id}/shows": "src/functions/shows/list.handler",
+      "POST /workspaces/{id}/shows": "src/functions/shows/create.handler",
+      "DELETE /shows/{id}": "src/functions/shows/delete.handler",
     },
   });
 

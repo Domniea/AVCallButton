@@ -17,38 +17,16 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         return badRequest("Missing workspaceId");
       }
 
-      await authorize(userId, workspaceId, "show:create");
+      await authorize(userId, workspaceId, "show:view");
 
-      if (!event.body) {
-        return badRequest("Missing request body");
-      }
-
-      const { name, location, startTime, endTime } =
-        JSON.parse(event.body);
-
-      if (
-        !name ||
-        typeof name !== "string" ||
-        name.trim().length < 2 ||
-        name.trim().length > 100
-      ) {
-        return badRequest("Invalid show name");
-      }
-
-      const show = await prisma.show.create({
-        data: {
-          name: name.trim(),
-          status: "draft",
-          location: location ?? null,
-          startTime: startTime ? new Date(startTime) : null,
-          endTime: endTime ? new Date(endTime) : null,
-          workspaceId,
-        },
+      const shows = await prisma.show.findMany({
+        where: { workspaceId },
+        orderBy: { createdAt: "desc" },
       });
 
       return {
-        statusCode: 201,
-        body: JSON.stringify({ show }),
+        statusCode: 200,
+        body: JSON.stringify({ shows }),
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -59,7 +37,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
           return forbidden("Insufficient permissions");
         }
       }
-      console.error("Failed to create show:", error);
-      return serverError("Failed to create show");
+      console.error("Failed to list shows:", error);
+      return serverError("Failed to list shows");
     }
   };

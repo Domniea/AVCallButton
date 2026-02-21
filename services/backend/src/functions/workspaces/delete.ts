@@ -3,6 +3,7 @@ import type {
 } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
+import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {
@@ -41,24 +42,3 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
       return serverError("Failed to delete workspace");
     }
   };
-
-function badRequest(message: string) {
-  return {
-    statusCode: 400,
-    body: JSON.stringify({ error: message }),
-  };
-}
-
-function forbidden(message: string) {
-  return {
-    statusCode: 403,
-    body: JSON.stringify({ error: message }),
-  };
-}
-
-function serverError(message: string) {
-  return {
-    statusCode: 500,
-    body: JSON.stringify({ error: message }),
-  };
-}

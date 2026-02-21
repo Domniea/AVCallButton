@@ -3,6 +3,7 @@ import type {
 } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
+import { serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {
@@ -66,9 +67,6 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
       };
     } catch (error) {
       console.error("Failed to list workspaces:", error);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "Failed to list workspaces" }),
-      };
+      return serverError("Failed to list workspaces");
     }
   };

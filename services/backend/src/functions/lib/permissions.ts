@@ -5,7 +5,9 @@ export type Action =
   | "workspace:delete"
   | "workspace:billing"
   | "workspace:invite"
+  | "workspace:deleteInvite"
   | "workspace:changeRole"
+  | "workspace:viewMembers"
   | "workspace:removeMember"
   | "show:create"
   | "show:update"
@@ -27,7 +29,9 @@ export const actionMinimumRank: Record<Action, number> = {
   "workspace:delete": 4,
   "workspace:billing": 4,
   "workspace:invite": 3,
+  "workspace:deleteInvite": 3,
   "workspace:changeRole": 4,
+  "workspace:viewMembers": 3,
   "workspace:removeMember": 4,
 
   "show:create": 2,
@@ -39,10 +43,7 @@ export const actionMinimumRank: Record<Action, number> = {
   "show:view": 1,
 };
 
-export function hasPermission(
-  role: Role,
-  action: Action
-): boolean {
+export function hasPermission(role: Role, action: Action): boolean {
   const userRank = roleRank[role];
   const requiredRank = actionMinimumRank[action];
   return userRank >= requiredRank;

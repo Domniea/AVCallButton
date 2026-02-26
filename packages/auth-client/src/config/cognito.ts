@@ -1,9 +1,9 @@
 export const cognitoConfig = {
-  region: "us-east-2",
-  userPoolId: "us-east-2_2hWkc6GeE",
-  domain: "us-east-22hwkc6gee.auth.us-east-2.amazoncognito.com",
 
-  webClientId: "5632vu9ba8fksa9dibn07udh4l",
+  region: "us-east-1",
+  userPoolId: "us-east-1_9uafTDTow",
+  domain: "us-east-19uaftdtow.auth.us-east-1.amazoncognito.com",
+  webClientId: "48h1itjn5g18fjbsap0cnqrr08",
 
   scopes: ["openid", "email", "phone"],
 };

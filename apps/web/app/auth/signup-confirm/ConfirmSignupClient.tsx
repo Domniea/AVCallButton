@@ -38,7 +38,9 @@ export default function ConfirmSignupClient() {
     if (!email) return;
 
     await confirmSignup(email, values.code);
-    router.push("/auth/login");
+
+    const inviteToken = sessionStorage.getItem("inviteToken");
+    router.push(inviteToken ? "/invite" : "/auth/login");
   };
 
   return (

@@ -36,7 +36,7 @@ export default function SignupPage() {
   const onSubmit = async (values: SignupSchema) => {
     const res = await signup(values.email, values.password);
     console.log('ON SUBMIT',res);
-    router.push(`/auth/confirm?email=${encodeURIComponent(values.email)}`);
+    router.push(`/auth/signup-confirm?email=${encodeURIComponent(values.email)}`);
   };
 
   return (

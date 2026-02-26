@@ -33,7 +33,6 @@ export default function LoginPage() {
   const {
     control,
     handleSubmit,
-    reset,
     formState: { isSubmitting },
   } = form;
 
@@ -47,11 +46,16 @@ export default function LoginPage() {
     ).unwrap()
     .then(() => dispatch(fetchMeThunk()));
 
-    router.replace("/home");
+    const inviteToken = sessionStorage.getItem("inviteToken");
+    router.replace(inviteToken ? "/invite" : "/home");
   } catch (err) {
     console.error("Login failed:", err);
   }
 };
+
+  const onSignup = () => {
+    router.push("/auth/signup");
+  };
 
   return (
     <Box
@@ -115,10 +119,10 @@ export default function LoginPage() {
             />
 
             <BaseButton
-              title="Reset"
+              title="Create Account"
               variety="secondary"
               type="button"
-              onClick={() => reset()}
+              onClick={() => onSignup()}
             />
           </VStack>
         </form>

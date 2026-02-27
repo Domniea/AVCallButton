@@ -32,16 +32,24 @@ export default function InvitePage() {
           },
           body: JSON.stringify({ token }),
         });
-  
+
         if (!res.ok) {
-          const data = await res.json();
-          setError(data.message || "Failed to accept invite");
-          return;
-        }
-  
-        const data = await res.json();
+            const data = await res.json();
+            const msg = data.message || data.error;
+          
+            if (msg?.includes("already a member")) {
+              sessionStorage.removeItem("inviteToken");
+              router.replace("/home");
+              return;
+            }
+          
+            setError(msg || "Failed to accept invite");
+            return;
+          }
+
+          
         sessionStorage.removeItem("inviteToken");
-        router.replace(`/workspaces/${data.membership.workspaceId}`);
+        router.replace("/home");
       } catch {
         setError("Something went wrong");
       }
@@ -65,7 +73,25 @@ export default function InvitePage() {
         acceptInvite(token);
       }
     }, [authStatus, acceptInvite, router]);
+
+    useEffect(() => {
+      if (!error) return;
+    
+      const timeout = setTimeout(() => {
+        router.replace("/home");
+      }, 4000);
+    
+      return () => clearTimeout(timeout);
+    }, [error, router]);
   
-    if (error) return <p>{error}</p>;
+    if (error) {
+      return (
+        <div>
+          <p>{error}</p>
+          <p>Redirecting you to your workspace…</p>
+        </div>
+      );
+    }
+    
     return <p>Processing invite...</p>;
   }

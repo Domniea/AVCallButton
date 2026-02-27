@@ -6,6 +6,7 @@ import type {
   import { authorize } from "../lib/authorization";
   import { roleRank, Role } from "../lib/permissions";
   import { badRequest, forbidden, serverError } from "../lib/responses";
+import { sendInviteEmail } from "../lib/email";
   
   const VALID_ROLES: Role[] = ["owner", "showLead", "leadTech", "tech"];
   
@@ -63,6 +64,18 @@ import type {
             expiresAt,
           },
         });
+
+        const workspace = await prisma.workspace.findUniqueOrThrow({
+            where: { id: workspaceId },
+            select: { name: true },
+          });
+          
+          await sendInviteEmail({
+            to: email,
+            workspaceName: workspace.name,
+            inviterEmail: claims.email as string,
+            token: invite.token,
+          });
   
         return {
           statusCode: 201,

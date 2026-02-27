@@ -21,6 +21,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     if (!invite) return notFound("Invite not found");
 
+    if (invite.email !== email) {
+      return badRequest(
+        `This invite was sent to ${invite.email}. Please log in with that account.`
+      );
+    }
+
     if (invite.status !== "pending") {
       return badRequest("Invite has already been " + invite.status);
     }

@@ -30,6 +30,8 @@ export function ApiStack({ stack, app }: StackContext) {
           COGNITO_USER_POOL_ID,
           COGNITO_CLIENT_ID,
           DATABASE_URL: process.env.DATABASE_URL!,
+          SES_FROM_EMAIL: "domniea@gmail.com",
+          APP_URL: "http://localhost:3000",
         },
         nodejs: {
           install: ["@prisma/client"],
@@ -72,6 +74,7 @@ export function ApiStack({ stack, app }: StackContext) {
     },
   });
 
+  api.attachPermissions(["ses:SendEmail", "ses:SendRawEmail"]);
   stack.addOutputs({
     ApiEndpoint: api.url,
   });

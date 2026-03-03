@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Box,
   VStack,
@@ -8,40 +8,33 @@ import {
   useColorMode,
   useColorModeValue,
 } from "native-base";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation, type ParamListBase } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { BaseInput } from "./../components/BaseInput";
-import { BaseButton } from "./../components/BaseButton";
-import { BaseCard } from "./../components/BaseCard";
+import type { ParamListBase } from "@react-navigation/native";
+
+import { BaseInput } from "../components/BaseInput";
+import { BaseButton } from "../components/BaseButton";
+import { BaseCard } from "../components/BaseCard";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
 import {
-  loginSchema,
-  type LoginSchema,
-} from "@av/forms/src/schemas/auth/login";
+  signupSchema,
+  type SignupSchema,
+} from "@av/forms/src/schemas/auth/signup";
 
-import { signIn, getCurrentUser } from "aws-amplify/auth";
-import type { AppDispatch, RootState } from "@av/store";
-import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
-import { logout } from "packages/auth-client/src";
-import { loginThunk } from "@av/store/src/auth";
+import { signup } from "@av/auth-client";
 
-type LoginNav = NativeStackNavigationProp<
-  ParamListBase & { invite: undefined; home: undefined },
-  "login"
+type SignupNav = NativeStackNavigationProp<
+  ParamListBase & { signupConfirm: { email: string } },
+  "signup"
 >;
 
-export default function Login() {
-  const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<LoginNav>();
+export default function SignUp() {
+  const navigation = useNavigation<SignupNav>();
   const { colorMode, toggleColorMode } = useColorMode();
 
-  const authStatus = useSelector((state: RootState) => state.auth.status);
-
-  const form = useAppForm(loginSchema, {
+  const form = useAppForm(signupSchema, {
     email: "",
     password: "",
   });
@@ -53,22 +46,9 @@ export default function Login() {
     formState: { isSubmitting },
   } = form;
 
-  const onSubmit = async (values: LoginSchema) => {
-    try {
-      await dispatch(
-      loginThunk({
-        email: values.email,
-        password: values.password,
-      })
-    ).unwrap()
-    .then(() => dispatch(fetchMeThunk()));
-
-      const hasInviteToken = await AsyncStorage.getItem("inviteToken");
-      navigation.replace(hasInviteToken ? "invite" : "home");
-    } catch (err) {
-      console.error("Login failed", err);
-      dispatch(logoutThunk());
-    }
+  const onSubmit = async (values: SignupSchema) => {
+    await signup(values.email, values.password);
+    navigation.navigate("signupConfirm", { email: values.email });
   };
 
   const bg = useColorModeValue("bg", "bgDark");
@@ -80,14 +60,9 @@ export default function Login() {
     <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
       <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
         <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-          Login
+          Create Account
         </Text>
 
-        <Text fontSize="sm" color={muted}>
-          Status: {authStatus}
-        </Text>
-
-        {/* Email */}
         <RHFInput
           control={control}
           name="email"
@@ -96,36 +71,34 @@ export default function Login() {
           componentProps={{
             placeholder: "Enter your email",
             autoCapitalize: "none",
+            autoComplete: "email",
           }}
         />
 
-        {/* Password */}
         <RHFInput
           control={control}
           name="password"
           label="Password"
           Component={BaseInput}
           componentProps={{
-            placeholder: "Enter your password",
+            placeholder: "Create a password",
             type: "password",
+            autoComplete: "new-password",
           }}
         />
 
-        {/* Submit Button */}
         <BaseButton
-          title={isSubmitting ? "Signing in..." : "Sign In"}
+          title={isSubmitting ? "Creating account..." : "Sign up"}
           onPress={handleSubmit(onSubmit)}
           variety="primary"
         />
 
-        {/* Reset */}
         <BaseButton
-          title="Signup"
+          title="Reset"
           variety="secondary"
-          onPress={() => navigation.navigate("signup" as never)}
+          onPress={() => reset()}
         />
 
-        {/* Theme Toggle */}
         <HStack alignItems="center" justifyContent="space-between" pt="6">
           <Text fontSize="lg" color={textColor}>
             {colorMode === "light" ? "Light Mode" : "Dark Mode"}

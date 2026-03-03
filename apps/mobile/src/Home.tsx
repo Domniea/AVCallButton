@@ -13,10 +13,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch, RootState } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
-// import { logout } from "packages/auth-client/src";
 
 import { fetchAuthSession } from "aws-amplify/auth";
 
@@ -29,13 +29,14 @@ export default function Home() {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const onLogout = async () => {
-  try {
-    await dispatch(logoutThunk()).unwrap();
-    navigator.navigate("landing" as never);
-  } catch (err) {
-    console.error("Logout failed:", err);
-  }
-};
+    try {
+      await dispatch(logoutThunk()).unwrap();
+      await AsyncStorage.removeItem("inviteToken");
+      navigator.navigate("landing" as never);
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   const bg = useColorModeValue("bg", "bgDark");
   const surface = useColorModeValue("surface", "surfaceDark");

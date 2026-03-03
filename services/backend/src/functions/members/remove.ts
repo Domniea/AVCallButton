@@ -11,21 +11,23 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const userId = claims.sub as string;
 
     const workspaceId = event.pathParameters?.id;
-    const memberId = event.pathParameters?.memberId;
-    if (!workspaceId || !memberId)
+    const targetUserId = event.pathParameters?.memberId;
+    if (!workspaceId || !targetUserId)
       return badRequest("Missing workspaceId or memberId");
 
     await authorize(userId, workspaceId, "workspace:removeMember");
 
     const target = await prisma.membership.findUnique({
-      where: { id: memberId },
+      where: {
+        userId_workspaceId: { userId: targetUserId, workspaceId },
+      },
     });
-    if (!target || target.workspaceId !== workspaceId)
-      return notFound("Member not found");
+
+    if (!target) return notFound("Member not found");
 
     if (target.userId === userId) return forbidden("Cannot remove yourself");
 
-    await prisma.membership.delete({ where: { id: memberId } });
+    await prisma.membership.delete({ where: { id: target.id } });
 
     return {
       statusCode: 200,

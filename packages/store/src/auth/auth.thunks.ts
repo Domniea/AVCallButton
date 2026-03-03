@@ -8,21 +8,6 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import { fetchMe } from "./auth.api";
 import type { AppUser } from "./authSlice";
 
-// //FIRST
-// export const loginThunk = createAsyncThunk<
-//   void,
-//   { email: string; password: string },
-//   { rejectValue: string }
-// >("auth/login", async ({ email, password }, { rejectWithValue }) => {
-//   try {
-//     await amplifyLogin(email, password);
-//   } catch (err) {
-//     console.error("loginThunk failed", err);
-//     return rejectWithValue("Invalid credentials");
-//   }
-// });
-
-
 export const loginThunk = createAsyncThunk<
   void,
   { email: string; password: string },
@@ -68,23 +53,6 @@ export const logoutThunk = createAsyncThunk<
 >("auth/logout", async () => {
   await amplifyLogout();
 });
-
-//FIRST
-// export const rehydrateAuthThunk = createAsyncThunk<
-//   void,
-//   void,
-//   { rejectValue: string }
-// >("auth/rehydrate", async (_, { rejectWithValue }) => {
-//   try {
-//     const session = await fetchAuthSession();
-//     if (!session.tokens?.accessToken) {
-//       return rejectWithValue("No active session");
-//     }
-//   } catch {
-//     return rejectWithValue("No active session");
-//   }
-// });
-
 
 export const rehydrateAuthThunk = createAsyncThunk<
   void,

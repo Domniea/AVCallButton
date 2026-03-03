@@ -10,6 +10,7 @@ export default function ({ config }: ConfigContext): ExpoConfig {
     name: isProd ? "AV Call Button" : "AV Call Button (Dev)",
 
     slug: "avcallbutton",
+    scheme: "avcallbutton",
 
     version: "1.0.0",
     orientation: "portrait",

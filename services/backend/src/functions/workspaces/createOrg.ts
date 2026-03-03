@@ -10,6 +10,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
     try {
       const claims = event.requestContext.authorizer.jwt.claims;
       const userId = claims.sub as string;
+      const email = typeof claims.email === 'string' ? claims.email : null;
 
       if (!event.body) {
         return badRequest("Missing request body");
@@ -39,6 +40,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         await tx.membership.create({
           data: {
             userId,
+            email,
             workspaceId: newWorkspace.id,
             role: "owner",
             status: "active",

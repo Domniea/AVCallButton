@@ -5,11 +5,14 @@ import type {
 import { prisma } from "../lib/prisma";
 import { serverError } from "../lib/responses";
 
+
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {
     try {
       const claims = event.requestContext.authorizer.jwt.claims;
       const userId = claims.sub as string;
+      const email = typeof claims.email === 'string' ? claims.email : null;
+      
 
       let personalMembership = await prisma.membership.findFirst({
         where: {
@@ -35,6 +38,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
           const membership = await tx.membership.create({
             data: {
               userId,
+              email,
               workspaceId: workspace.id,
               role: "owner",
               status: "active",

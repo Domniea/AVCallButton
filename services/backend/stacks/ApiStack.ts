@@ -45,6 +45,7 @@ export function ApiStack({ stack, app }: StackContext) {
     routes: {
       // Auth
       "GET /me": "src/functions/me.handler",
+      "DELETE /account": "src/functions/account/delete.handler",
 
       // Dashboard
       "GET /dashboard": "src/functions/dashboard/list.handler",
@@ -74,7 +75,7 @@ export function ApiStack({ stack, app }: StackContext) {
     },
   });
 
-  api.attachPermissions(["ses:SendEmail", "ses:SendRawEmail"]);
+  api.attachPermissions(["ses:SendEmail", "ses:SendRawEmail","cognito-idp:AdminDeleteUser"]);
   stack.addOutputs({
     ApiEndpoint: api.url,
   });

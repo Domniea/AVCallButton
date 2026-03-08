@@ -30,8 +30,9 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         const created = await prisma.$transaction(async (tx) => {
           const workspace = await tx.workspace.create({
             data: {
-              name: "Personal Workspace",
+              name: `Personal – ${userId}`,
               type: "personal",
+              
             },
           });
 
@@ -54,7 +55,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
 
       const memberships = await prisma.membership.findMany({
         where: { userId },
-        include: { workspace: true },
+        include: {
+          workspace: {
+            include: { _count: { select: { shows: true } } },
+          },
+        },
       });
 
       return {
@@ -66,6 +71,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
             type: m.workspace.type,
             role: m.role,
             createdAt: m.workspace.createdAt,
+            showCount: m.workspace._count.shows,
           })),
         }),
       };

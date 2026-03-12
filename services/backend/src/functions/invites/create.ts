@@ -16,7 +16,7 @@ import { sendInviteEmail } from "../lib/email";
         const claims = event.requestContext.authorizer.jwt.claims;
         const userId = claims.sub as string;
   
-        const workspaceId = event.pathParameters?.id;
+        const workspaceId = event.pathParameters?.workspaceId;
         if (!workspaceId) {
           return badRequest("Missing workspaceId");
         }

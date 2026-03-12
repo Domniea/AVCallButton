@@ -10,10 +10,10 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
 
-    const workspaceId = event.pathParameters?.id;
-    const targetUserId = event.pathParameters?.memberId;
+    const workspaceId = event.pathParameters?.workspaceId;
+    const targetUserId = event.pathParameters?.userId;
     if (!workspaceId || !targetUserId)
-      return badRequest("Missing workspaceId or memberId");
+      return badRequest("Missing workspaceId or userId");
 
     await authorize(userId, workspaceId, "workspace:removeMember");
 

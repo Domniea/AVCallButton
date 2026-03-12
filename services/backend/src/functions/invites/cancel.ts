@@ -10,7 +10,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
 
-    const inviteId = event.pathParameters?.id;
+    const inviteId = event.pathParameters?.inviteId;
     if (!inviteId) return badRequest("Missing invite ID");
 
     const invite = await prisma.invite.findUnique({

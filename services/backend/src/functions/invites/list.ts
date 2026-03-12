@@ -10,7 +10,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
             const claims = event.requestContext.authorizer.jwt.claims;
             const userId = claims.sub as string;
 
-            const workspaceId = event.pathParameters?.id as string;
+            const workspaceId = event.pathParameters?.workspaceId as string;
 
             const membership = await authorize(userId, workspaceId, "workspace:invite");
 

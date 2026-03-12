@@ -53,25 +53,31 @@ export function ApiStack({ stack, app }: StackContext) {
       // Workspaces
       "GET /workspaces": "src/functions/workspaces/list.handler",
       "POST /workspaces/org": "src/functions/workspaces/createOrg.handler",
-      "DELETE /workspaces/{id}": "src/functions/workspaces/delete.handler",
+      "DELETE /workspaces/{workspaceId}":
+        "src/functions/workspaces/delete.handler",
 
-      // Routes:
-      "GET /workspaces/{id}/members": "src/functions/members/list.handler",
-      "PATCH /workspaces/{id}/members/{memberId}":
+      // Members
+      "GET /workspaces/{workspaceId}/members":
+        "src/functions/members/list.handler",
+      "PATCH /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/updateRole.handler",
-      "DELETE /workspaces/{id}/members/{memberId}":
+      "DELETE /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/remove.handler",
 
       // Shows
-      "GET /workspaces/{id}/shows": "src/functions/shows/list.handler",
-      "POST /workspaces/{id}/shows": "src/functions/shows/create.handler",
-      "DELETE /shows/{id}": "src/functions/shows/delete.handler",
+      "GET /workspaces/{workspaceId}/shows":
+        "src/functions/shows/list.handler",
+      "POST /workspaces/{workspaceId}/shows":
+        "src/functions/shows/create.handler",
+      "DELETE /shows/{showId}": "src/functions/shows/delete.handler",
 
-      //Invites
-      "POST /workspaces/{id}/invites": "src/functions/invites/create.handler",
-      "GET /workspaces/{id}/invites": "src/functions/invites/list.handler",
+      // Invites
+      "POST /workspaces/{workspaceId}/invites":
+        "src/functions/invites/create.handler",
+      "GET /workspaces/{workspaceId}/invites":
+        "src/functions/invites/list.handler",
       "POST /invites/accept": "src/functions/invites/accept.handler",
-      "DELETE /invites/{id}": "src/functions/invites/cancel.handler",
+      "DELETE /invites/{inviteId}": "src/functions/invites/cancel.handler",
     },
   });
 

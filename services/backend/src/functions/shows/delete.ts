@@ -12,7 +12,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
       const claims = event.requestContext.authorizer.jwt.claims;
       const userId = claims.sub as string;
 
-      const showId = event.pathParameters?.id;
+      const showId = event.pathParameters?.showId;
       if (!showId) {
         return badRequest("Missing show id");
       }

@@ -10,7 +10,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
 
-    const workspaceId = event.pathParameters?.id;
+    const workspaceId = event.pathParameters?.workspaceId;
     if (!workspaceId) return badRequest("Missing workspaceId");
 
     await authorize(userId, workspaceId, "workspace:viewMembers");

@@ -13,10 +13,10 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
 
-    const workspaceId = event.pathParameters?.id;
-    const memberId = event.pathParameters?.memberId;
-    if (!workspaceId || !memberId)
-      return badRequest("Missing workspaceId or memberId");
+    const workspaceId = event.pathParameters?.workspaceId;
+    const targetUserId = event.pathParameters?.userId;
+    if (!workspaceId || !targetUserId)
+      return badRequest("Missing workspaceId or userId");
 
     const callerMembership = await authorize(
       userId,
@@ -30,10 +30,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     if (!role || !VALID_ROLES.includes(role)) return badRequest("Invalid role");
 
     const target = await prisma.membership.findUnique({
-      where: { id: memberId },
+      where: {
+        userId_workspaceId: { userId: targetUserId, workspaceId },
+      },
     });
-    if (!target || target.workspaceId !== workspaceId)
-      return notFound("Member not found");
+    if (!target) return notFound("Member not found");
 
     if (target.userId === userId)
       return forbidden("Cannot change your own role");
@@ -44,7 +45,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return forbidden("Cannot promote above your own rank");
 
     const updated = await prisma.membership.update({
-      where: { id: memberId },
+      where: { id: target.id },
       data: { role },
     });
 

@@ -5,6 +5,14 @@ import type {
 import { prisma } from "../lib/prisma";
 import { serverError } from "../lib/responses";
 
+const DEFAULT_ROLES = [
+  { rank: 2, name: "GUEST" },
+  { rank: 4, name: "CREW" },
+  { rank: 6, name: "LEAD" },
+  { rank: 8, name: "MANAGER" },
+  { rank: 10, name: "OWNER" },
+] as const;
+
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {
@@ -32,9 +40,30 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
             data: {
               name: `Personal – ${userId}`,
               type: "personal",
-              
             },
           });
+
+          await tx.workspaceRole.createMany({
+            data: DEFAULT_ROLES.map((r) => ({
+              workspaceId: workspace.id,
+              rank: r.rank,
+              name: r.name,
+              description: "",
+            })),
+          });
+
+          const ownerRole = await tx.workspaceRole.findUnique({
+            where: {
+              workspaceId_rank: {
+                workspaceId: workspace.id,
+                rank: 10,
+              },
+            },
+          });
+
+          if (!ownerRole) {
+            throw new Error("Failed to seed owner workspace role");
+          }
 
           const membership = await tx.membership.create({
             data: {
@@ -42,6 +71,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
               email,
               workspaceId: workspace.id,
               role: "owner",
+              workspaceRoleId: ownerRole.uuid,
               status: "active",
             },
             include: { workspace: true },

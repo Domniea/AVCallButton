@@ -1,4 +1,4 @@
-export type Role = "owner" | "showLead" | "leadTech" | "tech";
+export type Role = "owner" | "manager" | "lead" | "crew" | "guest";
 
 export type Action =
   | "workspace:update"
@@ -17,31 +17,32 @@ export type Action =
   | "show:assignShowLead"
   | "show:view";
 
-export const roleRank: Record<Role, number> = {
-  tech: 1,
-  leadTech: 2,
-  showLead: 3,
-  owner: 4,
-};
-
-export const actionMinimumRank: Record<Action, number> = {
-  "workspace:update": 3,
-  "workspace:delete": 4,
-  "workspace:billing": 4,
-  "workspace:invite": 3,
-  "workspace:deleteInvite": 3,
-  "workspace:changeRole": 4,
-  "workspace:viewMembers": 3,
-  "workspace:removeMember": 4,
-
-  "show:create": 2,
-  "show:update": 2,
-  "show:delete": 3,
-  "show:assignTech": 2,
-  "show:assignLeadTech": 2,
-  "show:assignShowLead": 3,
-  "show:view": 1,
-};
+  export const roleRank: Record<Role, number> = {
+    guest: 2,
+    crew: 4,
+    lead: 6,
+    manager: 8,
+    owner: 10,
+  };
+  
+  export const actionMinimumRank: Record<Action, number> = {
+    "workspace:update": 8,
+    "workspace:delete": 10,
+    "workspace:billing": 10,
+    "workspace:invite": 8,
+    "workspace:deleteInvite": 8,
+    "workspace:changeRole": 10,
+    "workspace:viewMembers": 8,
+    "workspace:removeMember": 10,
+  
+    "show:create": 6,
+    "show:update": 6,
+    "show:delete": 8,
+    "show:assignTech": 6,
+    "show:assignLeadTech": 6,
+    "show:assignShowLead": 8,
+    "show:view": 4,
+  };
 
 export function hasPermission(role: Role, action: Action): boolean {
   const userRank = roleRank[role];

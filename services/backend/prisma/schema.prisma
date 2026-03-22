@@ -13,9 +13,25 @@ model Workspace {
   type      String
   createdAt DateTime @default(now())
 
+  memberships    Membership[]
+  shows          Show[]
+  invites        Invite[]
+  workspaceRoles WorkspaceRole[]
+}
+
+model WorkspaceRole {
+  uuid        String    @id @default(uuid())
+  workspaceId String
+  rank        Int
+  name        String
+  description String    @default("")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
   memberships Membership[]
-  shows       Show[]
-  invites     Invite[]
+
+  @@unique([workspaceId, rank])
 }
 
 model Membership {
@@ -25,15 +41,19 @@ model Membership {
   workspaceId String
   email       String?
 
-  role     String
-  status   String   @default("active")
-  joinedAt DateTime @default(now())
+  role            String
+  workspaceRoleId String
+  status          String   @default("active")
+  joinedAt        DateTime @default(now())
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  // Cannot delete a WorkspaceRole row while any membership points at it (no standalone role delete).
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
 
   @@unique([userId, workspaceId])
   @@index([userId])
   @@index([workspaceId])
+  @@index([workspaceRoleId])
 }
 
 model Invite {

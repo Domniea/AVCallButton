@@ -4,11 +4,9 @@ import type {
   
   import { prisma } from "../lib/prisma";
   import { authorize } from "../lib/authorization";
-  import { roleRank, Role } from "../lib/permissions";
+  import { isRole, roleRank } from "../lib/permissions";
   import { badRequest, forbidden, serverError } from "../lib/responses";
 import { sendInviteEmail } from "../lib/email";
-  
-  const VALID_ROLES: Role[] = ["owner", "showLead", "leadTech", "tech"];
   
   export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
     async (event) => {
@@ -33,12 +31,12 @@ import { sendInviteEmail } from "../lib/email";
           return badRequest("Invalid email");
         }
   
-        if (!role || !VALID_ROLES.includes(role)) {
+        if (!role || typeof role !== "string" || !isRole(role)) {
           return badRequest("Invalid role");
         }
   
-        const callerRank = roleRank[membership.role as Role];
-        const invitedRank = roleRank[role as Role];
+        const callerRank = membership.workspaceRole.rank;
+        const invitedRank = roleRank[role];
         if (invitedRank > callerRank) {
           return forbidden("Cannot invite someone to a role above your own");
         }

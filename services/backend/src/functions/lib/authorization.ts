@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { hasPermission, Role, Action } from "./permissions";
+import { hasPermissionForRank, Action } from "./permissions";
 
 async function getMembership(userId: string, workspaceId: string) {
   return prisma.membership.findUnique({
@@ -8,6 +8,9 @@ async function getMembership(userId: string, workspaceId: string) {
         userId,
         workspaceId,
       },
+    },
+    include: {
+      workspaceRole: true,
     },
   });
 }
@@ -23,9 +26,15 @@ export async function authorize(
     throw new Error("NOT_AUTHORIZED");
   }
 
-  const role = membership.role as Role;
+  if (!membership.workspaceRole) {
+    throw new Error("FORBIDDEN");
+  }
 
-  if (!hasPermission(role, action)) {
+  if (membership.workspaceRole.workspaceId !== membership.workspaceId) {
+    throw new Error("FORBIDDEN");
+  }
+
+  if (!hasPermissionForRank(membership.workspaceRole.rank, action)) {
     throw new Error("FORBIDDEN");
   }
 

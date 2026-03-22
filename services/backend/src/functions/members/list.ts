@@ -17,11 +17,25 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     const members = await prisma.membership.findMany({
       where: { workspaceId, status: "active" },
+      include: { workspaceRole: true },
+      orderBy: { joinedAt: "asc" },
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ members }),
+      body: JSON.stringify({
+        members: members.map((m) => ({
+          id: m.id,
+          userId: m.userId,
+          email: m.email,
+          status: m.status,
+          joinedAt: m.joinedAt,
+          role: m.role,
+          roleRank: m.workspaceRole.rank,
+          roleName: m.workspaceRole.name,
+          workspaceRoleId: m.workspaceRoleId,
+        })),
+      }),
     };
   } catch (error) {
     if (error instanceof Error) {

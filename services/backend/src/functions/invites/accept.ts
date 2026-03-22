@@ -1,6 +1,15 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
-import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
+import { badRequest, notFound, serverError } from "../lib/responses";
+import { roleRank, type Role } from "../lib/permissions";
+
+/** Old invite `role` strings before guest/crew/lead/manager/owner. */
+const LEGACY_INVITE_ROLE_RANK: Record<string, number> = {
+  tech: 2,
+  leadTech: 4,
+  showLead: 6,
+  owner: 10,
+};
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,
@@ -35,6 +44,24 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Invite has expired");
     }
 
+    const rank =
+      roleRank[invite.role as Role] ?? LEGACY_INVITE_ROLE_RANK[invite.role];
+    if (rank === undefined) {
+      return badRequest("Invite has an invalid role; ask for a new invite");
+    }
+
+    const workspaceRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_rank: {
+          workspaceId: invite.workspaceId,
+          rank,
+        },
+      },
+    });
+    if (!workspaceRole) {
+      return badRequest("Workspace role missing; contact workspace admin");
+    }
+
     const membership = await prisma.$transaction(async (tx) => {
       const newMembership = await tx.membership.create({
         data: {
@@ -42,6 +69,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           email,
           workspaceId: invite.workspaceId,
           role: invite.role,
+          workspaceRoleId: workspaceRole.uuid,
           status: "active",
         },
       });

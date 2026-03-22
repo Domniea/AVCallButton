@@ -3,6 +3,7 @@ import type {
 } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
+import { authorize } from "../lib/authorization";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
@@ -16,18 +17,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         return badRequest("Missing workspaceId");
       }
 
-      const membership = await prisma.membership.findUnique({
-        where: {
-          userId_workspaceId: {
-            userId,
-            workspaceId,
-          },
-        },
-      });
-
-      if (!membership || membership.role !== "owner") {
-        return forbidden("Only owner can delete workspace");
-      }
+      await authorize(userId, workspaceId, "workspace:delete");
 
       await prisma.workspace.delete({
         where: { id: workspaceId },
@@ -38,6 +28,14 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         body: JSON.stringify({ success: true }),
       };
     } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "NOT_AUTHORIZED") {
+          return forbidden("Not a member of this workspace");
+        }
+        if (error.message === "FORBIDDEN") {
+          return forbidden("Only owner can delete workspace");
+        }
+      }
       console.error("Failed to delete workspace:", error);
       return serverError("Failed to delete workspace");
     }

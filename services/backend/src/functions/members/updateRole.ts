@@ -1,10 +1,8 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { roleRank, Role } from "../lib/permissions";
+import { isRole, roleRank, type Role } from "../lib/permissions";
 import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
-
-const VALID_ROLES: Role[] = ["owner", "showLead", "leadTech", "tech"];
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,
@@ -27,31 +25,56 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     if (!event.body) return badRequest("Missing request body");
     const { role } = JSON.parse(event.body);
 
-    if (!role || !VALID_ROLES.includes(role)) return badRequest("Invalid role");
+    if (!role || typeof role !== "string" || !isRole(role))
+      return badRequest("Invalid role");
 
     const target = await prisma.membership.findUnique({
       where: {
         userId_workspaceId: { userId: targetUserId, workspaceId },
       },
+      include: { workspaceRole: true },
     });
     if (!target) return notFound("Member not found");
 
     if (target.userId === userId)
       return forbidden("Cannot change your own role");
 
-    const callerRank = roleRank[callerMembership.role as Role];
+    const callerRank = callerMembership.workspaceRole.rank;
     const newRank = roleRank[role as Role];
+
+    const newWorkspaceRole = await prisma.workspaceRole.findUnique({
+      where: {
+        workspaceId_rank: { workspaceId, rank: newRank },
+      },
+    });
+    if (!newWorkspaceRole) {
+      return badRequest("Invalid role for this workspace");
+    }
+
     if (newRank > callerRank)
       return forbidden("Cannot promote above your own rank");
 
     const updated = await prisma.membership.update({
       where: { id: target.id },
-      data: { role },
+      data: {
+        role,
+        workspaceRoleId: newWorkspaceRole.uuid,
+      },
+      include: { workspaceRole: true },
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ member: updated }),
+      body: JSON.stringify({
+        member: {
+          id: updated.id,
+          userId: updated.userId,
+          role: updated.role,
+          roleRank: updated.workspaceRole.rank,
+          roleName: updated.workspaceRole.name,
+          workspaceRoleId: updated.workspaceRoleId,
+        },
+      }),
     };
   } catch (error) {
     if (error instanceof Error) {

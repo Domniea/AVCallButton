@@ -37,21 +37,16 @@ export default function SignupPage() {
 
   const onSubmit = async (values: LoginSchema) => {
     try {
-      await dispatch(
-        loginThunk({
-          email: values.email,
-          password: values.password,
-        }),
-      )
+      await dispatch(loginThunk({ email: values.email, password: values.password }))
         .unwrap()
         .then(() => dispatch(fetchMeThunk()));
-
       const inviteToken = sessionStorage.getItem("inviteToken");
       router.replace(inviteToken ? "/invite" : "/home");
     } catch (err) {
       console.error("Login failed:", err);
     }
-
+  };
+    
     return (
       <Box
         height="100vh"
@@ -120,4 +115,3 @@ export default function SignupPage() {
       </Box>
     );
   };
-}

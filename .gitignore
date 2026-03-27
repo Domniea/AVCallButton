@@ -33,6 +33,7 @@ yarn-error.*
 
 # environment files
 .env
+.env.local
 .env.*
 *.env
 *.env.*
@@ -43,6 +44,7 @@ yarn-error.*
 # build outputs
 build/
 
+<<<<<<< Updated upstream
 # Turbo
 .turbo
 **/.turbo
@@ -50,3 +52,13 @@ build/
 # SST
 services/backend/.sst/
 **/.sst/
+=======
+#nextjs
+.next/
+.vercel
+.env*.local
+#ignore notes
+notes.js
+>>>>>>> Stashed changes
+#ignore notes
+notes.js

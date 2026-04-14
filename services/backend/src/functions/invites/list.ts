@@ -2,6 +2,7 @@ import type {APIGatewayProxyHandlerV2WithJWTAuthorizer} from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
+import { inviteToApi } from "../lib/inviteDto";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
@@ -14,12 +15,18 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
 
             const membership = await authorize(userId, workspaceId, "workspace:invite");
 
-            const invites = await prisma.invite.findMany({
+            const rows = await prisma.invite.findMany({
                 where: {
                     workspaceId,
                     status: "pending",
                 },
+                include: { workspaceRole: true },
+                orderBy: { createdAt: "desc" },
             });
+
+            const invites = rows.map((inv) =>
+                inviteToApi(inv, inv.workspaceRole),
+            );
 
             return {
                 statusCode: 200,

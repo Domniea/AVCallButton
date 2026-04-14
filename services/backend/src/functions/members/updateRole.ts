@@ -1,7 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { isRole, roleRank, type Role } from "../lib/permissions";
+import { isRole, roleKeyFromRank, roleRank, type Role } from "../lib/permissions";
 import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -57,7 +57,6 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const updated = await prisma.membership.update({
       where: { id: target.id },
       data: {
-        role,
         workspaceRoleId: newWorkspaceRole.uuid,
       },
       include: { workspaceRole: true },
@@ -69,7 +68,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         member: {
           id: updated.id,
           userId: updated.userId,
-          role: updated.role,
+          role: roleKeyFromRank(updated.workspaceRole.rank),
           roleRank: updated.workspaceRole.rank,
           roleName: updated.workspaceRole.name,
           workspaceRoleId: updated.workspaceRoleId,

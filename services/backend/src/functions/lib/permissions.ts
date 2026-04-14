@@ -1,6 +1,6 @@
 export type Role = "owner" | "manager" | "lead" | "crew" | "guest";
 
-/** Canonical role keys for API bodies (invite role, membership.role string). Order = lowest → highest rank. */
+/** Canonical role keys for API bodies (invites, PATCH role). Order = lowest → highest rank. */
 export const ROLES: readonly Role[] = [
   "guest",
   "crew",
@@ -11,6 +11,14 @@ export const ROLES: readonly Role[] = [
 
 export function isRole(value: string): value is Role {
   return (ROLES as readonly string[]).includes(value);
+}
+
+/** Map `WorkspaceRole.rank` to API role key when it matches a seeded tier; otherwise null. */
+export function roleKeyFromRank(rank: number): Role | null {
+  for (const r of ROLES) {
+    if (roleRank[r] === rank) return r;
+  }
+  return null;
 }
 
 export type Action =
@@ -58,7 +66,10 @@ export const actionMinimumRank: Record<Action, number> = {
 };
 
 /** Permission check using the member's numeric rank from `WorkspaceRole.rank`. */
-export function hasPermissionForRank(userRank: number, action: Action): boolean {
+export function hasPermissionForRank(
+  userRank: number,
+  action: Action,
+): boolean {
   const requiredRank = actionMinimumRank[action];
   return userRank >= requiredRank;
 }

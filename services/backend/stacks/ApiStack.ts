@@ -65,8 +65,7 @@ export function ApiStack({ stack, app }: StackContext) {
         "src/functions/members/remove.handler",
 
       // Shows
-      "GET /workspaces/{workspaceId}/shows":
-        "src/functions/shows/list.handler",
+      "GET /workspaces/{workspaceId}/shows": "src/functions/shows/list.handler",
       "POST /workspaces/{workspaceId}/shows":
         "src/functions/shows/create.handler",
       "DELETE /shows/{showId}": "src/functions/shows/delete.handler",
@@ -81,7 +80,11 @@ export function ApiStack({ stack, app }: StackContext) {
     },
   });
 
-  api.attachPermissions(["ses:SendEmail", "ses:SendRawEmail","cognito-idp:AdminDeleteUser"]);
+  api.attachPermissions([
+    "ses:SendEmail",
+    "ses:SendRawEmail",
+    "cognito-idp:AdminDeleteUser",
+  ]);
   stack.addOutputs({
     ApiEndpoint: api.url,
   });

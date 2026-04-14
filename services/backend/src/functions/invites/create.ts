@@ -4,6 +4,7 @@ import type {
   
   import { prisma } from "../lib/prisma";
   import { authorize } from "../lib/authorization";
+  import { inviteToApi } from "../lib/inviteDto";
   import { isRole, roleRank } from "../lib/permissions";
   import { badRequest, forbidden, serverError } from "../lib/responses";
 import { sendInviteEmail } from "../lib/email";
@@ -26,8 +27,10 @@ import { sendInviteEmail } from "../lib/email";
         }
   
         const { email, role } = JSON.parse(event.body);
-  
-        if (!email || typeof email !== "string" || !email.includes("@")) {
+
+        const normalizedEmail =
+          typeof email === "string" ? email.trim().toLowerCase() : "";
+        if (!normalizedEmail || !normalizedEmail.includes("@")) {
           return badRequest("Invalid email");
         }
   
@@ -40,23 +43,32 @@ import { sendInviteEmail } from "../lib/email";
         if (invitedRank > callerRank) {
           return forbidden("Cannot invite someone to a role above your own");
         }
-  
+
+        const workspaceRole = await prisma.workspaceRole.findUnique({
+          where: {
+            workspaceId_rank: { workspaceId, rank: invitedRank },
+          },
+        });
+        if (!workspaceRole) {
+          return badRequest("Invalid role for this workspace");
+        }
+
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
-  
+
         const invite = await prisma.invite.upsert({
           where: {
-            email_workspaceId: { email, workspaceId },
+            email_workspaceId: { email: normalizedEmail, workspaceId },
           },
           update: {
-            role,
+            workspaceRoleId: workspaceRole.uuid,
             invitedBy: userId,
             expiresAt,
             status: "pending",
           },
           create: {
-            email,
-            role,
+            email: normalizedEmail,
+            workspaceRoleId: workspaceRole.uuid,
             workspaceId,
             invitedBy: userId,
             expiresAt,
@@ -69,7 +81,7 @@ import { sendInviteEmail } from "../lib/email";
           });
           
           await sendInviteEmail({
-            to: email,
+            to: normalizedEmail,
             workspaceName: workspace.name,
             inviterEmail: claims.email as string,
             token: invite.token,
@@ -77,7 +89,9 @@ import { sendInviteEmail } from "../lib/email";
   
         return {
           statusCode: 201,
-          body: JSON.stringify({ invite }),
+          body: JSON.stringify({
+            invite: inviteToApi(invite, workspaceRole),
+          }),
         };
       } catch (error) {
         if (error instanceof Error) {

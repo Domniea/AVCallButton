@@ -1,15 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
-import { roleRank, type Role } from "../lib/permissions";
-
-/** Old invite `role` strings before guest/crew/lead/manager/owner. */
-const LEGACY_INVITE_ROLE_RANK: Record<string, number> = {
-  tech: 2,
-  leadTech: 4,
-  showLead: 6,
-  owner: 10,
-};
+import { roleKeyFromRank } from "../lib/permissions";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,
@@ -18,6 +10,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
     const email = claims.email as string;
+    const normalizedEmail = email.trim().toLowerCase();
 
     if (!event.body) return badRequest("Missing request body");
 
@@ -26,13 +19,14 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     const invite = await prisma.invite.findUnique({
       where: { token },
+      include: { workspaceRole: true },
     });
 
     if (!invite) return notFound("Invite not found");
 
-    if (invite.email !== email) {
+    if (invite.email.toLowerCase() !== normalizedEmail) {
       return badRequest(
-        `This invite was sent to ${invite.email}. Please log in with that account.`
+        `This invite was sent to ${invite.email}. Please log in with that account.`,
       );
     }
 
@@ -44,32 +38,22 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Invite has expired");
     }
 
-    const rank =
-      roleRank[invite.role as Role] ?? LEGACY_INVITE_ROLE_RANK[invite.role];
-    if (rank === undefined) {
-      return badRequest("Invite has an invalid role; ask for a new invite");
+    const { workspaceRole } = invite;
+    if (!workspaceRole) {
+      return badRequest("Invite is missing workspace role; ask for a new invite");
     }
 
-    const workspaceRole = await prisma.workspaceRole.findUnique({
-      where: {
-        workspaceId_rank: {
-          workspaceId: invite.workspaceId,
-          rank,
-        },
-      },
-    });
-    if (!workspaceRole) {
-      return badRequest("Workspace role missing; contact workspace admin");
+    if (workspaceRole.workspaceId !== invite.workspaceId) {
+      return badRequest("Invite data is inconsistent; ask for a new invite");
     }
 
     const membership = await prisma.$transaction(async (tx) => {
       const newMembership = await tx.membership.create({
         data: {
           userId,
-          email,
+          email: normalizedEmail,
           workspaceId: invite.workspaceId,
-          role: invite.role,
-          workspaceRoleId: workspaceRole.uuid,
+          workspaceRoleId: invite.workspaceRoleId,
           status: "active",
         },
       });
@@ -88,7 +72,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         membership: {
           id: membership.id,
           workspaceId: membership.workspaceId,
-          role: membership.role,
+          role: roleKeyFromRank(workspaceRole.rank),
         },
       }),
     };

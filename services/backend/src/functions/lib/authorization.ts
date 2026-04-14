@@ -18,7 +18,7 @@ async function getMembership(userId: string, workspaceId: string) {
 export async function authorize(
   userId: string,
   workspaceId: string,
-  action: Action
+  action: Action,
 ) {
   const membership = await getMembership(userId, workspaceId);
 
@@ -44,7 +44,7 @@ export async function authorize(
 export async function hasPermissionForUser(
   userId: string,
   workspaceId: string,
-  action: Action
+  action: Action,
 ): Promise<boolean> {
   try {
     await authorize(userId, workspaceId, action);

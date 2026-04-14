@@ -1,6 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
+import { roleKeyFromRank } from "../lib/permissions";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -30,7 +31,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           email: m.email,
           status: m.status,
           joinedAt: m.joinedAt,
-          role: m.role,
+          role: roleKeyFromRank(m.workspaceRole.rank),
           roleRank: m.workspaceRole.rank,
           roleName: m.workspaceRole.name,
           workspaceRoleId: m.workspaceRoleId,

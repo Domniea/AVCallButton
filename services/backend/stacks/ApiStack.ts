@@ -64,11 +64,13 @@ export function ApiStack({ stack, app }: StackContext) {
       "DELETE /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/remove.handler",
 
-      // Shows
-      "GET /workspaces/{workspaceId}/shows": "src/functions/shows/list.handler",
-      "POST /workspaces/{workspaceId}/shows":
-        "src/functions/shows/create.handler",
-      "DELETE /shows/{showId}": "src/functions/shows/delete.handler",
+      // Events
+      "GET /workspaces/{workspaceId}/events": "src/functions/events/list.handler",
+      "POST /workspaces/{workspaceId}/events":
+        "src/functions/events/create.handler",
+      "DELETE /events/{eventId}": "src/functions/events/delete.handler",
+      "POST /events/{eventId}/assignments":
+        "src/functions/events/assign.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":

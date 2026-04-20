@@ -17,13 +17,17 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         return badRequest("Missing workspaceId");
       }
 
-      await authorize(userId, workspaceId, "show:create");
+      const callerMembership = await authorize(
+        userId,
+        workspaceId,
+        "event:create",
+      );
 
       if (!event.body) {
         return badRequest("Missing request body");
       }
 
-      const { name, location, startTime, endTime } =
+      const { name, location, venue, startTime, endTime } =
         JSON.parse(event.body);
 
       if (
@@ -32,23 +36,39 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
         name.trim().length < 2 ||
         name.trim().length > 100
       ) {
-        return badRequest("Invalid show name");
+        return badRequest("Invalid event name");
       }
 
-      const show = await prisma.show.create({
-        data: {
-          name: name.trim(),
-          status: "draft",
-          location: location ?? null,
-          startTime: startTime ? new Date(startTime) : null,
-          endTime: endTime ? new Date(endTime) : null,
-          workspaceId,
-        },
+      const created = await prisma.$transaction(async (tx) => {
+        const newEvent = await tx.event.create({
+          data: {
+            name: name.trim(),
+            status: "draft",
+            location: location ?? null,
+            venue: venue ?? null,
+            startTime: startTime ? new Date(startTime) : null,
+            endTime: endTime ? new Date(endTime) : null,
+            workspaceId,
+          },
+        });
+
+        const rank = callerMembership.workspaceRole.rank;
+        await tx.eventAssignment.create({
+          data: {
+            eventId: newEvent.id,
+            membershipId: callerMembership.id,
+            workspaceRoleId: callerMembership.workspaceRoleId,
+            eventRank: rank,
+            assignedBy: userId,
+          },
+        });
+
+        return newEvent;
       });
 
       return {
         statusCode: 201,
-        body: JSON.stringify({ show }),
+        body: JSON.stringify({ event: created }),
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -59,7 +79,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
           return forbidden("Insufficient permissions");
         }
       }
-      console.error("Failed to create show:", error);
-      return serverError("Failed to create show");
+      console.error("Failed to create event:", error);
+      return serverError("Failed to create event");
     }
   };

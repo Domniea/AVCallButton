@@ -4,7 +4,7 @@ import type {
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
+import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {
@@ -12,29 +12,21 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
       const claims = event.requestContext.authorizer.jwt.claims;
       const userId = claims.sub as string;
 
-      const showId = event.pathParameters?.showId;
-      if (!showId) {
-        return badRequest("Missing show id");
+      const workspaceId = event.pathParameters?.workspaceId;
+      if (!workspaceId) {
+        return badRequest("Missing workspaceId");
       }
 
-      const show = await prisma.show.findUnique({
-        where: { id: showId },
-        select: { workspaceId: true },
-      });
+      await authorize(userId, workspaceId, "event:view");
 
-      if (!show) {
-        return notFound("Show not found");
-      }
-
-      await authorize(userId, show.workspaceId, "show:delete");
-
-      await prisma.show.delete({
-        where: { id: showId },
+      const events = await prisma.event.findMany({
+        where: { workspaceId },
+        orderBy: { createdAt: "desc" },
       });
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: true }),
+        body: JSON.stringify({ events }),
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -45,8 +37,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
           return forbidden("Insufficient permissions");
         }
       }
-      console.error("Failed to delete show:", error);
-      return serverError("Failed to delete show");
+      console.error("Failed to list events:", error);
+      return serverError("Failed to list events");
     }
   };
-

@@ -16,12 +16,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       include: {
         workspace: {
           include: {
-            shows: {
+            events: {
               orderBy: { createdAt: "desc" },
               take: 3,
             },
             _count: {
-              select: { shows: true },
+              select: { events: true },
             },
           },
         },
@@ -34,8 +34,8 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       name: m.workspace.name,
       type: m.workspace.type,
       role: roleKeyFromRank(m.workspaceRole.rank),
-      showCount: m.workspace._count.shows,
-      recentShows: m.workspace.shows,
+      eventCount: m.workspace._count.events,
+      recentEvents: m.workspace.events,
     }));
 
     return {

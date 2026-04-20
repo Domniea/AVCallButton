@@ -7,6 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum EventInviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Workspace {
   id        String   @id @default(uuid())
   name      String
@@ -14,40 +20,42 @@ model Workspace {
   createdAt DateTime @default(now())
 
   memberships    Membership[]
-  shows          Show[]
+  events         Event[]
   invites        Invite[]
   workspaceRoles WorkspaceRole[]
 }
 
 model WorkspaceRole {
-  uuid        String    @id @default(uuid())
+  uuid        String   @id @default(uuid())
   workspaceId String
   rank        Int
   name        String
-  description String    @default("")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  invites Invite[]
-  memberships Membership[]
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invites          Invite[]
+  memberships      Membership[]
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
 
   @@unique([workspaceId, rank])
 }
 
 model Membership {
-  id String @id @default(uuid())
-
-  userId      String
-  workspaceId String
-  email       String?
-
+  id              String   @id @default(uuid())
+  userId          String
+  workspaceId     String
+  email           String?
   workspaceRoleId String
   status          String   @default("active")
   joinedAt        DateTime @default(now())
 
-  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole    WorkspaceRole     @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
 
   @@unique([userId, workspaceId])
   @@index([userId])
@@ -56,17 +64,18 @@ model Membership {
 }
 
 model Invite {
-  id          String    @id @default(uuid())
-  email       String
+  id              String   @id @default(uuid())
+  email           String
   workspaceRoleId String
-  workspaceRole   WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
-  status      String    @default("pending")
-  token       String    @unique @default(uuid())
-  expiresAt   DateTime
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  invitedBy   String
-  createdAt   DateTime  @default(now())
+  status          String   @default("pending")
+  token           String   @unique @default(uuid())
+  expiresAt       DateTime
+  workspaceId     String
+  invitedBy       String
+  createdAt       DateTime @default(now())
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
 
   @@unique([email, workspaceId])
   @@index([token])
@@ -74,35 +83,75 @@ model Invite {
   @@index([email])
 }
 
-model Show {
-  id        String    @id @default(uuid())
-  name      String
-  status    String
-  location  String?
-  startTime DateTime?
-  endTime   DateTime?
-  createdAt DateTime  @default(now())
-
+model Event {
+  id          String    @id @default(uuid())
+  name        String
+  status      String
+  location    String?
+  venue       String?
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime  @default(now())
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  logs     Log[]
-  messages Message[]
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  logs             Log[]
+  messages         Message[]
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
 
   @@index([workspaceId])
   @@index([status])
   @@index([startTime])
 }
 
+model EventInvite {
+
+  id              String   @id @default(uuid())
+  eventId         String
+  membershipId    String
+  workspaceRoleId String
+  eventRank       Int
+  assignedBy      String
+  status          EventInviteStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+
+  @@unique([eventId, membershipId])
+  @@index([eventId])
+  @@index([membershipId])
+}
+model EventAssignment {
+  id              String   @id @default(uuid())
+  eventId         String
+  membershipId    String
+  workspaceRoleId String
+  eventRank       Int
+  assignedBy      String
+  createdAt       DateTime @default(now())
+
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  membership    Membership    @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+
+  @@unique([eventId, membershipId])
+  @@index([eventId])
+  @@index([membershipId])
+}
+
 model Log {
   id        String   @id @default(uuid())
   message   String
   createdAt DateTime @default(now())
+  eventId   String
 
-  showId String
-  show   Show   @relation(fields: [showId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
 
-  @@index([showId])
+  @@index([eventId])
   @@index([createdAt])
 }
 
@@ -110,12 +159,11 @@ model Message {
   id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
+  eventId   String
+  userId    String
 
-  showId String
-  userId String
+  event Event @relation(fields: [eventId], references: [id])
 
-  show Show @relation(fields: [showId], references: [id])
-
-  @@index([showId])
+  @@index([eventId])
   @@index([createdAt])
 }

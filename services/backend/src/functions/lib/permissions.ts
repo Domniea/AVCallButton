@@ -30,13 +30,13 @@ export type Action =
   | "workspace:changeRole"
   | "workspace:viewMembers"
   | "workspace:removeMember"
-  | "show:create"
-  | "show:update"
-  | "show:delete"
-  | "show:assignTech"
-  | "show:assignLeadTech"
-  | "show:assignShowLead"
-  | "show:view";
+  | "event:create"
+  | "event:update"
+  | "event:delete"
+  | "event:assignTech"
+  | "event:assignLeadTech"
+  | "event:assignEventLead"
+  | "event:view";
 
 export const roleRank: Record<Role, number> = {
   guest: 2,
@@ -56,13 +56,13 @@ export const actionMinimumRank: Record<Action, number> = {
   "workspace:viewMembers": 8,
   "workspace:removeMember": 10,
 
-  "show:create": 6,
-  "show:update": 6,
-  "show:delete": 8,
-  "show:assignTech": 6,
-  "show:assignLeadTech": 6,
-  "show:assignShowLead": 8,
-  "show:view": 4,
+  "event:create": 6,
+  "event:update": 6,
+  "event:delete": 8,
+  "event:assignTech": 6,
+  "event:assignLeadTech": 6,
+  "event:assignEventLead": 8,
+  "event:view": 4,
 };
 
 /** Permission check using the member's numeric rank from `WorkspaceRole.rank`. */

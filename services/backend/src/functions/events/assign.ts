@@ -102,10 +102,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         }),
       };
     } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message.includes("Unique constraint")
-      ) {
+      if (err instanceof Error && err.message.includes("Unique constraint")) {
         return badRequest("User is already assigned to this event");
       }
       throw err;

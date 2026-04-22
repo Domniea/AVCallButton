@@ -41,7 +41,9 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     const { workspaceRole } = invite;
     if (!workspaceRole) {
-      return badRequest("Invite is missing workspace role; ask for a new invite");
+      return badRequest(
+        "Invite is missing workspace role; ask for a new invite",
+      );
     }
 
     if (workspaceRole.workspaceId !== invite.workspaceId) {

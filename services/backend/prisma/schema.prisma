@@ -13,6 +13,16 @@ enum EventInviteStatus {
   REJECTED
 }
 
+enum MembershipType {
+  INTERNAL
+  EXTERNAL
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Workspace {
   id        String   @id @default(uuid())
   name      String
@@ -49,7 +59,8 @@ model Membership {
   workspaceId     String
   email           String?
   workspaceRoleId String
-  status          String   @default("active")
+  type            MembershipType   @default(INTERNAL)
+  status          MembershipStatus @default(ACTIVE)
   joinedAt        DateTime @default(now())
 
   workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -76,6 +87,7 @@ model Invite {
 
   workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  eventInvites   EventInvite[]
 
   @@unique([email, workspaceId])
   @@index([token])
@@ -110,20 +122,22 @@ model EventInvite {
 
   id              String   @id @default(uuid())
   eventId         String
-  membershipId    String
+  membershipId    String?
+  inviteId        String?
   workspaceRoleId String
   eventRank       Int
   assignedBy      String
   status          EventInviteStatus @default(PENDING)
   createdAt       DateTime @default(now())
 
-  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  membership    Membership?   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  invite        Invite?       @relation(fields: [inviteId], references: [id], onDelete: Cascade)
   workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
 
-  @@unique([eventId, membershipId])
   @@index([eventId])
   @@index([membershipId])
+  @@index([inviteId])
 }
 model EventAssignment {
   id              String   @id @default(uuid())

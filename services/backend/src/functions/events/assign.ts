@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
+import { MembershipStatus } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
@@ -41,7 +42,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const assigneeMembership = await prisma.membership.findFirst({
       where: {
         workspaceId,
-        status: "active",
+        status: MembershipStatus.ACTIVE,
         email: { equals: normalizedEmail, mode: "insensitive" },
       },
       include: { workspaceRole: true },

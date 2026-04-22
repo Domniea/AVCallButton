@@ -1,3 +1,5 @@
+import { MembershipStatus } from "@prisma/client";
+
 import { prisma } from "./prisma";
 import { hasPermissionForRank, Action } from "./permissions";
 
@@ -22,7 +24,7 @@ export async function authorize(
 ) {
   const membership = await getMembership(userId, workspaceId);
 
-  if (!membership || membership.status !== "active") {
+  if (!membership || membership.status !== MembershipStatus.ACTIVE) {
     throw new Error("NOT_AUTHORIZED");
   }
 

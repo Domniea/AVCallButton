@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
+import { MembershipStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
 import { roleKeyFromRank } from "../lib/permissions";
@@ -54,7 +55,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           email: normalizedEmail,
           workspaceId: invite.workspaceId,
           workspaceRoleId: invite.workspaceRoleId,
-          status: "active",
+          status: MembershipStatus.ACTIVE,
         },
       });
 

@@ -139,6 +139,7 @@ model EventInvite {
   @@index([membershipId])
   @@index([inviteId])
 }
+
 model EventAssignment {
   id              String   @id @default(uuid())
   eventId         String

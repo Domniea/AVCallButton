@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
+import { MembershipStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
 import { roleKeyFromRank } from "../lib/permissions";
@@ -17,7 +18,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     await authorize(userId, workspaceId, "workspace:viewMembers");
 
     const members = await prisma.membership.findMany({
-      where: { workspaceId, status: "active" },
+      where: { workspaceId, status: MembershipStatus.ACTIVE },
       include: { workspaceRole: true },
       orderBy: { joinedAt: "asc" },
     });

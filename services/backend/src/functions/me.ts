@@ -2,6 +2,8 @@ import type {
   APIGatewayProxyHandlerV2WithJWTAuthorizer,
 } from "aws-lambda";
 
+import { normalizeEmail } from "./lib/email";
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "http://localhost:3000",
   "Access-Control-Allow-Headers": "Authorization,Content-Type",
@@ -14,7 +16,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
       const claims = event.requestContext.authorizer.jwt.claims;
 
       const userId = claims.sub as string;
-      const email = claims.email as string;
+      const email = normalizeEmail(claims.email);
 
       return {
         statusCode: 200,

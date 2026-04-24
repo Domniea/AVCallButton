@@ -2,6 +2,7 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { MembershipStatus } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
+import { normalizeEmail } from "../lib/email";
 import { badRequest, serverError } from "../lib/responses";
 import { seedDefaultWorkspaceRoles } from "../lib/workspaceRoles";
 
@@ -11,7 +12,8 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   try {
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
-    const email = typeof claims.email === "string" ? claims.email : null;
+    const normalizedClaimEmail = normalizeEmail(claims.email);
+    const email = normalizedClaimEmail === "" ? null : normalizedClaimEmail;
 
     if (!event.body) {
       return badRequest("Missing request body");

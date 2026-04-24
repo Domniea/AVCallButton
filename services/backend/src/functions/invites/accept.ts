@@ -3,6 +3,7 @@ import { MembershipStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
 import { roleKeyFromRank } from "../lib/permissions";
+import { isValidEmailInput, normalizeEmail } from "../lib/email";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,
@@ -10,8 +11,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   try {
     const claims = event.requestContext.authorizer.jwt.claims;
     const userId = claims.sub as string;
-    const email = claims.email as string;
-    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!isValidEmailInput(claims.email)) {
+      return badRequest("Invalid email");
+    }
+    const normalizedEmail = normalizeEmail(claims.email);
 
     if (!event.body) return badRequest("Missing request body");
 
@@ -25,7 +29,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     if (!invite) return notFound("Invite not found");
 
-    if (invite.email.toLowerCase() !== normalizedEmail) {
+    if (normalizeEmail(invite.email) !== normalizedEmail) {
       return badRequest(
         `This invite was sent to ${invite.email}. Please log in with that account.`,
       );
@@ -87,3 +91,4 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return serverError("Failed to accept invite");
   }
 };
+

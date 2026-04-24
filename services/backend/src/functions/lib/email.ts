@@ -2,6 +2,15 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const ses = new SESClient({ region: "us-east-1" });
 
+export function normalizeEmail(value: unknown): string {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+export function isValidEmailInput(value: unknown): boolean {
+  const email = normalizeEmail(value);
+  return email.length > 0 && email.includes("@");
+}
+
 export async function sendInviteEmail(params: {
   to: string;
   workspaceName: string;

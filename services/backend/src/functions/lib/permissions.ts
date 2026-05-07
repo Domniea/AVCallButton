@@ -33,9 +33,7 @@ export type Action =
   | "event:create"
   | "event:update"
   | "event:delete"
-  | "event:assignTech"
-  | "event:assignLeadTech"
-  | "event:assignEventLead"
+  | "event:assignStaff"
   | "event:view";
 
 export const roleRank: Record<Role, number> = {
@@ -59,9 +57,7 @@ export const actionMinimumRank: Record<Action, number> = {
   "event:create": 6,
   "event:update": 6,
   "event:delete": 8,
-  "event:assignTech": 6,
-  "event:assignLeadTech": 6,
-  "event:assignEventLead": 8,
+  "event:assignStaff": 6,
   "event:view": 4,
 };
 

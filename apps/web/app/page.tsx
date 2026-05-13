@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Box, VStack, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 
 import type { RootState } from "@av/store";
-import { BaseButton } from "@/components/reusable/BaseButton";
 
 export default function HomeEntryPage() {
   const router = useRouter();
@@ -18,6 +17,8 @@ export default function HomeEntryPage() {
   useEffect(() => {
     if (authStatus === "authenticated") {
       router.replace("/home");
+    } else if (authStatus === "unauthenticated") {
+      router.replace("/landingpage");
     }
   }, [authStatus, router]);
 
@@ -39,38 +40,12 @@ export default function HomeEntryPage() {
     return (
       <Box
         height="100vh"
-        flex={1}
         bg="bg"
-        px={6}
-        py={10}
         display="flex"
+        alignItems="center"
         justifyContent="center"
       >
-        <VStack
-          width="100%"
-          maxWidth="480px"
-          height="100%"
-          alignItems="center"
-          justifyContent="center"
-          gap={6}
-        >
-          <VStack
-            bg="bg"
-            borderRadius="xl"
-            p={8}
-            gap={8}
-            width="100%"
-            boxShadow="lg"
-          >
-            <Text fontSize="2xl" fontWeight="bold" color="text">
-              Welcome to AV Call Button
-            </Text>
-
-            <BaseButton onClick={() => router.replace("/auth/login")}>
-              Please sign in to continue
-            </BaseButton>
-          </VStack>
-        </VStack>
+        <Text color="gray.500">Redirecting…</Text>
       </Box>
     );
   }

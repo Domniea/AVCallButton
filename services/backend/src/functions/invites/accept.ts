@@ -1,5 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { MembershipStatus } from "@prisma/client";
+import { EventInviteStatus, MembershipStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
 import { roleKeyFromRank } from "../lib/permissions";
@@ -64,6 +64,30 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           status: MembershipStatus.ACTIVE,
         },
       });
+
+      const pendingEventInvites = await tx.eventInvite.findMany({
+        where: {
+          inviteId: invite.id,
+          status: EventInviteStatus.PENDING,
+        },
+      });
+
+      for (const ev of pendingEventInvites) {
+        await tx.eventAssignment.create({
+          data: {
+            eventId: ev.eventId,
+            membershipId: newMembership.id,
+            workspaceRoleId: newMembership.workspaceRoleId,
+            eventRank: ev.eventRank,
+            assignedBy: ev.assignedBy,
+          },
+        });
+
+        await tx.eventInvite.update({
+          where: { id: ev.id },
+          data: { status: EventInviteStatus.ACCEPTED, membershipId: newMembership.id, inviteId: null },
+        });
+      }
 
       await tx.invite.update({
         where: { id: invite.id },

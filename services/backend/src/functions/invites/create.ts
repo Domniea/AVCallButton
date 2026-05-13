@@ -1,6 +1,4 @@
-import type {
-  APIGatewayProxyHandlerV2WithJWTAuthorizer,
-} from "aws-lambda";
+import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
@@ -25,19 +23,15 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Missing workspaceId");
     }
 
-    const membership = await authorize(
-      userId,
-      workspaceId,
-      "workspace:invite",
-    );
+    const membership = await authorize(userId, workspaceId, "workspace:invite");
 
     if (!event.body) {
       return badRequest("Missing request body");
     }
 
     const { email, role } = JSON.parse(event.body) as {
-      email?: unknown;
-      role?: unknown;
+      email?: string;
+      role?: number;
     };
 
     if (!isValidEmailInput(email)) {
@@ -51,6 +45,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     const callerRank = membership.workspaceRole.rank;
     const invitedRank = roleRank[role];
+
     if (invitedRank > callerRank) {
       return forbidden("Cannot invite someone to a role above your own");
     }

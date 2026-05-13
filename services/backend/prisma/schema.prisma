@@ -54,14 +54,14 @@ model WorkspaceRole {
 }
 
 model Membership {
-  id              String   @id @default(uuid())
+  id              String           @id @default(uuid())
   userId          String
   workspaceId     String
   email           String?
   workspaceRoleId String
   type            MembershipType   @default(INTERNAL)
   status          MembershipStatus @default(ACTIVE)
-  joinedAt        DateTime @default(now())
+  joinedAt        DateTime         @default(now())
 
   workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceRole    WorkspaceRole     @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
@@ -87,7 +87,7 @@ model Invite {
 
   workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
-  eventInvites   EventInvite[]
+  eventInvites  EventInvite[]
 
   @@unique([email, workspaceId])
   @@index([token])
@@ -119,8 +119,7 @@ model Event {
 }
 
 model EventInvite {
-
-  id              String   @id @default(uuid())
+  id              String            @id @default(uuid())
   eventId         String
   membershipId    String?
   inviteId        String?
@@ -128,13 +127,15 @@ model EventInvite {
   eventRank       Int
   assignedBy      String
   status          EventInviteStatus @default(PENDING)
-  createdAt       DateTime @default(now())
+  createdAt       DateTime          @default(now())
 
   event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   membership    Membership?   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
   invite        Invite?       @relation(fields: [inviteId], references: [id], onDelete: Cascade)
   workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
 
+  @@unique([eventId, inviteId])
+  @@unique([eventId, membershipId])
   @@index([eventId])
   @@index([membershipId])
   @@index([inviteId])

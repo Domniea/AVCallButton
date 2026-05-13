@@ -53,7 +53,6 @@ export const actionMinimumRank: Record<Action, number> = {
   "workspace:changeRole": 10,
   "workspace:viewMembers": 8,
   "workspace:removeMember": 10,
-
   "event:create": 6,
   "event:update": 6,
   "event:delete": 8,

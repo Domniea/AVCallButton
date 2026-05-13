@@ -1,7 +1,12 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { isRole, roleKeyFromRank, roleRank, type Role } from "../lib/permissions";
+import {
+  isRole,
+  roleKeyFromRank,
+  roleRank,
+  type Role,
+} from "../lib/permissions";
 import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (

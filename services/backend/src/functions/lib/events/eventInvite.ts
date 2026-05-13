@@ -1,11 +1,15 @@
-import { prisma } from "../prisma";
-import { normalizeEmail } from "../email";
+import type { Prisma } from "@prisma/client";
 import {
   EventInviteStatus,
   Membership,
   MembershipStatus,
   MembershipType,
 } from "@prisma/client";
+
+import { prisma } from "../prisma";
+import { normalizeEmail, sendInviteEmail } from "../email";
+
+type DbClient = Prisma.TransactionClient | typeof prisma;
 
 type InviteBranch =
   | "invite_to_workspace_and_assign"
@@ -109,6 +113,24 @@ export function resolveInviteBranch(
   return "assign_now";
 }
 
+/**
+ * Event roster rank must be at least 1 and cannot exceed the workspace tier rank
+ * (`WorkspaceRole.rank` for that member or invite).
+ */
+export function assertEventRankWithinWorkspaceRoleRank(
+  eventRank: number,
+  workspaceRoleRank: number,
+): void {
+  if (eventRank < 1) {
+    throw new Error("Event rank must be at least 1");
+  }
+  if (eventRank > workspaceRoleRank) {
+    throw new Error(
+      "Event rank cannot be greater than the workspace role rank",
+    );
+  }
+}
+
 export async function setEventStaffAssignment(
   assignedBy: string,
   eventId: string,
@@ -125,15 +147,7 @@ export async function setEventStaffAssignment(
     throw new Error("Workspace role not found for membership");
   }
 
-  if (eventRank > assigneeWorkspaceRole.rank) {
-    throw new Error(
-      "Event rank cannot be greater than the assignee's workspace role rank",
-    );
-  }
-
-  if (eventRank < 1) {
-    throw new Error("Event rank must be at least 1");
-  }
+  assertEventRankWithinWorkspaceRoleRank(eventRank, assigneeWorkspaceRole.rank);
 
   return prisma.eventAssignment.upsert({
     where: { eventId_membershipId: { eventId, membershipId: membership.id } },
@@ -155,9 +169,11 @@ export async function setEventStaffAssignment(
 export async function reactivateMemberAndSetEventStaffAssignment(
   assignedBy: string,
   eventId: string,
-  membership: Membership,
+  membership: Membership | null,
   eventRank: number,
 ) {
+  if (!membership) throw new Error("Membership not found");
+
   if (membership.status !== MembershipStatus.INACTIVE) {
     throw new Error("Membership is not inactive");
   }
@@ -170,6 +186,132 @@ export async function reactivateMemberAndSetEventStaffAssignment(
   return setEventStaffAssignment(assignedBy, eventId, membership, eventRank);
 }
 
-export async function queWorkspaceInviteAndPendingEventInviteAssignment() {
-  return
+export async function createEventInvite(
+  db: DbClient,
+  eventId: string,
+  userId: string,
+  workspaceRoleId: string,
+  eventRank: number,
+  inviteId: string,
+) {
+  return db.eventInvite.create({
+    data: {
+      eventId,
+      workspaceRoleId,
+      eventRank,
+      assignedBy: userId,
+      inviteId,
+      status: EventInviteStatus.PENDING,
+    },
+  });
+}
+
+/** Queue a workspace invite and pending event invite assignment. */
+export async function queWorkspaceInviteAndPendingEventInviteAssignment(
+  userId: string,
+  workspaceRoleRank: number,
+  eventRank: number,
+  workspaceId: string,
+  eventId: string,
+  email: string,
+  inviterEmail: string,
+) {
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  const workspaceRole = await prisma.workspaceRole.findUnique({
+    where: {
+      workspaceId_rank: { workspaceId, rank: workspaceRoleRank },
+    },
+  });
+
+  if (!workspaceRole) {
+    throw new Error("Workspace role not found for this rank");
+  }
+
+  assertEventRankWithinWorkspaceRoleRank(eventRank, workspaceRole.rank);
+
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) {
+    throw new Error("Invalid email");
+  }
+
+  const workspace = await prisma.workspace.findUniqueOrThrow({
+    where: { id: workspaceId },
+    select: { name: true },
+  });
+
+  const { invite, eventInvite, sentEmail } = await prisma.$transaction(
+    async (tx) => {
+      const inviteRow = await tx.invite.upsert({
+        where: { email_workspaceId: { email: normalizedEmail, workspaceId } },
+        update: {
+          workspaceRoleId: workspaceRole.uuid,
+          invitedBy: userId,
+          expiresAt,
+          status: "pending",
+        },
+        create: {
+          email: normalizedEmail,
+          workspaceRoleId: workspaceRole.uuid,
+          workspaceId,
+          invitedBy: userId,
+          expiresAt,
+        },
+      });
+
+      const existingEventInvite = await tx.eventInvite.findFirst({
+        where: {
+          eventId,
+          inviteId: inviteRow.id,
+          status: EventInviteStatus.PENDING,
+        },
+      });
+
+      if (existingEventInvite) {
+        const samePayload =
+          existingEventInvite.eventRank === eventRank &&
+          existingEventInvite.workspaceRoleId === workspaceRole.uuid &&
+          existingEventInvite.assignedBy === userId;
+
+        if (!samePayload) {
+          throw new Error(
+            "Pending event invite already exists for this event and invite",
+          );
+        }
+
+        return {
+          invite: inviteRow,
+          eventInvite: existingEventInvite,
+          sentEmail: false as const,
+        };
+      }
+
+      const eventInviteRow = await createEventInvite(
+        tx,
+        eventId,
+        userId,
+        workspaceRole.uuid,
+        eventRank,
+        inviteRow.id,
+      );
+
+      return {
+        invite: inviteRow,
+        eventInvite: eventInviteRow,
+        sentEmail: true as const,
+      };
+    },
+  );
+
+  if (sentEmail) {
+    await sendInviteEmail({
+      to: normalizedEmail,
+      workspaceName: workspace.name,
+      inviterEmail: inviterEmail,
+      token: invite.token,
+    });
+  }
+
+  return { invite, eventInvite };
 }

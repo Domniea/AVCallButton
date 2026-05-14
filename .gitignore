@@ -43,7 +43,15 @@ yarn-error.*
 # build outputs
 build/
 
-#nextjs
+# nextjs
 .next/
 .vercel
 .env*.local
+
+# Turbo
+.turbo
+**/.turbo
+
+# SST
+services/backend/.sst/
+**/.sst/

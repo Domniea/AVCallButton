@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   VStack,
@@ -13,10 +13,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch, RootState } from "@av/store";
-import { authUnauthenticated } from "@av/store/src/auth";
+import { logoutThunk } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
-import { logout } from "@av/aws";
+
+import { fetchAuthSession } from "aws-amplify/auth";
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,10 +30,11 @@ export default function Home() {
 
   const onLogout = async () => {
     try {
-      await logout();
-    } finally {
-      dispatch(authUnauthenticated());
-      navigator.navigate('landing' as never)
+      await dispatch(logoutThunk()).unwrap();
+      await AsyncStorage.removeItem("inviteToken");
+      navigator.navigate("landing" as never);
+    } catch (err) {
+      console.error("Logout failed:", err);
     }
   };
 
@@ -40,10 +43,25 @@ export default function Home() {
   const textColor = useColorModeValue("text", "textDark");
   const muted = useColorModeValue("muted", "mutedDark");
 
+// useEffect(() => {
+//   let mounted = true;
+
+//   const loadSession = async () => {
+//     const session = await fetchAuthSession();
+//     if (!mounted) return;
+//     console.log("ID TOKEN:", session.tokens?.idToken?.toString());
+//   };
+
+//   loadSession();
+
+//   return () => {
+//     mounted = false;
+//   };
+// }, []);
+  
   return (
     <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
       <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
-        {/* Header */}
         <VStack space="1">
           <Text fontSize="2xl" fontWeight="bold" color={textColor}>
             Home
@@ -69,11 +87,7 @@ export default function Home() {
         )}
 
         {/* Actions */}
-        <BaseButton
-          title="Logout"
-          variety="secondary"
-          onPress={onLogout}
-        />
+        <BaseButton title="Logout" variety="secondary" onPress={onLogout} />
 
         {/* Theme Toggle */}
         <HStack alignItems="center" justifyContent="space-between" pt="6">

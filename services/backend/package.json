@@ -1,11 +1,27 @@
 {
   "name": "@av/backend",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "sst dev",
-    "deploy": "sst deploy"
+    "dev": "sst dev --stage dev",
+    "deploy": "sst deploy --stage dev",
+    "remove": "sst remove --stage dev"
+  },
+  "dependencies": {
+    "@av/auth-core": "*",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1001.0",
+    "@aws-sdk/client-ses": "^3.998.0",
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.0.1",
+    "pg": "^8.18.0",
+    "prisma": "^7.4.0"
   },
   "devDependencies": {
-    "sst": "^2.0.0"
+    "@types/pg": "^8.16.0",
+    "sst": "^2.43.0",
+    "typescript": "^5.2.2"
   }
 }

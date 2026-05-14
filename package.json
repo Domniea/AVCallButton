@@ -5,7 +5,8 @@
   "workspaces": {
     "packages": [
       "apps/*",
-      "packages/*"
+      "packages/*",
+      "services/*"
     ],
     "nohoist": [
       "**/@av/ui",
@@ -33,6 +34,7 @@
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.2.2",
     "@react-native-community/hooks": "^100.1.0",
+    "axios": "^1.13.2",
     "expo": "~54.0.25",
     "framer-motion": "^12.23.24",
     "native-base": "^3.4.28",

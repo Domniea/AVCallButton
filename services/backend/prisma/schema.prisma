@@ -1,0 +1,197 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REJECTED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELED
+}
+
+enum MembershipType {
+  INTERNAL
+  EXTERNAL
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  type      String
+  createdAt DateTime @default(now())
+
+  memberships    Membership[]
+  events         Event[]
+  invites        Invite[]
+  workspaceRoles WorkspaceRole[]
+}
+
+model WorkspaceRole {
+  uuid        String   @id @default(uuid())
+  workspaceId String
+  rank        Int
+  name        String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invites          Invite[]
+  memberships      Membership[]
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
+
+  @@unique([workspaceId, rank])
+}
+
+model Membership {
+  id              String           @id @default(uuid())
+  userId          String
+  workspaceId     String
+  email           String?
+  workspaceRoleId String
+  type            MembershipType   @default(INTERNAL)
+  status          MembershipStatus @default(ACTIVE)
+  joinedAt        DateTime         @default(now())
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole    WorkspaceRole     @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
+
+  @@unique([userId, workspaceId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([workspaceRoleId])
+}
+
+model Invite {
+  id              String         @id @default(uuid())
+  email           String
+  workspaceRoleId String
+  status          InviteStatus   @default(PENDING)
+  token           String         @unique @default(uuid())
+  expiresAt       DateTime
+  workspaceId     String
+  invitedBy       String
+  /**
+   * Membership type when accepted: INTERNAL from workspace invite API; EXTERNAL from event assign queue.
+   */
+  membershipType  MembershipType @default(INTERNAL)
+  createdAt       DateTime       @default(now())
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  eventInvites  EventInvite[]
+
+  @@unique([email, workspaceId])
+  @@index([token])
+  @@index([workspaceId])
+  @@index([email])
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  name        String
+  status      String
+  location    String?
+  venue       String?
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime  @default(now())
+  workspaceId String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  logs             Log[]
+  messages         Message[]
+  eventAssignments EventAssignment[]
+  eventInvites     EventInvite[]
+
+  @@index([workspaceId])
+  @@index([status])
+  @@index([startTime])
+}
+
+model EventInvite {
+  id              String            @id @default(uuid())
+  eventId         String
+  membershipId    String?
+  inviteId        String?
+  workspaceRoleId String
+  eventRank       Int
+  assignedBy      String
+  status          EventInviteStatus @default(PENDING)
+  createdAt       DateTime          @default(now())
+
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  membership    Membership?   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  invite        Invite?       @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+
+  @@unique([eventId, inviteId])
+  @@unique([eventId, membershipId])
+  @@index([eventId])
+  @@index([membershipId])
+  @@index([inviteId])
+}
+
+model EventAssignment {
+  id              String   @id @default(uuid())
+  eventId         String
+  membershipId    String
+  workspaceRoleId String
+  eventRank       Int
+  assignedBy      String
+  createdAt       DateTime @default(now())
+
+  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  membership    Membership    @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+
+  @@unique([eventId, membershipId])
+  @@index([eventId])
+  @@index([membershipId])
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  eventId   String
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([createdAt])
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  eventId   String
+  userId    String
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([createdAt])
+}

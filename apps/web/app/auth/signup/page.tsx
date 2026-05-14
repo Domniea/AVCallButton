@@ -4,7 +4,7 @@ import React from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
-import { signup } from "@av/aws"
+import { signup } from "../../../../../packages/auth-client/src";
 
 import { useColorMode } from "@/components/ui/color-mode";
 import { BaseInput } from "@/components/reusable/BaseInput";
@@ -12,7 +12,10 @@ import { BaseButton } from "@/components/reusable/BaseButton";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
-import { signupSchema, type SignupSchema } from "@av/forms/src/schemas/auth/signup";
+import {
+  signupSchema,
+  type SignupSchema,
+} from "@av/forms/src/schemas/auth/signup";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -32,17 +35,37 @@ export default function SignupPage() {
 
   const onSubmit = async (values: SignupSchema) => {
     const res = await signup(values.email, values.password);
-    console.log(res)
-    router.push(
-      `/auth/confirm?email=${encodeURIComponent(values.email)}`
-    );
+    console.log('ON SUBMIT',res);
+    router.push(`/auth/signup-confirm?email=${encodeURIComponent(values.email)}`);
   };
 
   return (
-    <Box height="100vh" flex={1} bg="bg" px={6} py={10} display="flex" justifyContent="center">
-      <VStack width="100%" maxWidth="480px" height="100%" alignItems="center" justifyContent="center" gap={6}>
+    <Box
+      height="100vh"
+      flex={1}
+      bg="bg"
+      px={6}
+      py={10}
+      display="flex"
+      justifyContent="center"
+    >
+      <VStack
+        width="100%"
+        maxWidth="480px"
+        height="100%"
+        alignItems="center"
+        justifyContent="center"
+        gap={6}
+      >
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-          <VStack bg="bg" borderRadius="xl" p={8} gap={8} width="100%" boxShadow="lg">
+          <VStack
+            bg="bg"
+            borderRadius="xl"
+            p={8}
+            gap={8}
+            width="100%"
+            boxShadow="lg"
+          >
             <Text fontSize="2xl" fontWeight="bold" color="text">
               Create Account
             </Text>
@@ -92,7 +115,15 @@ export default function SignupPage() {
               {colorMode === "light" ? "Light" : "Dark"}
             </Text>
 
-            <Box as="button" onClick={toggleColorMode} bg="surface" borderRadius="full" px="3" py="1" shadow="sm">
+            <Box
+              as="button"
+              onClick={toggleColorMode}
+              bg="surface"
+              borderRadius="full"
+              px="3"
+              py="1"
+              shadow="sm"
+            >
               <Text color="text">{colorMode === "light" ? "🌞" : "🌙"}</Text>
             </Box>
           </Flex>

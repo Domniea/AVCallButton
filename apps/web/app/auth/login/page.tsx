@@ -5,9 +5,7 @@ import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 
-import { login } from "@av/aws";
-import { getCurrentUser } from "aws-amplify/auth";
-import { authAuthenticated } from "@av/store/src/auth";
+import { fetchMeThunk, loginThunk } from "@av/store/src/auth";
 import type { AppDispatch } from "@av/store";
 
 import { useColorMode } from "@/components/ui/color-mode";
@@ -29,32 +27,34 @@ export default function LoginPage() {
   const form = useAppForm(loginSchema, {
     email: "",
     password: "",
-  });
+  })
+    ;
 
   const {
     control,
     handleSubmit,
-    reset,
     formState: { isSubmitting },
   } = form;
 
   const onSubmit = async (values: LoginSchema) => {
-    try {
-      await login(values.email, values.password);
+  try {
+    await dispatch(
+      loginThunk({
+        email: values.email,
+        password: values.password,
+      })
+    ).unwrap()
+    .then(() => dispatch(fetchMeThunk()));
 
-      const user = await getCurrentUser();
+    const inviteToken = sessionStorage.getItem("inviteToken");
+    router.replace(inviteToken ? "/invite" : "/home");
+  } catch (err) {
+    console.error("Login failed:", err);
+  }
+};
 
-      dispatch(
-        authAuthenticated({
-          id: user.userId,
-          email: user.signInDetails?.loginId,
-        }),
-      );
-
-      router.replace("/home");
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
+  const onSignup = () => {
+    router.push("/auth/signup");
   };
 
   return (
@@ -119,10 +119,10 @@ export default function LoginPage() {
             />
 
             <BaseButton
-              title="Reset"
+              title="Create Account"
               variety="secondary"
               type="button"
-              onClick={() => reset()}
+              onClick={() => onSignup()}
             />
           </VStack>
         </form>

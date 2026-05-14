@@ -1,4 +1,3 @@
-// packages/forms/src/schemas/auth/reset.ts
 import { z } from "zod";
 
 export const resetPasswordSchema = z.object({

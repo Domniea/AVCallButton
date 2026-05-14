@@ -4,13 +4,16 @@ import React from "react";
 import { Box, VStack, Text } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { resetPassword } from "@av/aws";
+import { resetPassword } from "../../../../../../packages/auth-client/src";
 import { BaseInput } from "@/components/reusable/BaseInput";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
-import { resetPasswordSchema, type ResetPasswordSchema } from "@av/forms/src/schemas/auth/resetPassword";
+import {
+  resetPasswordSchema,
+  type ResetPasswordSchema,
+} from "@av/forms/src/schemas/auth/resetPassword";
 
 export default function ResetConfirmClient() {
   const router = useRouter();

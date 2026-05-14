@@ -1,12 +1,17 @@
 {
   "extends": "../../tsconfig.json",
   "references": [
-    { "path": "../../packages/ui" }
+    { "path": "../../packages/ui",
+    },
+    {
+      "path": "../../packages/auth-client",
+    }
   ],
   "compilerOptions": {
     "jsx": "react-native",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["."]
+  "include": ["."],
+  
 }

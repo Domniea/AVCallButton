@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -9,8 +9,7 @@ import { useColorMode } from "@/components/ui/color-mode";
 import type { RootState, AppDispatch } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 
-import { logout } from "@av/aws";
-import { authUnauthenticated } from "@av/store/src/auth";
+import { logoutThunk } from "@av/store/src/auth";
 
 export default function HomePage() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -20,17 +19,32 @@ export default function HomePage() {
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const onLogout = async () => {
-    try {
-      await logout();
-
-      dispatch(authUnauthenticated());
-
+  useEffect(() => {
+    if (authStatus === "unauthenticated") {
       router.replace("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
     }
-  };
+  }, [authStatus, router]);
+
+  if (authStatus === "idle" || authStatus === "loading") {
+    return (
+      <Box height="100vh" bg="bg" display="flex" alignItems="center" justifyContent="center">
+        <Text color="gray.500">Checking session…</Text>
+      </Box>
+    );
+  }
+
+  if (authStatus === "unauthenticated") {
+    return null;
+  }
+  
+const onLogout = async () => {
+  try {
+    await dispatch(logoutThunk()).unwrap();
+    router.replace("/");
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
   const onResetPassword = () => {
     router.push("/auth/reset");
   };
@@ -75,16 +89,10 @@ export default function HomePage() {
               <Text fontSize="sm" color="text">
                 Logged in as
               </Text>
-              <Text fontSize="md" color="text"fontWeight="semibold">
+              <Text fontSize="md" color="text" fontWeight="semibold">
                 {user.email ?? user.id}
               </Text>
             </VStack>
-          )}
-
-          {authStatus === "unauthenticated" && (
-            <Text fontSize="sm" color="red.400">
-              Not logged in
-            </Text>
           )}
 
           {authStatus === "authenticated" && (

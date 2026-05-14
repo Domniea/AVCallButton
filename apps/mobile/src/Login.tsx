@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   VStack,
@@ -8,8 +8,10 @@ import {
   useColorMode,
   useColorModeValue,
 } from "native-base";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, type ParamListBase } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BaseInput } from "./../components/BaseInput";
 import { BaseButton } from "./../components/BaseButton";
 import { BaseCard } from "./../components/BaseCard";
@@ -23,16 +25,18 @@ import {
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import {
-  authAuthenticated,
-  authLoading,
-  authUnauthenticated,
-} from "@av/store/src/auth";
-import { logout } from "@av/aws";
+import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
+import { logout } from "packages/auth-client/src";
+import { loginThunk } from "@av/store/src/auth";
+
+type LoginNav = NativeStackNavigationProp<
+  ParamListBase & { invite: undefined; home: undefined },
+  "login"
+>;
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation()
+  const navigation = useNavigation<LoginNav>();
   const { colorMode, toggleColorMode } = useColorMode();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -51,35 +55,20 @@ export default function Login() {
 
   const onSubmit = async (values: LoginSchema) => {
     try {
-      dispatch(authLoading());
-
-      await signIn({
-        username: values.email,
+      await dispatch(
+      loginThunk({
+        email: values.email,
         password: values.password,
-        options: {
-          authFlowType: "USER_PASSWORD_AUTH",
-        },
-      });
+      })
+    ).unwrap()
+    .then(() => dispatch(fetchMeThunk()));
 
-      const user = await getCurrentUser();
-
-      dispatch(
-        authAuthenticated({
-          id: user.userId,
-          email: user.signInDetails?.loginId,
-        }),
-      );
-
-      navigation.navigate("home" as never)
-
+      const hasInviteToken = await AsyncStorage.getItem("inviteToken");
+      navigation.replace(hasInviteToken ? "invite" : "home");
     } catch (err) {
       console.error("Login failed", err);
-      dispatch(authUnauthenticated());
+      dispatch(logoutThunk());
     }
-  };
-  const onLogout = () => {
-    logout();
-    dispatch(authUnauthenticated());
   };
 
   const bg = useColorModeValue("bg", "bgDark");
@@ -131,9 +120,9 @@ export default function Login() {
 
         {/* Reset */}
         <BaseButton
-          title="Logout"
+          title="Signup"
           variety="secondary"
-          onPress={() => onLogout()}
+          onPress={() => navigation.navigate("signup" as never)}
         />
 
         {/* Theme Toggle */}

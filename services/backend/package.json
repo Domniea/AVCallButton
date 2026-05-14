@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "sst dev",
-    "deploy": "sst deploy",
-    "remove": "sst remove"
+    "dev": "sst dev --stage dev",
+    "deploy": "sst deploy --stage dev",
+    "remove": "sst remove --stage dev"
   },
   "dependencies": {
     "@av/auth-core": "*",

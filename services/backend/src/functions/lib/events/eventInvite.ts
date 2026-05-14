@@ -1,9 +1,11 @@
-import type { Prisma } from "@prisma/client";
+import type { EventInvite } from "@prisma/client";
 import {
   EventInviteStatus,
+  InviteStatus,
   Membership,
   MembershipStatus,
   MembershipType,
+  Prisma,
 } from "@prisma/client";
 
 import { prisma } from "../prisma";
@@ -249,7 +251,8 @@ export async function queWorkspaceInviteAndPendingEventInviteAssignment(
           workspaceRoleId: workspaceRole.uuid,
           invitedBy: userId,
           expiresAt,
-          status: "pending",
+          status: InviteStatus.PENDING,
+          membershipType: MembershipType.EXTERNAL,
         },
         create: {
           email: normalizedEmail,
@@ -257,6 +260,8 @@ export async function queWorkspaceInviteAndPendingEventInviteAssignment(
           workspaceId,
           invitedBy: userId,
           expiresAt,
+          status: InviteStatus.PENDING,
+          membershipType: MembershipType.EXTERNAL,
         },
       });
 
@@ -314,4 +319,91 @@ export async function queWorkspaceInviteAndPendingEventInviteAssignment(
   }
 
   return { invite, eventInvite };
+}
+
+export type FinalizePendingEventInvitesOnAcceptResult = {
+  assignments: Array<{
+    id: string;
+    eventId: string;
+    membershipId: string;
+    workspaceRoleId: string;
+    eventRank: number;
+    assignedBy: string;
+  }>;
+  finalizedEventInviteIds: string[];
+};
+
+/**
+ * Materialize pending `EventInvite` rows for this workspace invite into `EventAssignment`s
+ * and mark each `EventInvite` accepted (membership leg, `inviteId` cleared). Call inside `tx`.
+ *
+ * Pass `pendingRows` when you already loaded pending invites (e.g. to choose `Membership.type`)
+ * so the list is not queried twice.
+ */
+export async function finalizePendingEventInvitesOnAccept(
+  tx: DbClient,
+  inviteId: string,
+  membership: { id: string; workspaceRoleId: string },
+  pendingRows?: EventInvite[],
+): Promise<FinalizePendingEventInvitesOnAcceptResult> {
+  const pending =
+    pendingRows ??
+    (await tx.eventInvite.findMany({
+      where: {
+        inviteId,
+        status: EventInviteStatus.PENDING,
+      },
+    }));
+
+  if (pending.length === 0) {
+    return { assignments: [], finalizedEventInviteIds: [] };
+  }
+
+  const workspaceRole = await tx.workspaceRole.findUnique({
+    where: { uuid: membership.workspaceRoleId },
+  });
+
+  if (!workspaceRole) {
+    throw new Error("Workspace role not found for membership");
+  }
+
+  const assignments: FinalizePendingEventInvitesOnAcceptResult["assignments"] =
+    [];
+  const finalizedEventInviteIds: string[] = [];
+
+  for (const ev of pending) {
+    assertEventRankWithinWorkspaceRoleRank(ev.eventRank, workspaceRole.rank);
+
+    const row = await tx.eventAssignment.create({
+      data: {
+        eventId: ev.eventId,
+        membershipId: membership.id,
+        workspaceRoleId: membership.workspaceRoleId,
+        eventRank: ev.eventRank,
+        assignedBy: ev.assignedBy,
+      },
+    });
+
+    assignments.push({
+      id: row.id,
+      eventId: row.eventId,
+      membershipId: row.membershipId,
+      workspaceRoleId: row.workspaceRoleId,
+      eventRank: row.eventRank,
+      assignedBy: row.assignedBy,
+    });
+
+    await tx.eventInvite.update({
+      where: { id: ev.id },
+      data: {
+        status: EventInviteStatus.ACCEPTED,
+        membershipId: membership.id,
+        inviteId: null,
+      },
+    });
+
+    finalizedEventInviteIds.push(ev.id);
+  }
+
+  return { assignments, finalizedEventInviteIds };
 }

@@ -1,5 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
+import { InviteStatus } from "@prisma/client";
+
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
 import { inviteToApi } from "../lib/inviteDto";
@@ -19,7 +21,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const rows = await prisma.invite.findMany({
       where: {
         workspaceId,
-        status: "pending",
+        status: InviteStatus.PENDING,
       },
       include: { workspaceRole: true },
       orderBy: { createdAt: "desc" },

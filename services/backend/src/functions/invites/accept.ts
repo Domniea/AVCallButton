@@ -1,9 +1,28 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { EventInviteStatus, MembershipStatus } from "@prisma/client";
+import {
+  EventInviteStatus,
+  InviteStatus,
+  MembershipStatus,
+  Prisma,
+} from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
 import { roleKeyFromRank } from "../lib/permissions";
 import { isValidEmailInput, normalizeEmail } from "../lib/email";
+import { finalizePendingEventInvitesOnAccept } from "../lib/events/eventInvite";
+
+const ACCEPT_BAD_REQUEST_MESSAGES = new Set([
+  "Workspace role not found for membership",
+  "Event rank must be at least 1",
+  "Event rank cannot be greater than the workspace role rank",
+]);
+
+function prismaUniqueTarget(error: Prisma.PrismaClientKnownRequestError): string {
+  const t = error.meta?.target;
+  if (Array.isArray(t)) return t.join(",");
+  if (typeof t === "string") return t;
+  return "";
+}
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,
@@ -35,7 +54,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       );
     }
 
-    if (invite.status !== "pending") {
+    if (invite.status !== InviteStatus.PENDING) {
       return badRequest("Invite has already been " + invite.status);
     }
 
@@ -54,48 +73,44 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Invite data is inconsistent; ask for a new invite");
     }
 
-    const membership = await prisma.$transaction(async (tx) => {
-      const newMembership = await tx.membership.create({
-        data: {
-          userId,
-          email: normalizedEmail,
-          workspaceId: invite.workspaceId,
-          workspaceRoleId: invite.workspaceRoleId,
-          status: MembershipStatus.ACTIVE,
-        },
-      });
-
-      const pendingEventInvites = await tx.eventInvite.findMany({
-        where: {
-          inviteId: invite.id,
-          status: EventInviteStatus.PENDING,
-        },
-      });
-
-      for (const ev of pendingEventInvites) {
-        await tx.eventAssignment.create({
-          data: {
-            eventId: ev.eventId,
-            membershipId: newMembership.id,
-            workspaceRoleId: newMembership.workspaceRoleId,
-            eventRank: ev.eventRank,
-            assignedBy: ev.assignedBy,
+    const { membership, assignments, finalizedEventInviteIds } =
+      await prisma.$transaction(async (tx) => {
+        const pendingEventInvites = await tx.eventInvite.findMany({
+          where: {
+            inviteId: invite.id,
+            status: EventInviteStatus.PENDING,
           },
         });
 
-        await tx.eventInvite.update({
-          where: { id: ev.id },
-          data: { status: EventInviteStatus.ACCEPTED, membershipId: newMembership.id, inviteId: null },
+        const newMembership = await tx.membership.create({
+          data: {
+            userId,
+            email: normalizedEmail,
+            workspaceId: invite.workspaceId,
+            workspaceRoleId: invite.workspaceRoleId,
+            status: MembershipStatus.ACTIVE,
+            type: invite.membershipType,
+          },
         });
-      }
 
-      await tx.invite.update({
-        where: { id: invite.id },
-        data: { status: "accepted" },
+        const finalizeResult = await finalizePendingEventInvitesOnAccept(
+          tx,
+          invite.id,
+          newMembership,
+          pendingEventInvites,
+        );
+
+        await tx.invite.update({
+          where: { id: invite.id },
+          data: { status: InviteStatus.ACCEPTED },
+        });
+
+        return {
+          membership: newMembership,
+          assignments: finalizeResult.assignments,
+          finalizedEventInviteIds: finalizeResult.finalizedEventInviteIds,
+        };
       });
-
-      return newMembership;
-    });
 
     return {
       statusCode: 200,
@@ -104,10 +119,32 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           id: membership.id,
           workspaceId: membership.workspaceId,
           role: roleKeyFromRank(workspaceRole.rank),
+          type: membership.type,
         },
+        assignments,
+        finalizedEventInviteIds,
       }),
     };
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      const target = prismaUniqueTarget(error);
+      if (target.includes("userId") && target.includes("workspaceId")) {
+        return badRequest("You are already a member of this workspace");
+      }
+      if (target.includes("eventId") && target.includes("membershipId")) {
+        return badRequest("Event already assigned");
+      }
+      return badRequest("A record with this information already exists");
+    }
+    if (
+      error instanceof Error &&
+      ACCEPT_BAD_REQUEST_MESSAGES.has(error.message)
+    ) {
+      return badRequest(error.message);
+    }
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       return badRequest("You are already a member of this workspace");
     }
@@ -115,4 +152,3 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return serverError("Failed to accept invite");
   }
 };
-

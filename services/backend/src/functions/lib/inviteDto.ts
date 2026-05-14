@@ -17,5 +17,6 @@ export function inviteToApi(invite: Invite, workspaceRole: WorkspaceRole) {
     role: roleKeyFromRank(workspaceRole.rank),
     roleRank: workspaceRole.rank,
     roleName: workspaceRole.name,
+    membershipType: invite.membershipType,
   };
 }

@@ -10,7 +10,15 @@ datasource db {
 enum EventInviteStatus {
   PENDING
   ACCEPTED
+  EXPIRED
   REJECTED
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELED
 }
 
 enum MembershipType {
@@ -75,15 +83,19 @@ model Membership {
 }
 
 model Invite {
-  id              String   @id @default(uuid())
+  id              String         @id @default(uuid())
   email           String
   workspaceRoleId String
-  status          String   @default("pending")
-  token           String   @unique @default(uuid())
+  status          InviteStatus   @default(PENDING)
+  token           String         @unique @default(uuid())
   expiresAt       DateTime
   workspaceId     String
   invitedBy       String
-  createdAt       DateTime @default(now())
+  /**
+   * Membership type when accepted: INTERNAL from workspace invite API; EXTERNAL from event assign queue.
+   */
+  membershipType  MembershipType @default(INTERNAL)
+  createdAt       DateTime       @default(now())
 
   workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceRole WorkspaceRole @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)

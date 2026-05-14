@@ -69,8 +69,10 @@ export function ApiStack({ stack, app }: StackContext) {
       "POST /workspaces/{workspaceId}/events":
         "src/functions/events/create.handler",
       "DELETE /events/{eventId}": "src/functions/events/delete.handler",
-      "POST /events/{eventId}/assignments":
-        "src/functions/events/assign.handler",
+      "POST /events/{eventId}/roster/assignments":
+        "src/functions/events/roster/assign.handler",
+      "DELETE /events/{eventId}/roster/pending-invites/{eventInviteId}":
+        "src/functions/events/roster/deletePendingInvite.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":
@@ -78,7 +80,8 @@ export function ApiStack({ stack, app }: StackContext) {
       "GET /workspaces/{workspaceId}/invites":
         "src/functions/invites/list.handler",
       "POST /invites/accept": "src/functions/invites/accept.handler",
-      "DELETE /invites/{inviteId}": "src/functions/invites/cancel.handler",
+      "PATCH /workspaces/{workspaceId}/invites/{inviteId}/revoke":
+        "src/functions/invites/revoke.handler",
     },
   });
 

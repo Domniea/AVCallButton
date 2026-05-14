@@ -1,4 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
+import { InviteStatus, MembershipType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
@@ -70,7 +71,8 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         workspaceRoleId: workspaceRole.uuid,
         invitedBy: userId,
         expiresAt,
-        status: "pending",
+        status: InviteStatus.PENDING,
+        membershipType: MembershipType.INTERNAL,
       },
       create: {
         email: normalizedEmail,
@@ -78,6 +80,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         workspaceId,
         invitedBy: userId,
         expiresAt,
+        membershipType: MembershipType.INTERNAL,
       },
     });
 

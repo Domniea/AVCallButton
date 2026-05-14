@@ -1,8 +1,8 @@
 import type { EventAssignment, EventInvite, Invite } from "@prisma/client";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../../lib/prisma";
 import { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { badRequest, forbidden, notFound, serverError } from "../lib/responses";
-import { isValidEmailInput, normalizeEmail } from "../lib/email";
+import { badRequest, forbidden, notFound, serverError } from "../../lib/responses";
+import { isValidEmailInput, normalizeEmail } from "../../lib/email";
 import {
   assertNoDuplicateAssignmentOrPendingInvite,
   findWorkspaceMembershipByEmail,
@@ -10,8 +10,8 @@ import {
   reactivateMemberAndSetEventStaffAssignment,
   resolveInviteBranch,
   setEventStaffAssignment,
-} from "../lib/events/eventInvite";
-import { authorize } from "../lib/authorization";
+} from "../../lib/events/eventInvite";
+import { authorize } from "../../lib/authorization";
 
 /** JSON number or non-empty numeric string → integer ≥ 1; otherwise null. */
 function parsePositiveInt(value: unknown): number | null {

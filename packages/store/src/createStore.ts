@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "./auth/authSlice";
+import { workspaceReducer } from "./workspace/workspaceSlice";
+import { eventsReducer } from "./events/eventsSlice";
 
 export const createStore = () =>
   configureStore({
     reducer: {
       auth: authReducer,
+      workspace: workspaceReducer,
+      events: eventsReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

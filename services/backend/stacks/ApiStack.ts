@@ -59,20 +59,29 @@ export function ApiStack({ stack, app }: StackContext) {
       // Members
       "GET /workspaces/{workspaceId}/members":
         "src/functions/members/list.handler",
+      "GET /workspaces/{workspaceId}/members/lookup":
+        "src/functions/members/lookup.handler",
       "PATCH /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/updateRole.handler",
       "DELETE /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/remove.handler",
 
       // Events
-      "GET /workspaces/{workspaceId}/events": "src/functions/events/list.handler",
+      "GET /workspaces/{workspaceId}/events":
+        "src/functions/events/list.handler",
       "POST /workspaces/{workspaceId}/events":
         "src/functions/events/create.handler",
       "DELETE /events/{eventId}": "src/functions/events/delete.handler",
-      "POST /events/{eventId}/roster/assignments":
-        "src/functions/events/roster/assign.handler",
+
+      // Roster
+      "GET /events/{eventId}/roster":
+        "src/functions/events/roster/list.handler",
       "DELETE /events/{eventId}/roster/pending-invites/{eventInviteId}":
         "src/functions/events/roster/deletePendingInvite.handler",
+      "POST /events/{eventId}/roster/assignments":
+        "src/functions/events/roster/assign.handler",
+      "DELETE /events/{eventId}/roster/assignments/{eventAssignmentId}":
+        "src/functions/events/roster/deleteAssignment.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":

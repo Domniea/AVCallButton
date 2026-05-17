@@ -1,10 +1,16 @@
 import type { EventAssignment, EventInvite, Invite } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { badRequest, forbidden, notFound, serverError } from "../../lib/responses";
+import {
+  badRequest,
+  forbidden,
+  notFound,
+  serverError,
+} from "../../lib/responses";
 import { isValidEmailInput, normalizeEmail } from "../../lib/email";
 import {
   assertNoDuplicateAssignmentOrPendingInvite,
+  findPendingWorkspaceInviteByEmail,
   findWorkspaceMembershipByEmail,
   queWorkspaceInviteAndPendingEventInviteAssignment,
   reactivateMemberAndSetEventStaffAssignment,
@@ -12,24 +18,19 @@ import {
   setEventStaffAssignment,
 } from "../../lib/events/eventInvite";
 import { authorize } from "../../lib/authorization";
+import { parseWorkspaceRoleRank } from "../../lib/permissions";
 
-/** JSON number or non-empty numeric string → integer ≥ 1; otherwise null. */
-function parsePositiveInt(value: unknown): number | null {
-  const n =
-    typeof value === "number"
-      ? value
-      : typeof value === "string" && value.trim() !== ""
-        ? Number(value)
-        : NaN;
-  if (!Number.isInteger(n) || n < 1) return null;
-  return n;
+function bodyHasWorkspaceRoleRank(body: Record<string, unknown>): boolean {
+  return (
+    body.workspaceRoleRank !== undefined && body.workspaceRoleRank !== null
+  );
 }
 
 /** Domain errors from `eventInvite` → HTTP 400 (must match `throw new Error(...)` text). */
 const ASSIGN_BAD_REQUEST_MESSAGES = new Set([
   "Event already assigned",
   "User already invited",
-  "Event rank must be at least 1",
+  "Invalid event rank",
   "Event rank cannot be greater than the workspace role rank",
   "Membership not found",
   "Workspace role not found for membership",
@@ -111,7 +112,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const body = parsed as Record<string, unknown>;
     const email = body.email;
 
-    const eventRank = parsePositiveInt(body.eventRank);
+    const eventRank = parseWorkspaceRoleRank(body.eventRank);
     if (eventRank === null) {
       return badRequest("Invalid eventRank");
     }
@@ -152,10 +153,35 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     switch (inviteBranch) {
       case "invite_to_workspace_and_assign": {
-        const workspaceRoleRank = parsePositiveInt(body.workspaceRoleRank);
-        if (workspaceRoleRank === null) {
-          return badRequest("Invalid workspaceRoleRank");
+        const pendingInvite = await findPendingWorkspaceInviteByEmail(
+          normalizedEmail,
+          workspaceId,
+        );
+
+        let workspaceRoleRank: number;
+
+        if (pendingInvite) {
+          if (bodyHasWorkspaceRoleRank(body)) {
+            return badRequest(
+              "workspaceRoleRank must not be sent when a pending workspace invite already exists for this email",
+            );
+          }
+          workspaceRoleRank = pendingInvite.workspaceRole.rank;
+        } else {
+          if (!bodyHasWorkspaceRoleRank(body)) {
+            return badRequest(
+              "workspaceRoleRank is required when the email is not in this workspace",
+            );
+          }
+          const parsedWorkspaceRoleRank = parseWorkspaceRoleRank(
+            body.workspaceRoleRank,
+          );
+          if (parsedWorkspaceRoleRank === null) {
+            return badRequest("Invalid workspaceRoleRank");
+          }
+          workspaceRoleRank = parsedWorkspaceRoleRank;
         }
+
         const { invite, eventInvite } =
           await queWorkspaceInviteAndPendingEventInviteAssignment(
             userId,
@@ -176,6 +202,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         };
       }
       case "reactivate_then_assign": {
+        if (bodyHasWorkspaceRoleRank(body)) {
+          return badRequest(
+            "workspaceRoleRank must not be sent for existing workspace members",
+          );
+        }
         const assignment = await reactivateMemberAndSetEventStaffAssignment(
           userId,
           eventId,
@@ -191,6 +222,11 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         };
       }
       case "assign_now": {
+        if (bodyHasWorkspaceRoleRank(body)) {
+          return badRequest(
+            "workspaceRoleRank must not be sent for existing workspace members",
+          );
+        }
         const assignment = await setEventStaffAssignment(
           userId,
           eventId,

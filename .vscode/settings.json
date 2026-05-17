@@ -1,4 +1,13 @@
 {
+  "files.exclude": {
+    "packages/store/src/**/*.js": true,
+    "packages/store/src/**/*.d.ts": true,
+    "packages/store/src/**/*.d.ts.map": true,
+    "services/backend/src/**/*.js": true,
+    "services/backend/src/**/*.d.ts": true,
+    "services/backend/src/**/*.d.ts.map": true
+  },
+
   "eslint.workingDirectories": [{ "mode": "auto" }],
 
   "editor.formatOnSave": true,

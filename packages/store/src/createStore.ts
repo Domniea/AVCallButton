@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { authReducer } from "./auth/authSlice";
 import { workspaceReducer } from "./workspace/workspaceSlice";
 import { eventsReducer } from "./events/eventsSlice";
+import { rosterReducer } from "./roster/rosterSlice";
 
 export const createStore = () =>
   configureStore({
@@ -9,6 +10,7 @@ export const createStore = () =>
       auth: authReducer,
       workspace: workspaceReducer,
       events: eventsReducer,
+      roster: rosterReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

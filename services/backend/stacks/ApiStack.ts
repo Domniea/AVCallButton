@@ -80,8 +80,6 @@ export function ApiStack({ stack, app }: StackContext) {
         "src/functions/events/roster/deletePendingInvite.handler",
       "POST /events/{eventId}/roster/assignments":
         "src/functions/events/roster/assign.handler",
-      "DELETE /events/{eventId}/roster/assignments/{eventAssignmentId}":
-        "src/functions/events/roster/deleteAssignment.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":

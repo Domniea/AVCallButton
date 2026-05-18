@@ -39,6 +39,12 @@ export type EventRosterResponse = {
   pendingInvites: RosterPendingInvite[];
 };
 
+export type AssignStaffData = {
+  email: string;
+  eventRank: number;
+  workspaceRoleRank?: number;
+};
+
 export async function fetchEventRoster(
   token: string,
   eventId: string,
@@ -48,4 +54,22 @@ export async function fetchEventRoster(
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
+}
+
+export async function assignStaff(
+  token: string,
+  eventId: string,
+  data: AssignStaffData,
+): Promise<void> {
+  const api = getApiClient();
+  const body: AssignStaffData = {
+    email: data.email,
+    eventRank: data.eventRank,
+  };
+  if (data.workspaceRoleRank != null) {
+    body.workspaceRoleRank = data.workspaceRoleRank;
+  }
+  await api.post(`/events/${eventId}/roster/assignments`, body, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }

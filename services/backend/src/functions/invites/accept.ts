@@ -7,7 +7,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
-import { roleKeyFromRank } from "../lib/permissions";
+import { membershipAcceptToApi } from "../lib/mappers/member";
 import { isValidEmailInput, normalizeEmail } from "../lib/email";
 import { finalizePendingEventInvitesOnAccept } from "../lib/events/eventInvite";
 
@@ -115,12 +115,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        membership: {
-          id: membership.id,
-          workspaceId: membership.workspaceId,
-          role: roleKeyFromRank(workspaceRole.rank),
-          type: membership.type,
-        },
+        membership: membershipAcceptToApi(membership, workspaceRole),
         assignments,
         finalizedEventInviteIds,
       }),

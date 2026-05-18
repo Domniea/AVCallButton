@@ -1,12 +1,8 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import {
-  isRole,
-  roleKeyFromRank,
-  roleRank,
-  type Role,
-} from "../lib/permissions";
+import { membershipRoleToApi } from "../lib/mappers/member";
+import { isRole, roleRank, type Role } from "../lib/permissions";
 import { badRequest, notFound, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -70,14 +66,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        member: {
-          id: updated.id,
-          userId: updated.userId,
-          role: roleKeyFromRank(updated.workspaceRole.rank),
-          roleRank: updated.workspaceRole.rank,
-          roleName: updated.workspaceRole.name,
-          workspaceRoleId: updated.workspaceRoleId,
-        },
+        member: membershipRoleToApi(updated),
       }),
     };
   } catch (error) {

@@ -21,16 +21,16 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   loginSchema,
   type LoginSchema,
-} from "@av/forms/src/schemas/auth/login";
+} from "@av/forms/src/schemas/auth/loginSchema";
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
-import { logout } from "packages/auth-client/src";
+import { logout } from "@av/auth-client";
 import { loginThunk } from "@av/store/src/auth";
 
 type LoginNav = NativeStackNavigationProp<
-  ParamListBase & { invite: undefined; home: undefined },
+  ParamListBase & { invite: undefined; dashboard: undefined },
   "login"
 >;
 
@@ -64,7 +64,7 @@ export default function Login() {
     .then(() => dispatch(fetchMeThunk()));
 
       const hasInviteToken = await AsyncStorage.getItem("inviteToken");
-      navigation.replace(hasInviteToken ? "invite" : "home");
+      navigation.replace(hasInviteToken ? "invite" : "dashboard");
     } catch (err) {
       console.error("Login failed", err);
       dispatch(logoutThunk());

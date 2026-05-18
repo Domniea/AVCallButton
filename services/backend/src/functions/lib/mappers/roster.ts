@@ -6,7 +6,7 @@ import type {
   WorkspaceRole,
 } from "@prisma/client";
 
-import { roleKeyFromRank } from "../permissions";
+import { workspaceRoleFields } from "./role";
 
 export type EventAssignmentWithRelations = EventAssignment & {
   membership: Membership;
@@ -29,9 +29,7 @@ export function eventAssignmentToApi(row: EventAssignmentWithRelations) {
     email: row.membership.email,
     membershipType: row.membership.type,
     eventRank: row.eventRank,
-    role: roleKeyFromRank(row.workspaceRole.rank),
-    roleRank: row.workspaceRole.rank,
-    roleName: row.workspaceRole.name,
+    ...workspaceRoleFields(row.workspaceRole),
     assignedBy: row.assignedBy,
     createdAt: row.createdAt.toISOString(),
   };
@@ -49,9 +47,33 @@ export function eventInviteToApi(row: EventInviteWithRelations) {
     status: row.status,
     eventRank: row.eventRank,
     email,
-    role: roleKeyFromRank(row.workspaceRole.rank),
-    roleRank: row.workspaceRole.rank,
-    roleName: row.workspaceRole.name,
+    ...workspaceRoleFields(row.workspaceRole),
+    assignedBy: row.assignedBy,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+/** Pending event invite leg of assign (queued external). */
+export function eventInviteToAssignResponse(eventInvite: EventInvite) {
+  return {
+    id: eventInvite.id,
+    eventId: eventInvite.eventId,
+    inviteId: eventInvite.inviteId,
+    workspaceRoleId: eventInvite.workspaceRoleId,
+    eventRank: eventInvite.eventRank,
+    status: eventInvite.status,
+    assignedBy: eventInvite.assignedBy,
+  };
+}
+
+/** Confirmed assignment leg of assign (member / reactivate). */
+export function eventAssignmentToAssignResponse(row: EventAssignment) {
+  return {
+    id: row.id,
+    eventId: row.eventId,
+    membershipId: row.membershipId,
+    workspaceRoleId: row.workspaceRoleId,
+    eventRank: row.eventRank,
     assignedBy: row.assignedBy,
     createdAt: row.createdAt.toISOString(),
   };

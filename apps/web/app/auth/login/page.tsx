@@ -17,7 +17,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   loginSchema,
   type LoginSchema,
-} from "@av/forms/src/schemas/auth/login";
+} from "@av/forms/src/schemas/auth/loginSchema";
 
 export default function LoginPage() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -47,7 +47,7 @@ export default function LoginPage() {
     .then(() => dispatch(fetchMeThunk()));
 
     const inviteToken = sessionStorage.getItem("inviteToken");
-    router.replace(inviteToken ? "/invite" : "/home");
+    router.replace(inviteToken ? "/invite" : "/dashboard");
   } catch (err) {
     console.error("Login failed:", err);
   }

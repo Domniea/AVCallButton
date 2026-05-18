@@ -7,18 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootState } from "@av/store";
+import type { RootStackParamList } from "./navigation/types";
 
-type RootStackParams = {
-  landing: undefined;
-  login: undefined;
-  home: undefined;
-  invite: { token?: string };
-};
-type InviteNav = NativeStackNavigationProp<RootStackParams, "invite">;
+type InviteNav = NativeStackNavigationProp<RootStackParamList, "invite">;
 
 export default function Invite() {
   const navigation = useNavigation<InviteNav>();
-  const route = useRoute<RouteProp<RootStackParams, "invite">>();
+  const route = useRoute<RouteProp<RootStackParamList, "invite">>();
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +52,7 @@ export default function Invite() {
 
           if (msg?.includes("already a member")) {
             await AsyncStorage.removeItem("inviteToken"); // consumed; won’t trigger invite again
-            navigation.replace("home");
+            navigation.replace("dashboard");
             return;
           }
 
@@ -66,7 +61,7 @@ export default function Invite() {
         }
 
         await AsyncStorage.removeItem("inviteToken"); // consumed; won’t trigger invite again
-        navigation.replace("home");
+        navigation.replace("dashboard");
       } catch {
         setError("Something went wrong");
       }
@@ -104,7 +99,7 @@ export default function Invite() {
 
     const timeout = setTimeout(async () => {
       await AsyncStorage.removeItem("inviteToken");
-      navigation.replace("home");
+      navigation.replace("dashboard");
     }, 4000);
 
     return () => clearTimeout(timeout);

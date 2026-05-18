@@ -1,4 +1,3 @@
-import type { EventAssignment, EventInvite, Invite } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import {
@@ -18,6 +17,11 @@ import {
   setEventStaffAssignment,
 } from "../../lib/events/eventInvite";
 import { authorize } from "../../lib/authorization";
+import {
+  eventAssignmentToAssignResponse,
+  eventInviteToAssignResponse,
+} from "../../lib/mappers/roster";
+import { inviteToAssignResponse } from "../../lib/mappers/invite";
 import { parseWorkspaceRoleRank } from "../../lib/permissions";
 
 function bodyHasWorkspaceRoleRank(body: Record<string, unknown>): boolean {
@@ -39,42 +43,6 @@ const ASSIGN_BAD_REQUEST_MESSAGES = new Set([
   "Invalid email",
   "Pending event invite already exists for this event and invite",
 ]);
-
-function inviteToAssignResponse(invite: Invite) {
-  return {
-    id: invite.id,
-    email: invite.email,
-    workspaceId: invite.workspaceId,
-    workspaceRoleId: invite.workspaceRoleId,
-    status: invite.status,
-    expiresAt: invite.expiresAt.toISOString(),
-    createdAt: invite.createdAt.toISOString(),
-  };
-}
-
-function eventInviteToAssignResponse(eventInvite: EventInvite) {
-  return {
-    id: eventInvite.id,
-    eventId: eventInvite.eventId,
-    inviteId: eventInvite.inviteId,
-    workspaceRoleId: eventInvite.workspaceRoleId,
-    eventRank: eventInvite.eventRank,
-    status: eventInvite.status,
-    assignedBy: eventInvite.assignedBy,
-  };
-}
-
-function eventAssignmentToAssignResponse(row: EventAssignment) {
-  return {
-    id: row.id,
-    eventId: row.eventId,
-    membershipId: row.membershipId,
-    workspaceRoleId: row.workspaceRoleId,
-    eventRank: row.eventRank,
-    assignedBy: row.assignedBy,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
   event,

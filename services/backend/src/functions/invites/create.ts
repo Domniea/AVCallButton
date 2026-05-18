@@ -3,7 +3,7 @@ import { InviteStatus, MembershipType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { inviteToApi } from "../lib/inviteToApi";
+import { inviteToApi } from "../lib/mappers/invite";
 import { isRole, roleRank } from "../lib/permissions";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 import {

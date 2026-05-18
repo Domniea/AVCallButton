@@ -110,7 +110,7 @@ export default function DashboardPage() {
             )}
           </VStack>
           <HStack flexWrap="wrap">
-            <BaseButton variety="tertiary" onClick={() => router.push("/home")}>
+            <BaseButton variety="tertiary" onClick={() => router.push("/dashboard")}>
               Account
             </BaseButton>
             <BaseButton variety="secondary" onClick={onLogout}>

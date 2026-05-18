@@ -14,6 +14,7 @@ import {
 import { BaseButton } from "@/components/reusable/BaseButton";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { workspaceDisplayName } from "@/lib/workspaceDisplayName";
+import Link from "next/link"; 
 
 export default function WorkspacePage() {
   const params = useParams();
@@ -128,15 +129,6 @@ export default function WorkspacePage() {
   return (
     <Box minHeight="100vh" bg="bg" px={6} py={10}>
       <VStack align="stretch" maxWidth="720px" mx="auto" gap={6}>
-        <HStack>
-          <BaseButton
-            variety="tertiary"
-            onClick={() => router.push("/dashboard")}
-          >
-            Back
-          </BaseButton>
-        </HStack>
-
         <BaseCard
           title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
           titleAlign="start"
@@ -190,6 +182,7 @@ export default function WorkspacePage() {
           {eventsMatchRoute && events.length > 0 && (
             <VStack align="stretch" gap={2}>
               {events.map((ev) => (
+                <Link href={`/workspace/${workspaceId}/event/${ev.id}`} key={ev.id}>
                 <Box
                   key={ev.id}
                   borderWidth={1}
@@ -208,10 +201,19 @@ export default function WorkspacePage() {
                       : ""}
                   </Text>
                 </Box>
+                </Link>
               ))}
             </VStack>
           )}
         </BaseCard>
+        <HStack pt={6} w='50%' justifyContent='center' mx='auto'>
+          <BaseButton
+            variety="tertiary"
+            onClick={() => router.push("/dashboard")}
+          >
+            Back
+          </BaseButton>
+        </HStack>
       </VStack>
     </Box>
   );

@@ -13,17 +13,14 @@
       "**/@av/ui/**"
     ]
   },
-  "react-native": {
-    "appWorkingDirectory": "apps/mobile"
-  },
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "check-types": "turbo run check-types",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "android": "yarn --cwd apps/mobile android",
+    "ios": "yarn --cwd apps/mobile ios"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.4.2",

@@ -1,7 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
-import { roleKeyFromRank } from "../lib/permissions";
+import { membershipToDashboardWorkspace } from "../lib/mappers/workspace";
 import { serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -29,14 +29,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       },
     });
 
-    const workspaces = memberships.map((m) => ({
-      workspaceId: m.workspace.id,
-      name: m.workspace.name,
-      type: m.workspace.type,
-      role: roleKeyFromRank(m.workspaceRole.rank),
-      eventCount: m.workspace._count.events,
-      recentEvents: m.workspace.events,
-    }));
+    const workspaces = memberships.map(membershipToDashboardWorkspace);
 
     return {
       statusCode: 200,

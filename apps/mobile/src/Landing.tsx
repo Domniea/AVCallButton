@@ -33,7 +33,7 @@ export default function Landing() {
 
   useEffect(() => {
     if (authStatus === "authenticated") {
-      navigation.replace("home" as never);
+      navigation.replace("dashboard");
     }
   }, [authStatus, navigation]);
 

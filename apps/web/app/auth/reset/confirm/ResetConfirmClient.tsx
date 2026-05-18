@@ -13,7 +13,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   resetPasswordSchema,
   type ResetPasswordSchema,
-} from "@av/forms/src/schemas/auth/resetPassword";
+} from "@av/forms/src/schemas/auth/resetPasswordSchema";
 
 export default function ResetConfirmClient() {
   const router = useRouter();

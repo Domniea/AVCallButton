@@ -11,9 +11,7 @@ import { BaseButton } from "@/components/reusable/BaseButton";
 export default function HomeEntryPage() {
   const router = useRouter();
 
-  const authStatus = useSelector(
-    (state: RootState) => state.auth.status
-  );
+  const authStatus = useSelector((state: RootState) => state.auth.status);
 
   useEffect(() => {
     if (authStatus === "authenticated") {

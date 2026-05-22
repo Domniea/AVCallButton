@@ -31,7 +31,6 @@ export default function AssignStaffModal({
 
   const onSubmit = async (data: z.infer<typeof assignStaffSchema>) => {
     try {
-      //   await axios.post(`/api/workspace/${workspaceId}/event/${eventId}/roster/assignments`, data);
       console.log(data);
       dispatch(assignStaffThunk({ eventId: eventId as string, data: data as AssignStaffData }));
       onClose();

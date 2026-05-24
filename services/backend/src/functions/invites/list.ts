@@ -1,6 +1,6 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
-import { InviteStatus } from "@prisma/client";
+import { InviteStatus } from "../lib/prismaClient";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";

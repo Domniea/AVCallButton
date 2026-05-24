@@ -15,7 +15,7 @@ export default function HomeEntryPage() {
 
   useEffect(() => {
     if (authStatus === "authenticated") {
-      router.replace("/dasboard");
+      router.replace("/dashboard");
     }
   }, [authStatus, router]);
 

@@ -1,12 +1,10 @@
-import type { EventInvite } from "@prisma/client";
+import type { EventInvite, Membership, Prisma } from "@prisma/client";
 import {
   EventInviteStatus,
   InviteStatus,
-  Membership,
   MembershipStatus,
   MembershipType,
-  Prisma,
-} from "@prisma/client";
+} from "../prismaClient";
 
 import { isWorkspaceRoleRank } from "../permissions";
 import { prisma } from "../prisma";

@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./prismaClient";
+import type { PrismaClient as PrismaClientType } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -12,7 +13,7 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 
 declare global {
-  var prisma: PrismaClient | undefined;
+  var prisma: PrismaClientType | undefined;
 }
 
 export const prisma =

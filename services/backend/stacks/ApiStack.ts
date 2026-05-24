@@ -1,4 +1,5 @@
 import { StackContext, Api, use } from "sst/constructs";
+import { PRISMA_FUNCTION_DEFAULTS } from "./prismaLambda";
 
 const COGNITO_REGION = "us-east-1";
 const COGNITO_USER_POOL_ID = "us-east-1_9uafTDTow";
@@ -33,12 +34,7 @@ export function ApiStack({ stack, app }: StackContext) {
           SES_FROM_EMAIL: "domniea@gmail.com",
           APP_URL: "http://localhost:3000",
         },
-        nodejs: {
-          install: ["@prisma/client"],
-          esbuild: {
-            external: ["@prisma/client", ".prisma/client"],
-          },
-        },
+        ...PRISMA_FUNCTION_DEFAULTS,
       },
     },
 

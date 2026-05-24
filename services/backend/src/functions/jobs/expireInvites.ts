@@ -1,5 +1,5 @@
 import type { ScheduledHandler } from "aws-lambda";
-import { EventInviteStatus, InviteStatus } from "@prisma/client";
+import { EventInviteStatus, InviteStatus } from "../lib/prismaClient";
 
 import { prisma } from "../lib/prisma";
 

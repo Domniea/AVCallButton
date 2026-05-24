@@ -1,5 +1,5 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { MembershipStatus } from "@prisma/client";
+import { MembershipStatus } from "../lib/prismaClient";
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
 import { membershipToApi } from "../lib/mappers/member";

@@ -1,4 +1,5 @@
 import { StackContext, Api, use } from "sst/constructs";
+import { PRISMA_FUNCTION_DEFAULTS } from "./prismaLambda";
 
 const COGNITO_REGION = "us-east-1";
 const COGNITO_USER_POOL_ID = "us-east-1_9uafTDTow";
@@ -9,7 +10,7 @@ export function ApiStack({ stack, app }: StackContext) {
     cors: {
       allowHeaders: ["Authorization", "Content-Type"],
       allowMethods: ["GET", "POST", "DELETE", "PATCH", "OPTIONS"],
-      allowOrigins: ["http://localhost:3000"],
+      allowOrigins: ["http://localhost:3000", "https://av-call-button-web.vercel.app"],
     },
 
     authorizers: {
@@ -33,12 +34,7 @@ export function ApiStack({ stack, app }: StackContext) {
           SES_FROM_EMAIL: "domniea@gmail.com",
           APP_URL: "http://localhost:3000",
         },
-        nodejs: {
-          install: ["@prisma/client"],
-          esbuild: {
-            external: ["@prisma/client", ".prisma/client"],
-          },
-        },
+        ...PRISMA_FUNCTION_DEFAULTS,
       },
     },
 
@@ -59,20 +55,27 @@ export function ApiStack({ stack, app }: StackContext) {
       // Members
       "GET /workspaces/{workspaceId}/members":
         "src/functions/members/list.handler",
+      "GET /workspaces/{workspaceId}/members/lookup":
+        "src/functions/members/lookup.handler",
       "PATCH /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/updateRole.handler",
       "DELETE /workspaces/{workspaceId}/members/{userId}":
         "src/functions/members/remove.handler",
 
       // Events
-      "GET /workspaces/{workspaceId}/events": "src/functions/events/list.handler",
+      "GET /workspaces/{workspaceId}/events":
+        "src/functions/events/list.handler",
       "POST /workspaces/{workspaceId}/events":
         "src/functions/events/create.handler",
       "DELETE /events/{eventId}": "src/functions/events/delete.handler",
-      "POST /events/{eventId}/roster/assignments":
-        "src/functions/events/roster/assign.handler",
+
+      // Roster
+      "GET /events/{eventId}/roster":
+        "src/functions/events/roster/list.handler",
       "DELETE /events/{eventId}/roster/pending-invites/{eventInviteId}":
         "src/functions/events/roster/deletePendingInvite.handler",
+      "POST /events/{eventId}/roster/assignments":
+        "src/functions/events/roster/assign.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":

@@ -39,6 +39,13 @@ yarn-error.*
 
 # typescript build output
 *.tsbuildinfo
+# Lambdas / store: sources only — SST and Next consume .ts directly
+services/backend/src/**/*.js
+services/backend/src/**/*.d.ts
+packages/store/src/**/*.js
+packages/store/src/**/*.d.ts
+packages/store/src/**/*.d.ts.map
+packages/store/src/**/*.js.map
 
 # build outputs
 build/

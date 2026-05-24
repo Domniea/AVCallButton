@@ -1,13 +1,14 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
+import type { Prisma as PrismaTypes } from "@prisma/client";
 import {
   EventInviteStatus,
   InviteStatus,
   MembershipStatus,
   Prisma,
-} from "@prisma/client";
+} from "../lib/prismaClient";
 import { prisma } from "../lib/prisma";
 import { badRequest, notFound, serverError } from "../lib/responses";
-import { roleKeyFromRank } from "../lib/permissions";
+import { membershipAcceptToApi } from "../lib/mappers/member";
 import { isValidEmailInput, normalizeEmail } from "../lib/email";
 import { finalizePendingEventInvitesOnAccept } from "../lib/events/eventInvite";
 
@@ -17,7 +18,7 @@ const ACCEPT_BAD_REQUEST_MESSAGES = new Set([
   "Event rank cannot be greater than the workspace role rank",
 ]);
 
-function prismaUniqueTarget(error: Prisma.PrismaClientKnownRequestError): string {
+function prismaUniqueTarget(error: PrismaTypes.PrismaClientKnownRequestError): string {
   const t = error.meta?.target;
   if (Array.isArray(t)) return t.join(",");
   if (typeof t === "string") return t;
@@ -115,12 +116,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        membership: {
-          id: membership.id,
-          workspaceId: membership.workspaceId,
-          role: roleKeyFromRank(workspaceRole.rank),
-          type: membership.type,
-        },
+        membership: membershipAcceptToApi(membership, workspaceRole),
         assignments,
         finalizedEventInviteIds,
       }),

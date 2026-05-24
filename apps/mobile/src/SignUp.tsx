@@ -21,7 +21,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   signupSchema,
   type SignupSchema,
-} from "@av/forms/src/schemas/auth/signup";
+} from "@av/forms/src/schemas/auth/signupSchema";
 
 import { signup } from "@av/auth-client";
 

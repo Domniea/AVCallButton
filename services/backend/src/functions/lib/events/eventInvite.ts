@@ -1,13 +1,12 @@
-import type { EventInvite } from "@prisma/client";
+import type { EventInvite, Membership, Prisma } from "@prisma/client";
 import {
   EventInviteStatus,
   InviteStatus,
-  Membership,
   MembershipStatus,
   MembershipType,
-  Prisma,
-} from "@prisma/client";
+} from "../prismaClient";
 
+import { isWorkspaceRoleRank } from "../permissions";
 import { prisma } from "../prisma";
 import { normalizeEmail, sendInviteEmail } from "../email";
 
@@ -17,6 +16,23 @@ type InviteBranch =
   | "invite_to_workspace_and_assign"
   | "reactivate_then_assign"
   | "assign_now";
+
+export async function findPendingWorkspaceInviteByEmail(
+  email: string,
+  workspaceId: string,
+) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return null;
+
+  return prisma.invite.findFirst({
+    where: {
+      workspaceId,
+      email: { equals: normalizedEmail, mode: "insensitive" },
+      status: InviteStatus.PENDING,
+    },
+    include: { workspaceRole: true },
+  });
+}
 
 export async function findWorkspaceMembershipByEmail(
   email: string,
@@ -116,15 +132,15 @@ export function resolveInviteBranch(
 }
 
 /**
- * Event roster rank must be at least 1 and cannot exceed the workspace tier rank
- * (`WorkspaceRole.rank` for that member or invite).
+ * Event rank uses the same tier scale as `WorkspaceRole.rank` and cannot exceed
+ * the assignee's workspace role rank for that workspace.
  */
 export function assertEventRankWithinWorkspaceRoleRank(
   eventRank: number,
   workspaceRoleRank: number,
 ): void {
-  if (eventRank < 1) {
-    throw new Error("Event rank must be at least 1");
+  if (!isWorkspaceRoleRank(eventRank)) {
+    throw new Error("Invalid event rank");
   }
   if (eventRank > workspaceRoleRank) {
     throw new Error(
@@ -156,6 +172,7 @@ export async function setEventStaffAssignment(
     update: {
       eventRank,
       assignedBy,
+      workspaceRoleId: membership.workspaceRoleId,
     },
     create: {
       eventId,
@@ -276,7 +293,7 @@ export async function queWorkspaceInviteAndPendingEventInviteAssignment(
       if (existingEventInvite) {
         const samePayload =
           existingEventInvite.eventRank === eventRank &&
-          existingEventInvite.workspaceRoleId === workspaceRole.uuid &&
+          existingEventInvite.workspaceRoleId === inviteRow.workspaceRoleId &&
           existingEventInvite.assignedBy === userId;
 
         if (!samePayload) {
@@ -296,7 +313,7 @@ export async function queWorkspaceInviteAndPendingEventInviteAssignment(
         tx,
         eventId,
         userId,
-        workspaceRole.uuid,
+        inviteRow.workspaceRoleId,
         eventRank,
         inviteRow.id,
       );

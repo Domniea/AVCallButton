@@ -78,6 +78,8 @@ export const BaseCard: React.FC<BaseCardProps> = ({
           fontWeight="bold"
           textAlign={titleAlign}
           mb={3}
+          minW={0}
+          overflowWrap="break-word"
         >
           {title}
         </Text>

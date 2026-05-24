@@ -1,10 +1,10 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
-import { InviteStatus } from "@prisma/client";
+import { InviteStatus } from "../lib/prismaClient";
 
 import { prisma } from "../lib/prisma";
 import { authorize } from "../lib/authorization";
-import { inviteToApi } from "../lib/inviteToApi";
+import { inviteToApi } from "../lib/mappers/invite";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (

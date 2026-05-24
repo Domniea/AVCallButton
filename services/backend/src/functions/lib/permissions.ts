@@ -34,7 +34,8 @@ export type Action =
   | "event:update"
   | "event:delete"
   | "event:assignStaff"
-  | "event:view";
+  | "event:view"
+  | "event:viewRoster";
 
 export const roleRank: Record<Role, number> = {
   guest: 2,
@@ -43,6 +44,25 @@ export const roleRank: Record<Role, number> = {
   manager: 8,
   owner: 10,
 };
+
+/** Seeded workspace / event tier ranks (guest 2 … owner 10). */
+export const WORKSPACE_ROLE_RANKS: readonly number[] = Object.values(roleRank);
+
+export function isWorkspaceRoleRank(rank: number): boolean {
+  return WORKSPACE_ROLE_RANKS.includes(rank);
+}
+
+/** JSON number or numeric string → a valid tier rank; otherwise null. */
+export function parseWorkspaceRoleRank(value: unknown): number | null {
+  const n =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim() !== ""
+        ? Number(value)
+        : NaN;
+  if (!Number.isInteger(n) || !isWorkspaceRoleRank(n)) return null;
+  return n;
+}
 
 export const actionMinimumRank: Record<Action, number> = {
   "workspace:update": 8,
@@ -58,6 +78,7 @@ export const actionMinimumRank: Record<Action, number> = {
   "event:delete": 8,
   "event:assignStaff": 6,
   "event:view": 4,
+  "event:viewRoster": 6,
 };
 
 /** Permission check using the member's numeric rank from `WorkspaceRole.rank`. */

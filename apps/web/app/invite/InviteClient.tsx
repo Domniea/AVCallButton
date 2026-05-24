@@ -39,7 +39,7 @@ export default function InvitePage() {
           
             if (msg?.includes("already a member")) {
               sessionStorage.removeItem("inviteToken");
-              router.replace("/home");
+              router.replace("/dashboard");
               return;
             }
           
@@ -49,7 +49,7 @@ export default function InvitePage() {
 
           
         sessionStorage.removeItem("inviteToken");
-        router.replace("/home");
+        router.replace("/dashboard");
       } catch {
         setError("Something went wrong");
       }
@@ -78,7 +78,7 @@ export default function InvitePage() {
       if (!error) return;
     
       const timeout = setTimeout(() => {
-        router.replace("/home");
+        router.replace("/dashboard");
       }, 4000);
     
       return () => clearTimeout(timeout);

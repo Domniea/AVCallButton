@@ -51,8 +51,9 @@ export default function ({ config }: ConfigContext): ExpoConfig {
       APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
       API_URL: process.env.EXPO_PUBLIC_API_URL,
       eas: {
-        projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
-        // projectId: "e9508cb9-cf8f-4576-b40b-4c7ade333434",
+        projectId:
+          process.env.EXPO_PUBLIC_PROJECT_ID ??
+          "e9508cb9-cf8f-4576-b40b-4c7ade333434",
       },
     },
   };

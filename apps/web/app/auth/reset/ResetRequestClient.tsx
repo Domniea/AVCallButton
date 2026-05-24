@@ -14,7 +14,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   forgotPasswordSchema,
   type ForgotPasswordSchema,
-} from "@av/forms/src/schemas/auth/forgotPassword";
+} from "@av/forms/src/schemas/auth/forgotPasswordSchema";
 
 export default function ResetRequestClient() {
   const { colorMode, toggleColorMode } = useColorMode();

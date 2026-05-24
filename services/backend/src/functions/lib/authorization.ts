@@ -1,4 +1,4 @@
-import { MembershipStatus } from "@prisma/client";
+import { MembershipStatus } from "./prismaClient";
 
 import { prisma } from "./prisma";
 import { hasPermissionForRank, Action } from "./permissions";

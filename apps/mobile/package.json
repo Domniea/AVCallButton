@@ -5,8 +5,12 @@
   "private": true,
   "scripts": {
     "start": "expo start --dev-client --clear",
-    "ios": "expo start --dev-client --ios --simulator 'iPhone 17 Pro Max'",
-    "android": "expo start --dev-client --android",
+    "ios": "expo run:ios",
+    "ios:start": "expo start --dev-client --ios --simulator 'iPhone 17 Pro Max'",
+    "android": "expo run:android",
+    "android:start": "expo start --dev-client --android",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
     "web": "expo start --web"
   },
   "dependencies": {

@@ -1,16 +1,12 @@
 import { Cron, StackContext } from "sst/constructs";
+import { PRISMA_FUNCTION_DEFAULTS } from "./prismaLambda";
 
 const CRON_FUNCTION_DEFAULTS = {
   environment: {
     DATABASE_URL: process.env.DATABASE_URL!,
   },
   timeout: 120,
-  nodejs: {
-    install: ["@prisma/client"],
-    esbuild: {
-      external: ["@prisma/client", ".prisma/client"],
-    },
-  },
+  ...PRISMA_FUNCTION_DEFAULTS,
 };
 
 /**

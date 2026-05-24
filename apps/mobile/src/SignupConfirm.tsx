@@ -21,7 +21,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   confirmEmailSchema,
   type ConfirmEmailSchema,
-} from "@av/forms/src/schemas/auth/confirmEmail";
+} from "@av/forms/src/schemas/auth/confirmEmailSchema";
 
 import { confirmSignup } from "@av/auth-client";
 

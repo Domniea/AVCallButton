@@ -1,10 +1,10 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
-import { MembershipStatus } from "@prisma/client";
+import { MembershipStatus } from "../lib/prismaClient";
 
 import { prisma } from "../lib/prisma";
 import { normalizeEmail } from "../lib/email";
 import { serverError } from "../lib/responses";
-import { roleKeyFromRank } from "../lib/permissions";
+import { membershipToWorkspaceSummary } from "../lib/mappers/workspace";
 import { seedDefaultWorkspaceRoles } from "../lib/workspaceRoles";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -69,16 +69,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     return {
       statusCode: 200,
       body: JSON.stringify({
-        workspaces: memberships.map((m) => ({
-          workspaceId: m.workspace.id,
-          name: m.workspace.name,
-          type: m.workspace.type,
-          role: roleKeyFromRank(m.workspaceRole.rank),
-          roleRank: m.workspaceRole.rank,
-          roleName: m.workspaceRole.name,
-          createdAt: m.workspace.createdAt,
-          eventCount: m.workspace._count.events,
-        })),
+        workspaces: memberships.map(membershipToWorkspaceSummary),
       }),
     };
   } catch (error) {

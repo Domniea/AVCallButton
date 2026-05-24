@@ -3,18 +3,28 @@
   "files": [],
   "include": [],
   "references": [
-    { "path": "./apps/mobile" },
-    { "path": "./apps/web" },
-    { "path": "./packages/ui" }
+    {
+      "path": "./apps/mobile"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./packages/ui"
+    }
   ],
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
-
     "baseUrl": ".",
     "paths": {
-      "@av/ui": ["packages/ui"],
-      "@av/ui/*": ["packages/ui/src/*"]
+      "@av/ui": [
+        "packages/ui"
+      ],
+      "@av/ui/*": [
+        "packages/ui/src/*"
+      ]
     }
-  }
+  },
+  "extends": "expo/tsconfig.base"
 }

@@ -15,7 +15,7 @@ import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   signupSchema,
   type SignupSchema,
-} from "@av/forms/src/schemas/auth/signup";
+} from "@av/forms/src/schemas/auth/signupSchema";
 
 export default function SignupPage() {
   const router = useRouter();

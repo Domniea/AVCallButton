@@ -1,11 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
     "composite": true,
+    "incremental": true,
     "outDir": "dist",
     "rootDir": "src",
     "skipLibCheck": true
   },
-"include": ["src/**/*.ts", "src/**/*.tsx"]
-
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
+

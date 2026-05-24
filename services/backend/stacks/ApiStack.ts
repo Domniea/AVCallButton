@@ -10,7 +10,7 @@ export function ApiStack({ stack, app }: StackContext) {
     cors: {
       allowHeaders: ["Authorization", "Content-Type"],
       allowMethods: ["GET", "POST", "DELETE", "PATCH", "OPTIONS"],
-      allowOrigins: ["http://localhost:3000"],
+      allowOrigins: ["http://localhost:3000", "https://av-call-button-web.vercel.app"],
     },
 
     authorizers: {

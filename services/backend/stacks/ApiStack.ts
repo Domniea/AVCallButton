@@ -77,6 +77,32 @@ export function ApiStack({ stack, app }: StackContext) {
       "POST /events/{eventId}/roster/assignments":
         "src/functions/events/roster/assign.handler",
 
+      // Zones
+      "GET /events/{eventId}/zones": "src/functions/events/zones/list.handler",
+      "POST /events/{eventId}/zones":
+        "src/functions/events/zones/create.handler",
+      "PATCH /events/{eventId}/zones/{zoneId}":
+        "src/functions/events/zones/update.handler",
+      "DELETE /events/{eventId}/zones/{zoneId}":
+        "src/functions/events/zones/delete.handler",
+
+      // Rooms
+      "GET /events/{eventId}/rooms": "src/functions/events/rooms/list.handler",
+      "POST /events/{eventId}/rooms":
+        "src/functions/events/rooms/create.handler",
+      "PATCH /events/{eventId}/rooms/{roomId}":
+        "src/functions/events/rooms/update.handler",
+      "DELETE /events/{eventId}/rooms/{roomId}":
+        "src/functions/events/rooms/delete.handler",
+
+      // Room assignments
+      "GET /events/{eventId}/rooms/{roomId}/assignments":
+        "src/functions/events/rooms/assignments/list.handler",
+      "POST /events/{eventId}/rooms/{roomId}/assignments":
+        "src/functions/events/rooms/assignments/create.handler",
+      "DELETE /events/{eventId}/rooms/{roomId}/assignments/{membershipId}":
+        "src/functions/events/rooms/assignments/delete.handler",
+
       // Invites
       "POST /workspaces/{workspaceId}/invites":
         "src/functions/invites/create.handler",

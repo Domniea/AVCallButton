@@ -80,6 +80,13 @@ function pendingSubtitle(p: RosterPendingInvite) {
   return parts.join(" · ");
 }
 
+function roomsForZone(
+  rooms: Array<{ id: string; name: string; zoneId: string | null }>,
+  zoneId: string,
+) {
+  return rooms.filter((room) => room.zoneId === zoneId);
+}
+
 export default function EventPage() {
   const params = useParams();
   const workspaceId = params.workspaceId as string;
@@ -312,6 +319,74 @@ export default function EventPage() {
                 </Box>
               </VStack>
             </Box>
+          </Box>
+
+          <Box borderTopWidth="1px" borderTopColor="cardBorder" pt={4} mt={4}>
+            <VStack align="stretch" gap={3}>
+              <Text fontSize="sm" fontWeight="semibold" color="text">
+                Zones & rooms
+              </Text>
+
+              {event.zones.length === 0 && event.rooms.length === 0 && (
+                <Text fontSize="sm" color="gray.500">
+                  No zones or rooms added yet.
+                </Text>
+              )}
+
+              {event.zones.map((zone) => {
+                const zoneRooms = roomsForZone(event.rooms, zone.id);
+                return (
+                  <Box
+                    key={zone.id}
+                    borderWidth={1}
+                    borderColor="cardBorder"
+                    borderRadius="md"
+                    px={3}
+                    py={2}
+                  >
+                    <Text fontSize="sm" fontWeight="medium" color="text">
+                      {zone.name}
+                    </Text>
+                    {zoneRooms.length === 0 ? (
+                      <Text fontSize="xs" color="gray.500">
+                        No rooms in this zone yet.
+                      </Text>
+                    ) : (
+                      <VStack align="stretch" gap={1} mt={1}>
+                        {zoneRooms.map((room) => (
+                          <Text key={room.id} fontSize="xs" color="gray.500">
+                            • {room.name}
+                          </Text>
+                        ))}
+                      </VStack>
+                    )}
+                  </Box>
+                );
+              })}
+
+              {event.rooms.some((room) => room.zoneId == null) && (
+                <Box
+                  borderWidth={1}
+                  borderColor="cardBorder"
+                  borderRadius="md"
+                  px={3}
+                  py={2}
+                >
+                  <Text fontSize="sm" fontWeight="medium" color="text">
+                    Unassigned rooms
+                  </Text>
+                  <VStack align="stretch" gap={1} mt={1}>
+                    {event.rooms
+                      .filter((room) => room.zoneId == null)
+                      .map((room) => (
+                        <Text key={room.id} fontSize="xs" color="gray.500">
+                          • {room.name}
+                        </Text>
+                      ))}
+                  </VStack>
+                </Box>
+              )}
+            </VStack>
           </Box>
         </BaseCard>
         <HStack pt={6} w="50%" justifyContent="center" mx="auto">

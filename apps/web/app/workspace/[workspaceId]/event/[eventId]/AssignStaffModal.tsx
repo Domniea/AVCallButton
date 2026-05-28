@@ -21,7 +21,7 @@ export default function AssignStaffModal({
   isOpen,
   onClose,
 }: AssignStaffModalProps) {
-  const { workspaceId, eventId } = useParams();
+  const { eventId } = useParams<{ eventId: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const form = useAppForm(assignStaffSchema, {
     email: "",

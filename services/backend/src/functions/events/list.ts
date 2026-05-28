@@ -20,6 +20,15 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     const events = await prisma.event.findMany({
       where: { workspaceId },
+      include: {
+        zones: {
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        },
+        rooms: {
+          include: { zone: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 

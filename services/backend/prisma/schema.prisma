@@ -71,10 +71,11 @@ model Membership {
   status          MembershipStatus @default(ACTIVE)
   joinedAt        DateTime         @default(now())
 
-  workspace        Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workspaceRole    WorkspaceRole     @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  workspace        Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole    WorkspaceRole         @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
+  roomAssignments  EventRoomAssignment[]
 
   @@unique([userId, workspaceId])
   @@index([userId])
@@ -124,6 +125,8 @@ model Event {
   messages         Message[]
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
+  zones            EventZone[]
+  rooms            EventRoom[]
 
   @@index([workspaceId])
   @@index([status])
@@ -168,6 +171,54 @@ model EventAssignment {
 
   @@unique([eventId, membershipId])
   @@index([eventId])
+  @@index([membershipId])
+}
+
+model EventZone {
+  id        String   @id @default(uuid())
+  eventId   String
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  rooms EventRoom[]
+
+  @@index([eventId])
+  @@index([eventId, sortOrder])
+}
+
+model EventRoom {
+  id        String   @id @default(uuid())
+  eventId   String
+  zoneId    String?
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event       Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  zone        EventZone?            @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  assignments EventRoomAssignment[]
+
+  @@index([eventId])
+  @@index([zoneId])
+  @@index([eventId, sortOrder])
+}
+
+model EventRoomAssignment {
+  id           String   @id @default(uuid())
+  roomId       String
+  membershipId String
+  assignedBy   String
+  createdAt    DateTime @default(now())
+
+  room       EventRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, membershipId])
+  @@index([roomId])
   @@index([membershipId])
 }
 

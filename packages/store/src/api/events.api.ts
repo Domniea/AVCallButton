@@ -10,6 +10,31 @@ export type EventSummary = {
   endTime: string | null;
   createdAt: string;
   workspaceId: string;
+  zones: {
+    id: string;
+    name: string;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+    eventId: string;
+  }[];
+  rooms: {
+    id: string;
+    name: string;
+    sortOrder: number;
+    createdAt: string;
+    updatedAt: string;
+    eventId: string;
+    zoneId: string | null;
+    zone: {
+      id: string;
+      name: string;
+      sortOrder: number;
+      createdAt: string;
+      updatedAt: string;
+      eventId: string;
+    } | null;
+  }[];
 };
 
 export type EventsListResponse = {

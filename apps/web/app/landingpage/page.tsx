@@ -35,7 +35,7 @@ export default function LandingPage() {
       <VStack gap={{ base: 8, md: 12 }} maxW="6xl" mx="auto" align="stretch">
         <HStack justify="space-between" flexWrap="wrap" gap={4}>
           <Text fontSize="xl" fontWeight="bold" color="text">
-            AV Call Button
+            WarRoom
           </Text>
           <HStack gap={3}>
             <BaseButton
@@ -85,6 +85,7 @@ export default function LandingPage() {
         >
           <Box position="relative" w="100%" aspectRatio={{ base: "16/10", md: "16/9" }}>
             <Image
+              key={slide.id}
               src={slide.imageSrc}
               alt={slide.label}
               fill

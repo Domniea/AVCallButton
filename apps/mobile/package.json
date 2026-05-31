@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "start": "expo start --dev-client --clear",
-    "ios": "expo run:ios",
-    "ios:start": "expo start --dev-client --ios --simulator 'iPhone 17 Pro Max'",
+    "ios": "expo run:ios --device 'iPhone 17 Pro Max'",
+    "ios:start": "xcrun simctl boot 'iPhone 17 Pro Max' 2>/dev/null; open -a Simulator; expo start --dev-client",
     "android": "expo run:android",
     "android:start": "expo start --dev-client --android",
     "prebuild": "expo prebuild",

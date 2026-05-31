@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
-import AssignStaffModal from "./AssignStaffModal";
+import AssignStaffModal from "./modals/AssignStaffModal";
+import AddRoomModal from "./modals/AddRoomModal";
+import CreateZoneModal from "./modals/CreateZoneModal";
 
 import type { AppDispatch, RootState } from "@av/store";
 import type { RosterAssignment, RosterPendingInvite } from "@av/store";
@@ -92,8 +94,11 @@ export default function EventPage() {
   const workspaceId = params.workspaceId as string;
   const eventId = params.eventId as string;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const [isAssignStaffModalOpen, setIsAssignStaffModalOpen] = useState(false);
+  const [isAddRoomModalOpen, setIsAddRoomModalOpen] = useState(false);
+  const [isCreateZoneModalOpen, setIsCreateZoneModalOpen] = useState(false);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
 
@@ -128,6 +133,14 @@ export default function EventPage() {
   const closeAssignStaffModal = () => {
     setIsAssignStaffModalOpen(false);
   };
+
+  useEffect(() => {
+    if (searchParams.get("createZone") === "1") {
+      setIsCreateZoneModalOpen(true);
+      router.replace(`/workspace/${workspaceId}/event/${eventId}`);
+    }
+  }, [searchParams, router, workspaceId, eventId]);
+
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.replace("/");
@@ -182,6 +195,14 @@ export default function EventPage() {
         <AssignStaffModal
           isOpen={isAssignStaffModalOpen}
           onClose={closeAssignStaffModal}
+        />
+        <AddRoomModal
+          isOpen={isAddRoomModalOpen}
+          onClose={() => setIsAddRoomModalOpen(false)}
+        />
+        <CreateZoneModal
+          isOpen={isCreateZoneModalOpen}
+          onClose={() => setIsCreateZoneModalOpen(false)}
         />
         <BaseCard title={event.name} titleAlign="start" variant="elevated">
           <HStack flexWrap="wrap" gap={2} mb={0}>
@@ -323,9 +344,25 @@ export default function EventPage() {
 
           <Box borderTopWidth="1px" borderTopColor="cardBorder" pt={4} mt={4}>
             <VStack align="stretch" gap={3}>
-              <Text fontSize="sm" fontWeight="semibold" color="text">
-                Zones & rooms
-              </Text>
+              <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                <Text fontSize="sm" fontWeight="semibold" color="text">
+                  Zones & rooms
+                </Text>
+                <HStack gap={2}>
+                  <BaseButton
+                    variety="secondary"
+                    title="Add room"
+                    btnWidth="auto"
+                    onClick={() => setIsAddRoomModalOpen(true)}
+                  />
+                  <BaseButton
+                    variety="secondary"
+                    title="Create zone"
+                    btnWidth="auto"
+                    onClick={() => setIsCreateZoneModalOpen(true)}
+                  />
+                </HStack>
+              </HStack>
 
               {event.zones.length === 0 && event.rooms.length === 0 && (
                 <Text fontSize="sm" color="gray.500">

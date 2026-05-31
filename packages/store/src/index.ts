@@ -10,4 +10,6 @@ export * from "./api/workspaces.api";
 export * from "./api/events.api";
 export * from "./api/members.api";
 export * from "./api/roster.api";
+export * from "./api/zones.api";
+export * from "./api/rooms.api";
 

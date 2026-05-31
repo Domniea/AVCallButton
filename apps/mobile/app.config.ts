@@ -1,5 +1,4 @@
 import { ExpoConfig, ConfigContext } from "expo/config";
-import "dotenv/config";
 
 export default function ({ config }: ConfigContext): ExpoConfig {
   const isProd = process.env.APP_ENV === "production";

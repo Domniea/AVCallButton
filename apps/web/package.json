@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:env": "set -a && . ./.env && set +a && next dev",
     "build": "next build",
+    "build:env": "set -a && . ./.env && set +a && next build",
     "start": "next start",
+    "start:env": "set -a && . ./.env && set +a && next start",
     "lint": "eslint . --max-warnings=0",
     "check-types": "tsc --noEmit"
   },

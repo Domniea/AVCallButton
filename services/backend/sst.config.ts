@@ -7,7 +7,7 @@ export default {
     return {
       name: "avcallbutton-backend",
       region: "us-east-1",
-      stage: input.stage || "dev",
+      stage: input.stage || "local",
     };
   },
   stacks(app: App) {

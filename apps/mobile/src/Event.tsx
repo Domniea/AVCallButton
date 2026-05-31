@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   VStack,
@@ -22,6 +22,9 @@ import { clearRoster, fetchEventsThunk, fetchRosterThunk } from "@av/store";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
+import AssignStaffModal from "./AssignStaffModal";
+import AddRoomModal from "./AddRoomModal";
+import CreateZoneModal from "./CreateZoneModal";
 import type { RootStackParamList } from "./navigation/types";
 
 type EventNav = NativeStackNavigationProp<RootStackParamList, "event">;
@@ -142,6 +145,10 @@ export default function EventScreen() {
 
   const rosterMatchesEvent =
     rosterEventId === eventId && rosterFetchStatus === "succeeded";
+
+  const [isAssignStaffOpen, setIsAssignStaffOpen] = useState(false);
+  const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
+  const [isCreateZoneOpen, setIsCreateZoneOpen] = useState(false);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -293,16 +300,35 @@ export default function EventScreen() {
                     )}
 
                   <Box borderTopWidth={1} borderTopColor={divider} pt={4} mt={1}>
-                    <BaseButton title="Assign staff" onPress={() => {}} />
+                    <BaseButton
+                      title="Assign staff"
+                      onPress={() => setIsAssignStaffOpen(true)}
+                    />
                   </Box>
                 </VStack>
               </Box>
 
               <Box borderTopWidth={1} borderTopColor={divider} pt={4}>
                 <VStack space={3}>
-                  <Text fontSize="sm" fontWeight="semibold" color={textColor}>
-                    Zones & rooms
-                  </Text>
+                  <HStack justifyContent="space-between" alignItems="center" flexWrap="wrap" space={2}>
+                    <Text fontSize="sm" fontWeight="semibold" color={textColor}>
+                      Zones & rooms
+                    </Text>
+                    <HStack space={2}>
+                      <BaseButton
+                        title="Add room"
+                        variety="secondary"
+                        btnWidth="auto"
+                        onPress={() => setIsAddRoomOpen(true)}
+                      />
+                      <BaseButton
+                        title="Create zone"
+                        variety="secondary"
+                        btnWidth="auto"
+                        onPress={() => setIsCreateZoneOpen(true)}
+                      />
+                    </HStack>
+                  </HStack>
 
                   {event.zones.length === 0 && event.rooms.length === 0 && (
                     <Text fontSize="sm" color={muted}>
@@ -369,6 +395,26 @@ export default function EventScreen() {
           </BaseCard>
         </VStack>
       </ScrollView>
+
+      <AssignStaffModal
+        isOpen={isAssignStaffOpen}
+        eventId={eventId}
+        onClose={() => setIsAssignStaffOpen(false)}
+      />
+      <AddRoomModal
+        isOpen={isAddRoomOpen}
+        eventId={eventId}
+        workspaceId={workspaceId}
+        zones={event.zones}
+        onClose={() => setIsAddRoomOpen(false)}
+      />
+      <CreateZoneModal
+        isOpen={isCreateZoneOpen}
+        eventId={eventId}
+        workspaceId={workspaceId}
+        rooms={event.rooms}
+        onClose={() => setIsCreateZoneOpen(false)}
+      />
     </Box>
   );
 }

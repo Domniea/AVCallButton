@@ -1,4 +1,6 @@
 import { getApiClient } from "./client";
+import type { EventRoom } from "./rooms.api";
+import type { EventZone } from "./zones.api";
 
 export type EventSummary = {
   id: string;
@@ -10,31 +12,8 @@ export type EventSummary = {
   endTime: string | null;
   createdAt: string;
   workspaceId: string;
-  zones: {
-    id: string;
-    name: string;
-    sortOrder: number;
-    createdAt: string;
-    updatedAt: string;
-    eventId: string;
-  }[];
-  rooms: {
-    id: string;
-    name: string;
-    sortOrder: number;
-    createdAt: string;
-    updatedAt: string;
-    eventId: string;
-    zoneId: string | null;
-    zone: {
-      id: string;
-      name: string;
-      sortOrder: number;
-      createdAt: string;
-      updatedAt: string;
-      eventId: string;
-    } | null;
-  }[];
+  zones: EventZone[];
+  rooms: EventRoom[];
 };
 
 export type EventsListResponse = {

@@ -7,10 +7,13 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "prisma generate && node scripts/verify-prisma-client.mjs && sst dev --stage dev",
-    "deploy": "prisma generate && node scripts/verify-prisma-client.mjs && sst deploy --stage dev",
+    "dev": "sst dev --stage local",
+    "deploy": "sst deploy --stage dev",
+    "deploy:prod": "sst deploy --stage prod",
     "prisma:generate": "prisma generate",
-    "remove": "sst remove --stage dev"
+    "remove:local": "sst remove --stage local",
+    "remove:dev": "sst remove --stage dev",
+    "remove:prod": "sst remove --stage prod"
   },
   "dependencies": {
     "@av/auth-core": "*",

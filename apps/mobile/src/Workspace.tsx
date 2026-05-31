@@ -222,6 +222,8 @@ export default function WorkspaceScreen() {
                         {ev.startTime
                           ? ` · ${new Date(ev.startTime).toLocaleString()}`
                           : ""}
+                        {` · ${ev.zones.length} zone${ev.zones.length === 1 ? "" : "s"}`}
+                        {` · ${ev.rooms.length} room${ev.rooms.length === 1 ? "" : "s"}`}
                       </Text>
                     </Box>
                   </Pressable>

@@ -86,6 +86,14 @@ export function ApiStack({ stack, app }: StackContext) {
       "DELETE /events/{eventId}/zones/{zoneId}":
         "src/functions/events/zones/delete.handler",
 
+      // Zone coverage
+      "GET /events/{eventId}/zones/{zoneId}/coverage":
+        "src/functions/events/zones/coverage/list.handler",
+      "POST /events/{eventId}/zones/{zoneId}/coverage":
+        "src/functions/events/zones/coverage/create.handler",
+      "DELETE /events/{eventId}/zones/{zoneId}/coverage/{membershipId}":
+        "src/functions/events/zones/coverage/delete.handler",
+
       // Rooms
       "GET /events/{eventId}/rooms": "src/functions/events/rooms/list.handler",
       "POST /events/{eventId}/rooms":
@@ -95,13 +103,13 @@ export function ApiStack({ stack, app }: StackContext) {
       "DELETE /events/{eventId}/rooms/{roomId}":
         "src/functions/events/rooms/delete.handler",
 
-      // Room assignments
-      "GET /events/{eventId}/rooms/{roomId}/assignments":
-        "src/functions/events/rooms/assignments/list.handler",
-      "POST /events/{eventId}/rooms/{roomId}/assignments":
-        "src/functions/events/rooms/assignments/create.handler",
-      "DELETE /events/{eventId}/rooms/{roomId}/assignments/{membershipId}":
-        "src/functions/events/rooms/assignments/delete.handler",
+      // Room coverage
+      "GET /events/{eventId}/rooms/{roomId}/coverage":
+        "src/functions/events/rooms/coverage/list.handler",
+      "POST /events/{eventId}/rooms/{roomId}/coverage":
+        "src/functions/events/rooms/coverage/create.handler",
+      "DELETE /events/{eventId}/rooms/{roomId}/coverage/{membershipId}":
+        "src/functions/events/rooms/coverage/delete.handler",
 
       // Invites
       "POST /workspaces/{workspaceId}/invites":

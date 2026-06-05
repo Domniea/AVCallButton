@@ -23,7 +23,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     await authorize(userId, room.event.workspaceId, "event:viewRoster");
 
-    const assignments = await prisma.eventRoomAssignment.findMany({
+    const coverage = await prisma.eventRoomCoverage.findMany({
       where: { roomId },
       include: {
         membership: {
@@ -35,13 +35,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       orderBy: { createdAt: "asc" },
     });
 
-    return { statusCode: 200, body: JSON.stringify({ assignments }) };
+    return { statusCode: 200, body: JSON.stringify({ coverage }) };
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "NOT_AUTHORIZED") return forbidden("Not a member of this workspace");
       if (error.message === "FORBIDDEN") return forbidden("Insufficient permissions");
     }
-    console.error("Failed to list room assignments:", error);
-    return serverError("Failed to list room assignments");
+    console.error("Failed to list room coverage:", error);
+    return serverError("Failed to list room coverage");
   }
 };

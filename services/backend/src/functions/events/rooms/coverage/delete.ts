@@ -25,13 +25,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
     await authorize(userId, room.event.workspaceId, "event:assignStaff");
 
-    const existing = await prisma.eventRoomAssignment.findFirst({
+    const existing = await prisma.eventRoomCoverage.findFirst({
       where: { roomId, membershipId },
       select: { id: true },
     });
-    if (!existing) return notFound("Room assignment not found");
+    if (!existing) return notFound("Room coverage not found");
 
-    await prisma.eventRoomAssignment.delete({ where: { id: existing.id } });
+    await prisma.eventRoomCoverage.delete({ where: { id: existing.id } });
     return {
       statusCode: 200,
       body: JSON.stringify({ deleted: true, roomId, membershipId }),
@@ -41,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       if (error.message === "NOT_AUTHORIZED") return forbidden("Not a member of this workspace");
       if (error.message === "FORBIDDEN") return forbidden("Insufficient permissions");
     }
-    console.error("Failed to delete room assignment:", error);
-    return serverError("Failed to delete room assignment");
+    console.error("Failed to delete room coverage:", error);
+    return serverError("Failed to delete room coverage");
   }
 };

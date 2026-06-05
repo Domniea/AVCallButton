@@ -75,7 +75,8 @@ model Membership {
   workspaceRole    WorkspaceRole         @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
-  roomAssignments  EventRoomAssignment[]
+  roomCoverage     EventRoomCoverage[]
+  zoneCoverage     EventZoneCoverage[]
 
   @@unique([userId, workspaceId])
   @@index([userId])
@@ -182,8 +183,9 @@ model EventZone {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  rooms EventRoom[]
+  event    Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  rooms    EventRoom[]
+  coverage EventZoneCoverage[]
 
   @@index([eventId])
   @@index([eventId, sortOrder])
@@ -198,16 +200,16 @@ model EventRoom {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event       Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  zone        EventZone?            @relation(fields: [zoneId], references: [id], onDelete: SetNull)
-  assignments EventRoomAssignment[]
+  event    Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  zone     EventZone?         @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  coverage EventRoomCoverage[]
 
   @@index([eventId])
   @@index([zoneId])
   @@index([eventId, sortOrder])
 }
 
-model EventRoomAssignment {
+model EventRoomCoverage {
   id           String   @id @default(uuid())
   roomId       String
   membershipId String
@@ -219,6 +221,21 @@ model EventRoomAssignment {
 
   @@unique([roomId, membershipId])
   @@index([roomId])
+  @@index([membershipId])
+}
+
+model EventZoneCoverage {
+  id           String   @id @default(uuid())
+  zoneId       String
+  membershipId String
+  assignedBy   String
+  createdAt    DateTime @default(now())
+
+  zone       EventZone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  membership Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([zoneId, membershipId])
+  @@index([zoneId])
   @@index([membershipId])
 }
 

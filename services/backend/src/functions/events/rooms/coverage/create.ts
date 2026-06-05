@@ -53,7 +53,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     });
     if (!eventAssignment) return badRequest("Membership is not assigned to this event");
 
-    const assignment = await prisma.eventRoomAssignment.create({
+    const coverage = await prisma.eventRoomCoverage.create({
       data: {
         roomId,
         membershipId,
@@ -64,16 +64,16 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       },
     });
 
-    return { statusCode: 201, body: JSON.stringify({ assignment }) };
+    return { statusCode: 201, body: JSON.stringify({ coverage }) };
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "NOT_AUTHORIZED") return forbidden("Not a member of this workspace");
       if (error.message === "FORBIDDEN") return forbidden("Insufficient permissions");
       if (error.message.includes("Unique constraint failed")) {
-        return badRequest("Membership already assigned to this room");
+        return badRequest("Membership already allocated to this room");
       }
     }
-    console.error("Failed to create room assignment:", error);
-    return serverError("Failed to create room assignment");
+    console.error("Failed to create room coverage:", error);
+    return serverError("Failed to create room coverage");
   }
 };

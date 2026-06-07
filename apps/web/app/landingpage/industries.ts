@@ -2,7 +2,7 @@ export type IndustrySlide = {
   id: string;
   label: string;
   description: string;
-  /** Path under `apps/web/public` (e.g. `/industries/foo.jpg`) */
+  /** Path under `apps/web/public/industries` where the images are stored */
   imageSrc: string;
 };
 

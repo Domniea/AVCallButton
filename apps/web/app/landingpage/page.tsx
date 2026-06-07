@@ -33,42 +33,17 @@ export default function LandingPage() {
   return (
     <Box minH="100vh" bg="bg" px={{ base: 4, md: 8 }} py={{ base: 6, md: 10 }}>
       <VStack gap={{ base: 8, md: 12 }} maxW="6xl" mx="auto" align="stretch">
-        <HStack justify="space-between" flexWrap="wrap" gap={4}>
-          <Text fontSize="xl" fontWeight="bold" color="text">
-            WarRoom
-          </Text>
-          <HStack gap={3}>
-            <BaseButton
-              title="Log in"
-              variety="secondary"
-              onClick={() => router.push("/auth/login")}
-            />
-            <BaseButton
-              title="Sign up"
-              variety="primary"
-              onClick={() => router.push("/auth/signup")}
-            />
-          </HStack>
-        </HStack>
+        
 
         <VStack align="stretch" gap={4}>
           <Text fontSize={{ base: "2xl", md: "4xl" }} fontWeight="bold" color="text">
-            AV breakout, built for your industry
+            Built for your industry
           </Text>
           <Text fontSize="md" color="gray.600" maxW="2xl">
             One place to see where AV Call Button fits—then create an account or sign in.
           </Text>
           <HStack gap={3} flexWrap="wrap">
-            <BaseButton
-              title="Sign up"
-              variety="primary"
-              onClick={() => router.push("/auth/signup")}
-            />
-            <BaseButton
-              title="Log in"
-              variety="secondary"
-              onClick={() => router.push("/auth/login")}
-            />
+          
           </HStack>
         </VStack>
 
@@ -132,7 +107,7 @@ export default function LandingPage() {
           </VStack>
         </Box>
 
-        <Flex justify="center" pt={2}>
+        {/* <Flex justify="center" pt={2}>
           <HStack gap={3}>
             <BaseButton
               title="Sign up"
@@ -145,7 +120,7 @@ export default function LandingPage() {
               onClick={() => router.push("/auth/login")}
             />
           </HStack>
-        </Flex>
+        </Flex> */}
       </VStack>
     </Box>
   );

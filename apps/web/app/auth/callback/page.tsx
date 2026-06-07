@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
         router.replace("/");
       } catch (err) {
         console.error("Auth callback failed:", err);
-        router.replace("/login");
+        router.replace("auth/login");
       }
     }
 

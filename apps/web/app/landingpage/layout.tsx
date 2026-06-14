@@ -1,18 +1,18 @@
 import React from "react";
 import { Box, VStack } from "@chakra-ui/react";
-    import LandingHeader from "./LandingHeader";
+import LandingHeader from "./LandingHeader";
+
 export default function LandingPageLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode; 
+  children: React.ReactNode;
 }) {
-    return (
-        <Box>
-            <VStack>
-                    <LandingHeader />
-            {children}
-            </VStack>
-            
-        </Box>
-    );
+  return (
+    <Box minH="100vh" bg="bg">
+      <VStack gap={{ base: 8, md: 12 }} maxW="7xl" mx="auto" align="stretch">
+        <LandingHeader />
+        {children}
+      </VStack>
+    </Box>
+  );
 }

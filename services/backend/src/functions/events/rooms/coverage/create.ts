@@ -2,6 +2,7 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
 import { prisma } from "../../../lib/prisma";
 import { authorize } from "../../../lib/authorization";
+import { findEventRosterAssignment } from "../../../lib/events/eventRoster";
 import { badRequest, forbidden, notFound, serverError } from "../../../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -47,16 +48,16 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     });
     if (!membership) return badRequest("Membership not found in event workspace");
 
-    const eventAssignment = await prisma.eventAssignment.findFirst({
-      where: { eventId, membershipId },
-      select: { id: true },
-    });
-    if (!eventAssignment) return badRequest("Membership is not assigned to this event");
+    const rosterEntry = await findEventRosterAssignment(eventId, membershipId);
+    if (!rosterEntry) {
+      return badRequest("Membership is not assigned to this event");
+    }
 
     const coverage = await prisma.eventRoomCoverage.create({
       data: {
         roomId,
         membershipId,
+        eventRank: rosterEntry.eventRank,
         assignedBy: userId,
       },
       include: {

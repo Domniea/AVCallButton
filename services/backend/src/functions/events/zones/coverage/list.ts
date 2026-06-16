@@ -32,7 +32,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           },
         },
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ eventRank: "desc" }, { createdAt: "asc" }],
     });
 
     return { statusCode: 200, body: JSON.stringify({ coverage }) };

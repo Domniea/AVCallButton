@@ -213,6 +213,7 @@ model EventRoomCoverage {
   id           String   @id @default(uuid())
   roomId       String
   membershipId String
+  eventRank    Int
   assignedBy   String
   createdAt    DateTime @default(now())
 
@@ -221,6 +222,7 @@ model EventRoomCoverage {
 
   @@unique([roomId, membershipId])
   @@index([roomId])
+  @@index([roomId, eventRank])
   @@index([membershipId])
 }
 
@@ -228,6 +230,7 @@ model EventZoneCoverage {
   id           String   @id @default(uuid())
   zoneId       String
   membershipId String
+  eventRank    Int
   assignedBy   String
   createdAt    DateTime @default(now())
 
@@ -236,6 +239,7 @@ model EventZoneCoverage {
 
   @@unique([zoneId, membershipId])
   @@index([zoneId])
+  @@index([zoneId, eventRank])
   @@index([membershipId])
 }
 

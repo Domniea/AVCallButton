@@ -33,33 +33,6 @@ export type UpdateRoomData = {
   sortOrder?: number;
 };
 
-/** Staff assigned to a room (`EventRoomAssignment`). */
-export type RoomAssignment = {
-  id: string;
-  roomId: string;
-  membershipId: string;
-  assignedBy: string;
-  createdAt: string;
-  membership: {
-    id: string;
-    userId: string;
-    workspaceId: string;
-    workspaceRole: {
-      id: string;
-      name: string;
-      rank: number;
-    };
-  };
-};
-
-export type RoomAssignmentsResponse = {
-  assignments: RoomAssignment[];
-};
-
-export type AssignRoomStaffData = {
-  membershipId: string;
-};
-
 export async function createRoom(
   token: string,
   eventId: string,
@@ -98,50 +71,5 @@ export async function updateRoom(
     data,
     { headers: { Authorization: `Bearer ${token}` } },
   );
-  return res.data;
-}
-
-export async function fetchRoomAssignments(
-  token: string,
-  eventId: string,
-  roomId: string,
-): Promise<RoomAssignmentsResponse> {
-  const api = getApiClient();
-  const res = await api.get<RoomAssignmentsResponse>(
-    `/events/${eventId}/rooms/${roomId}/assignments`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return res.data;
-}
-
-export async function assignRoomStaff(
-  token: string,
-  eventId: string,
-  roomId: string,
-  data: AssignRoomStaffData,
-): Promise<{ assignment: RoomAssignment }> {
-  const api = getApiClient();
-  const res = await api.post<{ assignment: RoomAssignment }>(
-    `/events/${eventId}/rooms/${roomId}/assignments`,
-    data,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return res.data;
-}
-
-export async function removeRoomAssignment(
-  token: string,
-  eventId: string,
-  roomId: string,
-  membershipId: string,
-): Promise<{ deleted: boolean; roomId: string; membershipId: string }> {
-  const api = getApiClient();
-  const res = await api.delete<{
-    deleted: boolean;
-    roomId: string;
-    membershipId: string;
-  }>(`/events/${eventId}/rooms/${roomId}/assignments/${membershipId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
   return res.data;
 }

@@ -12,4 +12,5 @@ export * from "./api/members.api";
 export * from "./api/roster.api";
 export * from "./api/zones.api";
 export * from "./api/rooms.api";
+export * from "./api/coverage.api";
 

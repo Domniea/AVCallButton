@@ -18,6 +18,7 @@ interface BaseButtonProps {
   children?: React.ReactNode;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 }
 
 const variants = {

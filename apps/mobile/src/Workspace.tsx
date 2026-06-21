@@ -138,13 +138,6 @@ export default function WorkspaceScreen() {
     <Box flex={1} bg={bg}>
       <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
         <VStack space={4} maxW="720" alignSelf="center" w="100%">
-          <BaseButton
-            title="Back"
-            variety="tertiary"
-            btnWidth="auto"
-            onPress={() => navigation.navigate("dashboard")}
-          />
-
           <BaseCard
             title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
             titleAlign="start"
@@ -231,6 +224,12 @@ export default function WorkspaceScreen() {
               </VStack>
             )}
           </BaseCard>
+          <BaseButton
+            title="Back"
+            variety="tertiary"
+            btnWidth="auto"
+            onPress={() => navigation.navigate("dashboard")}
+          />
         </VStack>
       </ScrollView>
     </Box>

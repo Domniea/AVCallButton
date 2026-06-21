@@ -43,6 +43,12 @@ export function ApiStack({ stack, app }: StackContext) {
       "GET /me": "src/functions/me.handler",
       "DELETE /account": "src/functions/account/delete.handler",
 
+      // Me (crew / self-scoped)
+      "GET /me/workspaces/{workspaceId}/events":
+        "src/functions/me/workspaces/events/list.handler",
+      "GET /me/event/{eventId}":
+        "src/functions/me/event/detail.handler",
+
       // Dashboard
       "GET /dashboard": "src/functions/dashboard/list.handler",
 

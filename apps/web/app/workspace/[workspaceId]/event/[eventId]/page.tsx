@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
@@ -21,6 +21,7 @@ import {
   fetchRoomCoverage,
   fetchZoneCoverage,
   removeRoomCoverage,
+  removeZoneCoverage,
   type RoomCoverage,
   type ZoneCoverage,
 } from "@av/store";
@@ -193,6 +194,141 @@ function CoverageList({
   );
 }
 
+function RoomCoverageSection({
+  room,
+  rows,
+  roster,
+  onAddStaff,
+  onRemove,
+  removingMembershipId,
+}: {
+  room: { id: string; name: string };
+  rows: RoomCoverage[];
+  roster: RosterAssignment[];
+  onAddStaff: () => void;
+  onRemove?: (membershipId: string) => void;
+  removingMembershipId?: string | null;
+}) {
+  return (
+    <Box
+      borderWidth={1}
+      borderColor="cardBorder"
+      borderRadius="md"
+      px={3}
+      py={3}
+      bg="surface"
+    >
+      <HStack justify="space-between" align="center" gap={2}>
+        <Text fontSize="sm" fontWeight="medium" color="text">
+          {room.name}
+        </Text>
+        <BaseButton
+          variety="tertiary"
+          title="Add staff"
+          btnWidth="auto"
+          onClick={onAddStaff}
+        />
+      </HStack>
+      <CoverageList
+        rows={rows}
+        roster={roster}
+        label="Room coverage"
+        onRemove={onRemove}
+        removingMembershipId={removingMembershipId}
+      />
+    </Box>
+  );
+}
+
+type RemovingCoverage = {
+  kind: "room" | "zone";
+  targetId: string;
+  membershipId: string;
+};
+
+function removingMembershipIdFor(
+  removing: RemovingCoverage | null,
+  kind: "room" | "zone",
+  targetId: string,
+): string | null {
+  if (!removing || removing.kind !== kind || removing.targetId !== targetId) {
+    return null;
+  }
+  return removing.membershipId;
+}
+
+function ZoneListRow({
+  name,
+  roomCount,
+  coverageCount,
+  isExpanded,
+  onToggle,
+  children,
+}: {
+  name: string;
+  roomCount: number;
+  coverageCount: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+  children?: ReactNode;
+}) {
+  const subtitle = [
+    roomCount === 1 ? "1 room" : `${roomCount} rooms`,
+    coverageCount > 0 ? `${coverageCount} on zone coverage` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <Box
+      borderWidth={1}
+      borderColor="cardBorder"
+      borderRadius="md"
+      bg="surface"
+      overflow="hidden"
+    >
+      <Box
+        as="button"
+        w="100%"
+        textAlign="left"
+        px={3}
+        py={3}
+        cursor="pointer"
+        _hover={{ bg: "blue.50" }}
+        _dark={{ _hover: { bg: "whiteAlpha.100" } }}
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+      >
+        <HStack justify="space-between" align="center" gap={3}>
+          <Box minW={0}>
+            <Text fontSize="sm" fontWeight="medium" color="text" truncate>
+              {name}
+            </Text>
+            <Text fontSize="xs" color="gray.500">
+              {subtitle || "No rooms yet"}
+            </Text>
+          </Box>
+          <Text fontSize="lg" color="gray.500" flexShrink={0} aria-hidden>
+            {isExpanded ? "∨" : "›"}
+          </Text>
+        </HStack>
+      </Box>
+      {isExpanded ? (
+        <Box
+          px={3}
+          pb={3}
+          pt={1}
+          borderTopWidth={1}
+          borderColor="cardBorder"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Box>
+      ) : null}
+    </Box>
+  );
+}
+
 function apiErrorMessage(err: unknown): string {
   if (
     err &&
@@ -230,13 +366,12 @@ export default function EventPage() {
   const [zoneCoverage, setZoneCoverage] = useState<
     Record<string, ZoneCoverage[]>
   >({});
-  const [removingRoomCoverage, setRemovingRoomCoverage] = useState<{
-    roomId: string;
-    membershipId: string;
-  } | null>(null);
+  const [removingCoverage, setRemovingCoverage] =
+    useState<RemovingCoverage | null>(null);
   const [coverageActionError, setCoverageActionError] = useState<string | null>(
     null,
   );
+  const [expandedZoneIds, setExpandedZoneIds] = useState<string[]>([]);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
 
@@ -384,10 +519,14 @@ export default function EventPage() {
     [refreshCoverageForTarget],
   );
 
-  const handleRemoveRoomCoverage = useCallback(
-    async (roomId: string, membershipId: string) => {
+  const handleRemoveCoverage = useCallback(
+    async (target: CoverageTarget, membershipId: string) => {
       setCoverageActionError(null);
-      setRemovingRoomCoverage({ roomId, membershipId });
+      setRemovingCoverage({
+        kind: target.kind,
+        targetId: target.id,
+        membershipId,
+      });
       try {
         const session = await fetchAuthSession();
         const token = session.tokens?.idToken?.toString();
@@ -396,17 +535,27 @@ export default function EventPage() {
           return;
         }
 
-        await removeRoomCoverage(token, eventId, roomId, membershipId);
-        setRoomCoverage((prev) => ({
-          ...prev,
-          [roomId]: (prev[roomId] ?? []).filter(
-            (row) => row.membershipId !== membershipId,
-          ),
-        }));
+        if (target.kind === "room") {
+          await removeRoomCoverage(token, eventId, target.id, membershipId);
+          setRoomCoverage((prev) => ({
+            ...prev,
+            [target.id]: (prev[target.id] ?? []).filter(
+              (row) => row.membershipId !== membershipId,
+            ),
+          }));
+        } else {
+          await removeZoneCoverage(token, eventId, target.id, membershipId);
+          setZoneCoverage((prev) => ({
+            ...prev,
+            [target.id]: (prev[target.id] ?? []).filter(
+              (row) => row.membershipId !== membershipId,
+            ),
+          }));
+        }
       } catch (err: unknown) {
         setCoverageActionError(apiErrorMessage(err));
       } finally {
-        setRemovingRoomCoverage(null);
+        setRemovingCoverage(null);
       }
     },
     [eventId],
@@ -419,6 +568,20 @@ export default function EventPage() {
   const closeCoverageModal = () => {
     setCoverageTarget(null);
   };
+
+  const toggleZoneExpanded = useCallback((zoneId: string) => {
+    setExpandedZoneIds((prev) =>
+      prev.includes(zoneId)
+        ? prev.filter((id) => id !== zoneId)
+        : [...prev, zoneId],
+    );
+  }, []);
+
+  useEffect(() => {
+    setExpandedZoneIds((prev) =>
+      prev.filter((id) => event?.zones.some((zone) => zone.id === id)),
+    );
+  }, [event?.zones]);
 
   useEffect(() => {
     if (searchParams.get("createZone") === "1") {
@@ -673,142 +836,156 @@ export default function EventPage() {
                 </Text>
               ) : null}
 
-              {event.zones.map((zone) => {
-                const zoneRooms = roomsForZone(event.rooms, zone.id);
-                return (
-                  <Box
-                    key={zone.id}
-                    borderWidth={1}
-                    borderColor="cardBorder"
-                    borderRadius="md"
-                    px={3}
-                    py={2}
-                  >
-                    <HStack justify="space-between" align="center" gap={2}>
-                      <Text fontSize="sm" fontWeight="medium" color="text">
-                        {zone.name}
-                      </Text>
-                      <BaseButton
-                        variety="secondary"
-                        title="Add staff"
-                        btnWidth="auto"
-                        onClick={() =>
-                          openCoverageModal({
-                            kind: "zone",
-                            id: zone.id,
-                            name: zone.name,
-                          })
-                        }
-                      />
-                    </HStack>
-                    <CoverageList
-                      rows={zoneCoverage[zone.id] ?? []}
-                      roster={rosterMatchesEvent ? assignments : []}
-                      label="Zone coverage"
-                    />
-                    {zoneRooms.length === 0 ? (
-                      <Text fontSize="xs" color="gray.500" mt={2}>
-                        No rooms in this zone yet.
-                      </Text>
-                    ) : (
-                      <VStack align="stretch" gap={2} mt={2}>
-                        {zoneRooms.map((room) => (
-                          <Box key={room.id} pl={2}>
-                            <HStack justify="space-between" align="center" gap={2}>
-                              <Text fontSize="xs" color="gray.500">
-                                {room.name}
-                              </Text>
-                              <BaseButton
-                                variety="tertiary"
-                                title="Add staff"
-                                btnWidth="auto"
-                                onClick={() =>
-                                  openCoverageModal({
-                                    kind: "room",
-                                    id: room.id,
-                                    name: room.name,
-                                  })
-                                }
-                              />
-                            </HStack>
-                            <CoverageList
-                              rows={roomCoverage[room.id] ?? []}
-                              roster={rosterMatchesEvent ? assignments : []}
-                              label="Room coverage"
-                              onRemove={(membershipId) =>
-                                void handleRemoveRoomCoverage(
-                                  room.id,
-                                  membershipId,
-                                )
-                              }
-                              removingMembershipId={
-                                removingRoomCoverage?.roomId === room.id
-                                  ? removingRoomCoverage.membershipId
-                                  : null
-                              }
-                            />
-                          </Box>
-                        ))}
-                      </VStack>
-                    )}
-                  </Box>
-                );
-              })}
-
-              {event.rooms.some((room) => room.zoneId == null) && (
-                <Box
-                  borderWidth={1}
-                  borderColor="cardBorder"
-                  borderRadius="md"
-                  px={3}
-                  py={2}
-                >
-                  <Text fontSize="sm" fontWeight="medium" color="text">
-                    Unassigned rooms
+              {event.zones.length > 0 && (
+                <VStack align="stretch" gap={2}>
+                  <Text fontSize="xs" fontWeight="medium" color="gray.500">
+                    Zones
                   </Text>
-                  <VStack align="stretch" gap={2} mt={1}>
-                    {event.rooms
-                      .filter((room) => room.zoneId == null)
-                      .map((room) => (
-                        <Box key={room.id}>
-                          <HStack justify="space-between" align="center" gap={2}>
-                            <Text fontSize="xs" color="gray.500">
-                              {room.name}
-                            </Text>
+                  {event.zones.map((zone) => {
+                    const zoneRooms = roomsForZone(event.rooms, zone.id);
+                    const isExpanded = expandedZoneIds.includes(zone.id);
+                    return (
+                      <ZoneListRow
+                        key={zone.id}
+                        name={zone.name}
+                        roomCount={zoneRooms.length}
+                        coverageCount={(zoneCoverage[zone.id] ?? []).length}
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleZoneExpanded(zone.id)}
+                      >
+                        <VStack align="stretch" gap={3}>
+                          <HStack justify="flex-end" align="center" gap={2}>
                             <BaseButton
-                              variety="tertiary"
+                              variety="secondary"
                               title="Add staff"
                               btnWidth="auto"
                               onClick={() =>
+                                openCoverageModal({
+                                  kind: "zone",
+                                  id: zone.id,
+                                  name: zone.name,
+                                })
+                              }
+                            />
+                          </HStack>
+                          <CoverageList
+                            rows={zoneCoverage[zone.id] ?? []}
+                            roster={rosterMatchesEvent ? assignments : []}
+                            label="Zone coverage"
+                            onRemove={(membershipId) =>
+                              void handleRemoveCoverage(
+                                {
+                                  kind: "zone",
+                                  id: zone.id,
+                                  name: zone.name,
+                                },
+                                membershipId,
+                              )
+                            }
+                            removingMembershipId={removingMembershipIdFor(
+                              removingCoverage,
+                              "zone",
+                              zone.id,
+                            )}
+                          />
+                          <Text fontSize="sm" fontWeight="semibold" color="text">
+                            Rooms
+                          </Text>
+                          {zoneRooms.length === 0 ? (
+                            <Text fontSize="sm" color="gray.500">
+                              No rooms in this zone yet.
+                            </Text>
+                          ) : (
+                            <VStack align="stretch" gap={2}>
+                              {zoneRooms.map((room) => (
+                                <RoomCoverageSection
+                                  key={room.id}
+                                  room={room}
+                                  rows={roomCoverage[room.id] ?? []}
+                                  roster={
+                                    rosterMatchesEvent ? assignments : []
+                                  }
+                                  onAddStaff={() =>
+                                    openCoverageModal({
+                                      kind: "room",
+                                      id: room.id,
+                                      name: room.name,
+                                    })
+                                  }
+                                  onRemove={(membershipId) =>
+                                    void handleRemoveCoverage(
+                                      {
+                                        kind: "room",
+                                        id: room.id,
+                                        name: room.name,
+                                      },
+                                      membershipId,
+                                    )
+                                  }
+                                  removingMembershipId={removingMembershipIdFor(
+                                    removingCoverage,
+                                    "room",
+                                    room.id,
+                                  )}
+                                />
+                              ))}
+                            </VStack>
+                          )}
+                        </VStack>
+                      </ZoneListRow>
+                    );
+                  })}
+                </VStack>
+              )}
+
+              {event.rooms.some((room) => room.zoneId == null) && (
+                    <Box
+                      borderWidth={1}
+                      borderColor="cardBorder"
+                      borderRadius="md"
+                      px={3}
+                      py={3}
+                      bg="surface"
+                    >
+                      <Text fontSize="sm" fontWeight="medium" color="text" mb={2}>
+                        Unassigned rooms
+                      </Text>
+                      <VStack align="stretch" gap={2}>
+                        {event.rooms
+                          .filter((room) => room.zoneId == null)
+                          .map((room) => (
+                            <RoomCoverageSection
+                              key={room.id}
+                              room={room}
+                              rows={roomCoverage[room.id] ?? []}
+                              roster={rosterMatchesEvent ? assignments : []}
+                              onAddStaff={() =>
                                 openCoverageModal({
                                   kind: "room",
                                   id: room.id,
                                   name: room.name,
                                 })
                               }
-                            />
-                          </HStack>
-                          <CoverageList
-                            rows={roomCoverage[room.id] ?? []}
-                            roster={rosterMatchesEvent ? assignments : []}
-                            label="Room coverage"
-                            onRemove={(membershipId) =>
-                              void handleRemoveRoomCoverage(
+                              onRemove={(membershipId) =>
+                                void handleRemoveCoverage(
+                                  {
+                                    kind: "room",
+                                    id: room.id,
+                                    name: room.name,
+                                  },
+                                  membershipId,
+                                )
+                              }
+                              removingMembershipId={removingMembershipIdFor(
+                                removingCoverage,
+                                "room",
                                 room.id,
-                                membershipId,
-                              )
-                            }
-                            removingMembershipId={
-                              removingRoomCoverage?.roomId === room.id
-                                ? removingRoomCoverage.membershipId
-                                : null
-                            }
-                          />
-                        </Box>
-                      ))}
-                  </VStack>
-                </Box>
-              )}
+                              )}
+                            />
+                          ))}
+                      </VStack>
+                    </Box>
+                  )}
             </VStack>
           </Box>
         </BaseCard>

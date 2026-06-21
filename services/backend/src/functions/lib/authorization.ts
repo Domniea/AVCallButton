@@ -55,3 +55,17 @@ export async function hasPermissionForUser(
     return false;
   }
 }
+
+/** Active workspace membership only; no rank check (used by /me routes). */
+export async function assertWorkspaceMembership(
+  userId: string,
+  workspaceId: string,
+) {
+  const membership = await getMembership(userId, workspaceId);
+
+  if (!membership || membership.status !== MembershipStatus.ACTIVE) {
+    throw new Error("NOT_AUTHORIZED");
+  }
+
+  return membership;
+}

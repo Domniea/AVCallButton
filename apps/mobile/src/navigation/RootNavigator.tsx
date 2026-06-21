@@ -1,7 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import Landing from "../Landing";
 import Login from "../Login";
 import SignUp from "../SignUp";
 import SignupConfirm from "../SignupConfirm";
@@ -10,6 +9,8 @@ import Invite from "../Invite";
 import Dashboard from "../Dashboard";
 import WorkspaceScreen from "../Workspace";
 import EventScreen from "../Event";
+import CrewWorkspaceScreen from "../CrewWorkspace";
+import CrewEventScreen from "../CrewEvent";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,12 +23,13 @@ const linking = {
   ],
   config: {
     screens: {
-      landing: "",
       login: "login",
       home: "home",
       dashboard: "dashboard",
       workspace: "workspace/:workspaceId",
       event: "workspace/:workspaceId/event/:eventId",
+      crewWorkspace: "crew/workspace/:workspaceId",
+      crewEvent: "crew/workspace/:workspaceId/event/:eventId",
       invite: "invite",
       signup: "signup",
       signupConfirm: "signup-confirm",
@@ -38,16 +40,11 @@ const linking = {
 export default function RootNavigator() {
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="landing"
-          component={Landing}
-          options={{ headerShown: false }}
-        />
+      <Stack.Navigator initialRouteName="login">
         <Stack.Screen
           name="login"
           component={Login}
-          options={{ title: "Log in" }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="signup"
@@ -73,6 +70,16 @@ export default function RootNavigator() {
           name="event"
           component={EventScreen}
           options={{ title: "Event" }}
+        />
+        <Stack.Screen
+          name="crewWorkspace"
+          component={CrewWorkspaceScreen}
+          options={{ title: "My events" }}
+        />
+        <Stack.Screen
+          name="crewEvent"
+          component={CrewEventScreen}
+          options={{ title: "My event" }}
         />
         <Stack.Screen name="home" component={Home} options={{ title: "Account" }} />
         <Stack.Screen

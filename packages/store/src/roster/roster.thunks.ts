@@ -7,29 +7,58 @@ import {
   fetchEventRoster,
   type EventRosterResponse,
 } from "../api/roster.api";
+import { withRetry } from "../api/retry";
+import type { RootState } from "../createStore";
 
 export type FetchRosterResult = EventRosterResponse & {
   eventId: string;
 };
 
+async function getIdToken(): Promise<string | null> {
+  let session = await fetchAuthSession();
+  let token = session.tokens?.idToken?.toString();
+  if (token) return token;
+
+  session = await fetchAuthSession({ forceRefresh: true });
+  token = session.tokens?.idToken?.toString();
+  return token ?? null;
+}
+
 export const fetchRosterThunk = createAsyncThunk<
   FetchRosterResult,
   string,
-  { rejectValue: string }
->("roster/fetchRoster", async (eventId, { rejectWithValue }) => {
-  try {
-    const session = await fetchAuthSession();
-    const token = session.tokens?.idToken?.toString();
-    if (!token) {
-      return rejectWithValue("No session token");
+  { rejectValue: string; state: RootState }
+>(
+  "roster/fetchRoster",
+  async (eventId, { rejectWithValue }) => {
+    try {
+      const token = await getIdToken();
+      if (!token) {
+        return rejectWithValue("No session token");
+      }
+      const data = await withRetry(() => fetchEventRoster(token, eventId), {
+        attempts: 6,
+        delayMs: 800,
+      });
+      return { eventId, ...data };
+    } catch (err) {
+      console.error("fetchRosterThunk failed:", err);
+      return rejectWithValue("Could not load event roster");
     }
-    const data = await fetchEventRoster(token, eventId);
-    return { eventId, ...data };
-  } catch (err) {
-    console.error("fetchRosterThunk failed:", err);
-    return rejectWithValue("Could not load event roster");
-  }
-});
+  },
+  {
+    condition: (eventId, { getState }) => {
+      const { auth, roster } = getState();
+      if (auth.status !== "authenticated" || auth.user == null) {
+        return false;
+      }
+      if (roster.fetchStatus === "loading" && roster.eventId === eventId) {
+        return false;
+      }
+      return true;
+    },
+  },
+);
 
 export const assignStaffThunk = createAsyncThunk<
   string,

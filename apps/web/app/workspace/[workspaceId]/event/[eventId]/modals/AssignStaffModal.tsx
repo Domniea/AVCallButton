@@ -1,17 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { BaseInput } from "@/components/reusable/BaseInput";
 import { BaseButton } from "@/components/reusable/BaseButton";
 import { BaseModal } from "@/components/reusable/BaseModal";
 import { useAppForm } from "@av/forms/src/useAppForm";
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { assignStaffSchema } from "@av/forms/src/schemas/roster/assignStaffSchema";
-import { VStack } from "@chakra-ui/react";
+import { Text, VStack } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import type { z } from "zod";
 import { useDispatch } from "react-redux";
-import { AppDispatch, AssignStaffData } from "@av/store";
-import { assignStaffThunk } from "@av/store/src/roster/roster.thunks";
+import type { AppDispatch, AssignStaffData } from "@av/store";
+import {
+  assignStaffThunk,
+  fetchRosterThunk,
+} from "@av/store/src/roster/roster.thunks";
 
 type AssignStaffModalProps = {
   isOpen: boolean;
@@ -24,30 +28,52 @@ export default function AssignStaffModal({
 }: AssignStaffModalProps) {
   const { eventId } = useParams<{ eventId: string }>();
   const dispatch = useDispatch<AppDispatch>();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useAppForm(assignStaffSchema, {
     email: "",
     eventRank: 0,
     workspaceRoleRank: 0,
   });
 
-  const onSubmit = async (data: z.infer<typeof assignStaffSchema>) => {
-    try {
-      console.log(data);
-      dispatch(assignStaffThunk({ eventId: eventId as string, data: data as AssignStaffData }));
-      onClose();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const {
     control,
     handleSubmit,
+    reset,
     formState: { isSubmitting },
   } = form;
 
+  const handleClose = () => {
+    setSubmitError(null);
+    reset();
+    onClose();
+  };
+
+  const onSubmit = async (data: z.infer<typeof assignStaffSchema>) => {
+    setSubmitError(null);
+    const payload: AssignStaffData = {
+      email: data.email,
+      eventRank: data.eventRank,
+    };
+    if (data.workspaceRoleRank != null && data.workspaceRoleRank > 0) {
+      payload.workspaceRoleRank = data.workspaceRoleRank;
+    }
+
+    try {
+      await dispatch(
+        assignStaffThunk({ eventId: eventId as string, data: payload }),
+      ).unwrap();
+      await dispatch(fetchRosterThunk(eventId as string)).unwrap();
+      handleClose();
+    } catch (err) {
+      setSubmitError(
+        typeof err === "string" ? err : "Could not assign staff. Try again.",
+      );
+    }
+  };
+
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} title="Assign staff">
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Assign staff">
       <form onSubmit={handleSubmit(onSubmit)}>
         <BaseModal.Body>
           <VStack align="stretch" gap={4}>
@@ -82,10 +108,15 @@ export default function AssignStaffModal({
                 type: "number",
               }}
             />
+            {submitError ? (
+              <Text fontSize="sm" color="red.500">
+                {submitError}
+              </Text>
+            ) : null}
           </VStack>
         </BaseModal.Body>
         <BaseModal.Footer>
-          <BaseButton variety="tertiary" type="button" onClick={onClose}>
+          <BaseButton variety="tertiary" type="button" onClick={handleClose}>
             Cancel
           </BaseButton>
           <BaseButton

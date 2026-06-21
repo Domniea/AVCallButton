@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, type ReactNode } from "react";
+import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Box,
   VStack,
@@ -23,7 +23,6 @@ import type {
   ZoneCoverage,
 } from "@av/store";
 import {
-  clearRoster,
   fetchEventsThunk,
   fetchRosterThunk,
   fetchRoomCoverage,
@@ -384,6 +383,7 @@ export default function EventScreen() {
   const { workspaceId, eventId } = route.params;
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
+  const authUser = useSelector((state: RootState) => state.auth.user);
   const event = useSelector((state: RootState) =>
     state.events.events.find((e) => e.id === eventId),
   );
@@ -431,6 +431,7 @@ export default function EventScreen() {
     null,
   );
   const [expandedZoneIds, setExpandedZoneIds] = useState<string[]>([]);
+  const rosterAutoRetriedRef = useRef(false);
 
   const loadCoverage = useCallback(async () => {
     if (!event) return;
@@ -604,7 +605,7 @@ export default function EventScreen() {
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
-      navigation.replace("landing");
+      navigation.replace("login");
     }
   }, [authStatus, navigation]);
 
@@ -616,12 +617,28 @@ export default function EventScreen() {
   }, [authStatus, workspaceId, eventsFetchStatus, dispatch]);
 
   useEffect(() => {
-    if (authStatus !== "authenticated" || !eventId) return;
+    if (authStatus !== "authenticated" || !authUser || !eventId) return;
     void dispatch(fetchRosterThunk(eventId));
-    return () => {
-      dispatch(clearRoster());
-    };
-  }, [authStatus, eventId, dispatch]);
+  }, [authStatus, authUser, eventId, dispatch]);
+
+  useEffect(() => {
+    rosterAutoRetriedRef.current = false;
+  }, [eventId]);
+
+  useEffect(() => {
+    if (
+      rosterFetchStatus !== "failed" ||
+      rosterEventId !== eventId ||
+      rosterAutoRetriedRef.current
+    ) {
+      return;
+    }
+    rosterAutoRetriedRef.current = true;
+    const timer = setTimeout(() => {
+      void dispatch(fetchRosterThunk(eventId));
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [rosterFetchStatus, rosterEventId, eventId, dispatch]);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !event) return;
@@ -718,9 +735,17 @@ export default function EventScreen() {
                   )}
 
                   {rosterFetchStatus === "failed" && rosterFetchError && (
-                    <Text fontSize="sm" color="red.500">
-                      {rosterFetchError}
-                    </Text>
+                    <VStack space={2} alignItems="flex-start">
+                      <Text fontSize="sm" color="red.500">
+                        {rosterFetchError}
+                      </Text>
+                      <BaseButton
+                        title="Retry roster"
+                        variety="tertiary"
+                        btnWidth="auto"
+                        onPress={() => void dispatch(fetchRosterThunk(eventId))}
+                      />
+                    </VStack>
                   )}
 
                   {rosterMatchesEvent &&

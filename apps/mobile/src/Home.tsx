@@ -17,12 +17,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch, RootState } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "./navigation/types";
 
-import { fetchAuthSession } from "aws-amplify/auth";
+type HomeNav = NativeStackNavigationProp<RootStackParamList, "home">;
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigator = useNavigation();
+  const navigation = useNavigation<HomeNav>();
   const { colorMode, toggleColorMode } = useColorMode();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -32,7 +34,7 @@ export default function Home() {
     try {
       await dispatch(logoutThunk()).unwrap();
       await AsyncStorage.removeItem("inviteToken");
-      navigator.navigate("landing" as never);
+      navigation.replace("login");
     } catch (err) {
       console.error("Logout failed:", err);
     }

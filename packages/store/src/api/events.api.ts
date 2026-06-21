@@ -20,6 +20,14 @@ export type EventsListResponse = {
   events: EventSummary[];
 };
 
+export type CreateEventInput = {
+  name: string;
+  location?: string;
+  venue?: string;
+  startTime?: string | null;
+  endTime?: string | null;
+};
+
 export async function fetchEvents(
   token: string,
   workspaceId: string,
@@ -34,4 +42,28 @@ export async function fetchEvents(
     },
   );
   return res.data;
+}
+
+export async function createEvent(
+  token: string,
+  workspaceId: string,
+  data: CreateEventInput,
+): Promise<{ event: EventSummary }> {
+  const api = getApiClient();
+  const res = await api.post<{ event: Omit<EventSummary, "zones" | "rooms"> }>(
+    `/workspaces/${workspaceId}/events`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return {
+    event: {
+      ...res.data.event,
+      zones: [],
+      rooms: [],
+    },
+  };
 }

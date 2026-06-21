@@ -18,6 +18,8 @@ import { logoutThunk } from "@av/store/src/auth";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
+import { useViewMode } from "./hooks/useViewMode";
+import { resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
 import type { RootStackParamList } from "./navigation/types";
 
@@ -26,6 +28,7 @@ type DashboardNav = NativeStackNavigationProp<RootStackParamList, "dashboard">;
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<DashboardNav>();
+  const { viewMode } = useViewMode();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -49,7 +52,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
-      navigation.replace("landing");
+      navigation.replace("login");
     }
   }, [authStatus, navigation]);
 
@@ -62,7 +65,7 @@ export default function Dashboard() {
   const onLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
-      navigation.replace("landing");
+      navigation.replace("login");
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -156,9 +159,16 @@ export default function Dashboard() {
                   key={ws.workspaceId}
                   onPress={() => {
                     dispatch(setActiveWorkspace(ws.workspaceId));
-                    navigation.navigate("workspace", {
-                      workspaceId: ws.workspaceId,
-                    });
+                    const mode = resolveViewMode(ws.roleRank, viewMode);
+                    if (mode === "admin") {
+                      navigation.navigate("workspace", {
+                        workspaceId: ws.workspaceId,
+                      });
+                    } else {
+                      navigation.navigate("crewWorkspace", {
+                        workspaceId: ws.workspaceId,
+                      });
+                    }
                   }}
                 >
                   <Box

@@ -4,8 +4,9 @@ import { PRISMA_FUNCTION_DEFAULTS } from "./prismaLambda";
 const COGNITO_REGION = "us-east-1";
 const COGNITO_USER_POOL_ID = "us-east-1_9uafTDTow";
 const COGNITO_CLIENT_ID = "48h1itjn5g18fjbsap0cnqrr08";
+const APP_URL = "https://av-call-button-web.vercel.app";
 
-export function ApiStack({ stack, app }: StackContext) {
+export function ApiStack({ stack }: StackContext) {
   const api = new Api(stack, "Api", {
     cors: {
       allowHeaders: ["Authorization", "Content-Type"],
@@ -32,7 +33,7 @@ export function ApiStack({ stack, app }: StackContext) {
           COGNITO_CLIENT_ID,
           DATABASE_URL: process.env.DATABASE_URL!,
           SES_FROM_EMAIL: "domniea@gmail.com",
-          APP_URL: "http://localhost:3000",
+          APP_URL,
         },
         ...PRISMA_FUNCTION_DEFAULTS,
       },
@@ -132,6 +133,7 @@ export function ApiStack({ stack, app }: StackContext) {
     "ses:SendEmail",
     "ses:SendRawEmail",
     "cognito-idp:AdminDeleteUser",
+    "cognito-idp:AdminGetUser",
   ]);
   stack.addOutputs({
     ApiEndpoint: api.url,

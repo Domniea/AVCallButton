@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, VStack, Text, HStack, Badge } from "@chakra-ui/react";
 import { useParams, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,13 +14,22 @@ import {
 import { BaseButton } from "@/components/reusable/BaseButton";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { workspaceDisplayName } from "@/lib/workspaceDisplayName";
-import Link from "next/link"; 
+import { ViewModeToggle } from "@/components/ViewModeToggle";
+import { useViewMode } from "@/hooks/useViewMode";
+import {
+  canAccessAdminDash,
+  resolveViewMode,
+} from "@/lib/viewMode";
+import Link from "next/link";
+import CreateEventModal from "./modals/CreateEventModal";
 
 export default function WorkspacePage() {
   const params = useParams();
   const workspaceId = params.workspaceId as string;
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const { viewMode, setViewMode } = useViewMode();
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const workspaces = useSelector(
@@ -92,6 +101,17 @@ export default function WorkspacePage() {
   }
 
   const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
+  const canToggleAdmin = workspace
+    ? canAccessAdminDash(workspace.roleRank)
+    : false;
+  const effectiveViewMode = workspace
+    ? resolveViewMode(workspace.roleRank, viewMode)
+    : "admin";
+
+  const onSwitchToCrew = () => {
+    setViewMode("crew");
+    router.push(`/crew/workspace/${workspaceId}`);
+  };
 
   if (workspaceFetchStatus === "loading" && workspaces.length === 0) {
     return (
@@ -126,9 +146,22 @@ export default function WorkspacePage() {
     );
   }
 
+  const canCreateShow = workspace ? canAccessAdminDash(workspace.roleRank) : false;
+
   return (
     <Box minHeight="100vh" bg="bg" px={6} py={10}>
+      <CreateEventModal
+        isOpen={isCreateEventOpen}
+        onClose={() => setIsCreateEventOpen(false)}
+      />
       <VStack align="stretch" maxWidth="720px" mx="auto" gap={6}>
+        {canToggleAdmin && (
+          <ViewModeToggle
+            viewMode={effectiveViewMode}
+            onToggle={onSwitchToCrew}
+          />
+        )}
+
         <BaseCard
           title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
           titleAlign="start"
@@ -152,6 +185,14 @@ export default function WorkspacePage() {
           <Text fontSize="sm" fontWeight="semibold" color="text" mb={2}>
             Events
           </Text>
+
+          {canCreateShow && (
+            <Box mb={3}>
+              <BaseButton onClick={() => setIsCreateEventOpen(true)}>
+                Create show
+              </BaseButton>
+            </Box>
+          )}
 
           {eventsFetchStatus === "loading" && (
             <Text fontSize="sm" color="gray.500">

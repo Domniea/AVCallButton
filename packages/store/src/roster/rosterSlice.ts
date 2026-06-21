@@ -40,11 +40,14 @@ const rosterSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchRosterThunk.pending, (state, action) => {
-        state.eventId = action.meta.arg;
+        const nextEventId = action.meta.arg;
+        if (state.eventId !== nextEventId) {
+          state.assignments = [];
+          state.pendingInvites = [];
+        }
+        state.eventId = nextEventId;
         state.fetchStatus = "loading";
         state.fetchError = null;
-        state.assignments = [];
-        state.pendingInvites = [];
       })
       .addCase(fetchRosterThunk.fulfilled, (state, action) => {
         state.eventId = action.payload.eventId;

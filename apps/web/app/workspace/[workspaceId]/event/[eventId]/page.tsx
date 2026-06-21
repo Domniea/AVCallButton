@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { Badge, Box, HStack, Text, VStack } from "@chakra-ui/react";
+import { Badge, Box, Grid, HStack, Text, VStack } from "@chakra-ui/react";
 import { fetchAuthSession } from "aws-amplify/auth";
 import AssignStaffModal from "./modals/AssignStaffModal";
 import AddRoomModal from "./modals/AddRoomModal";
@@ -15,7 +15,6 @@ import AssignCoverageModal, {
 import type { AppDispatch, RootState } from "@av/store";
 import type { RosterAssignment, RosterPendingInvite } from "@av/store";
 import {
-  clearRoster,
   fetchEventsThunk,
   fetchRosterThunk,
   fetchRoomCoverage,
@@ -374,6 +373,7 @@ export default function EventPage() {
   const [expandedZoneIds, setExpandedZoneIds] = useState<string[]>([]);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
+  const authUser = useSelector((state: RootState) => state.auth.user);
 
   const event = useSelector((state: RootState) =>
     state.events.events.find((e) => e.id === eventId),
@@ -399,6 +399,7 @@ export default function EventPage() {
   );
   const rosterMatchesEvent =
     rosterEventId === eventId && rosterFetchStatus === "succeeded";
+  const rosterAutoRetriedRef = useRef(false);
 
   const openAssignStaffModal = () => {
     setIsAssignStaffModalOpen(true);
@@ -604,12 +605,28 @@ export default function EventPage() {
   }, [authStatus, workspaceId, eventsFetchStatus, dispatch]);
 
   useEffect(() => {
-    if (authStatus !== "authenticated" || !eventId) return;
+    if (authStatus !== "authenticated" || !authUser || !eventId) return;
     void dispatch(fetchRosterThunk(eventId));
-    return () => {
-      dispatch(clearRoster());
-    };
-  }, [authStatus, eventId, dispatch]);
+  }, [authStatus, authUser, eventId, dispatch]);
+
+  useEffect(() => {
+    rosterAutoRetriedRef.current = false;
+  }, [eventId]);
+
+  useEffect(() => {
+    if (
+      rosterFetchStatus !== "failed" ||
+      rosterEventId !== eventId ||
+      rosterAutoRetriedRef.current
+    ) {
+      return;
+    }
+    rosterAutoRetriedRef.current = true;
+    const timer = setTimeout(() => {
+      void dispatch(fetchRosterThunk(eventId));
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [rosterFetchStatus, rosterEventId, eventId, dispatch]);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !event) return;
@@ -645,7 +662,7 @@ export default function EventPage() {
 
   return (
     <Box minHeight="100vh" bg="bg" px={6} py={10}>
-      <VStack align="stretch" maxW="840px" mx="auto" gap={6}>
+      <VStack align="stretch" maxW="1200px" mx="auto" gap={6}>
         <AssignStaffModal
           isOpen={isAssignStaffModalOpen}
           onClose={closeAssignStaffModal}
@@ -664,8 +681,9 @@ export default function EventPage() {
           onClose={closeCoverageModal}
           onAssigned={handleCoverageAssigned}
         />
+
         <BaseCard title={event.name} titleAlign="start" variant="elevated">
-          <HStack flexWrap="wrap" gap={2} mb={0}>
+          <HStack flexWrap="wrap" gap={2}>
             <Badge textTransform="capitalize">{event.status}</Badge>
             {rosterMatchesEvent && (
               <Badge variant="outline" colorPalette="gray">
@@ -676,90 +694,60 @@ export default function EventPage() {
               </Badge>
             )}
           </HStack>
+        </BaseCard>
 
-          <Box
-            w="80%"
-            mx="auto"
-            borderTopWidth="1px"
-            borderTopColor="cardBorder"
-            my={5}
-            aria-hidden
-          />
+        <Grid
+          w="100%"
+          gap={6}
+          alignItems="stretch"
+          templateColumns={{ base: "1fr", lg: "repeat(2, minmax(0, 1fr))" }}
+        >
+          <BaseCard title="Event details" titleAlign="start" variant="elevated">
+            <VStack align="stretch" gap={3}>
+              <DetailRow label="Location" value={event.location} />
+              <DetailRow label="Venue" value={event.venue} />
+              <DetailRow label="Starts" value={formattedStart} />
+              <DetailRow label="Ends" value={formattedEnd} />
+              {!event.location &&
+                !event.venue &&
+                !formattedStart &&
+                !formattedEnd && (
+                  <Text fontSize="sm" color="gray.500">
+                    No location or schedule set yet.
+                  </Text>
+                )}
+            </VStack>
 
-          <Box
-            display="grid"
-            gridTemplateColumns={{
-              base: "1fr",
-              md: "minmax(0, 1.15fr) minmax(0, 1fr)",
-            }}
-            columnGap={{ md: 8 }}
-            rowGap={{ base: 6, md: 4 }}
-            alignItems="start"
-            justifyItems="stretch"
-            w="100%"
-          >
-            <Box minW={0} alignSelf="start">
+            <Box borderTopWidth="1px" borderTopColor="cardBorder" pt={4} mt={4}>
               <VStack align="stretch" gap={3}>
-                <Text
-                  fontSize="sm"
-                  fontWeight="semibold"
-                  color="text"
-                  lineHeight="1.25"
-                  m={0}
-                >
-                  Event details
-                </Text>
-                <DetailRow label="Location" value={event.location} />
-                <DetailRow label="Venue" value={event.venue} />
-                <DetailRow label="Starts" value={formattedStart} />
-                <DetailRow label="Ends" value={formattedEnd} />
-                {!event.location &&
-                  !event.venue &&
-                  !formattedStart &&
-                  !formattedEnd && (
-                    <Text fontSize="sm" color="gray.500">
-                      No location or schedule set yet.
-                    </Text>
-                  )}
-              </VStack>
-            </Box>
-
-            <Box
-              minW={0}
-              alignSelf="start"
-              borderLeftWidth={{ base: "0", md: "1px" }}
-              borderTopWidth={{ base: "1px", md: "0" }}
-              borderColor="cardBorder"
-              pl={{ base: 0, md: 6 }}
-              pt={{ base: 4, md: 0 }}
-            >
-              <VStack align="stretch" gap={3} justify="flex-start">
-                <Text
-                  fontSize="sm"
-                  fontWeight="semibold"
-                  color="text"
-                  lineHeight="1.25"
-                  m={0}
-                >
+                <Text fontSize="sm" fontWeight="semibold" color="text">
                   Staff
                 </Text>
 
                 {rosterFetchStatus === "loading" && (
-                  <Text fontSize="sm" color="gray.500" m={0}>
+                  <Text fontSize="sm" color="gray.500">
                     Loading roster…
                   </Text>
                 )}
 
                 {rosterFetchStatus === "failed" && rosterFetchError && (
-                  <Text fontSize="sm" color="red.500" m={0}>
-                    {rosterFetchError}
-                  </Text>
+                  <VStack align="start" gap={2}>
+                    <Text fontSize="sm" color="red.500">
+                      {rosterFetchError}
+                    </Text>
+                    <BaseButton
+                      variety="tertiary"
+                      btnWidth="auto"
+                      title="Retry roster"
+                      onClick={() => void dispatch(fetchRosterThunk(eventId))}
+                    />
+                  </VStack>
                 )}
 
                 {rosterMatchesEvent &&
                   assignments.length === 0 &&
                   pendingInvites.length === 0 && (
-                    <Text fontSize="sm" color="gray.500" m={0}>
+                    <Text fontSize="sm" color="gray.500">
                       No staff on this event yet.
                     </Text>
                   )}
@@ -786,12 +774,7 @@ export default function EventPage() {
                     </VStack>
                   )}
 
-                <Box
-                  borderTopWidth="1px"
-                  borderTopColor="cardBorder"
-                  pt={4}
-                  mt={1}
-                >
+                <Box borderTopWidth="1px" borderTopColor="cardBorder" pt={4} mt={1}>
                   <BaseButton
                     title="Assign staff"
                     btnWidth="100%"
@@ -800,28 +783,23 @@ export default function EventPage() {
                 </Box>
               </VStack>
             </Box>
-          </Box>
+          </BaseCard>
 
-          <Box borderTopWidth="1px" borderTopColor="cardBorder" pt={4} mt={4}>
+          <BaseCard title="Zones & rooms" titleAlign="start" variant="elevated">
             <VStack align="stretch" gap={3}>
-              <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
-                <Text fontSize="sm" fontWeight="semibold" color="text">
-                  Zones & rooms
-                </Text>
-                <HStack gap={2}>
-                  <BaseButton
-                    variety="secondary"
-                    title="Add room"
-                    btnWidth="auto"
-                    onClick={() => setIsAddRoomModalOpen(true)}
-                  />
-                  <BaseButton
-                    variety="secondary"
-                    title="Create zone"
-                    btnWidth="auto"
-                    onClick={() => setIsCreateZoneModalOpen(true)}
-                  />
-                </HStack>
+              <HStack justify="flex-end" align="center" flexWrap="wrap" gap={2}>
+                <BaseButton
+                  variety="secondary"
+                  title="Add room"
+                  btnWidth="auto"
+                  onClick={() => setIsAddRoomModalOpen(true)}
+                />
+                <BaseButton
+                  variety="secondary"
+                  title="Create zone"
+                  btnWidth="auto"
+                  onClick={() => setIsCreateZoneModalOpen(true)}
+                />
               </HStack>
 
               {event.zones.length === 0 && event.rooms.length === 0 && (
@@ -987,9 +965,9 @@ export default function EventPage() {
                     </Box>
                   )}
             </VStack>
-          </Box>
-        </BaseCard>
-        <HStack pt={6} w="50%" justifyContent="center" mx="auto">
+          </BaseCard>
+        </Grid>
+        <HStack pt={6}>
           <BaseButton
             variety="tertiary"
             onClick={() => router.push(`/workspace/${workspaceId}`)}

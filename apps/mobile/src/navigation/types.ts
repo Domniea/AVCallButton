@@ -1,5 +1,4 @@
 export type RootStackParamList = {
-  landing: undefined;
   login: undefined;
   signup: undefined;
   signupConfirm: undefined;
@@ -9,4 +8,6 @@ export type RootStackParamList = {
   dashboard: undefined;
   workspace: { workspaceId: string };
   event: { workspaceId: string; eventId: string };
+  crewWorkspace: { workspaceId: string };
+  crewEvent: { workspaceId: string; eventId: string };
 };

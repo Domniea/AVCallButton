@@ -10,7 +10,7 @@ import {
 } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation, type ParamListBase } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BaseInput } from "./../components/BaseInput";
 import { BaseButton } from "./../components/BaseButton";
@@ -23,16 +23,11 @@ import {
   type LoginSchema,
 } from "@av/forms/src/schemas/auth/loginSchema";
 
-import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
-import { logout } from "@av/auth-client";
-import { loginThunk } from "@av/store/src/auth";
+import { fetchMeThunk, logoutThunk, loginThunk } from "@av/store/src/auth";
+import type { RootStackParamList } from "./navigation/types";
 
-type LoginNav = NativeStackNavigationProp<
-  ParamListBase & { invite: undefined; dashboard: undefined },
-  "login"
->;
+type LoginNav = NativeStackNavigationProp<RootStackParamList, "login">;
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,6 +35,12 @@ export default function Login() {
   const { colorMode, toggleColorMode } = useColorMode();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
+
+  useEffect(() => {
+    if (authStatus === "authenticated") {
+      navigation.replace("dashboard");
+    }
+  }, [authStatus, navigation]);
 
   const form = useAppForm(loginSchema, {
     email: "",
@@ -49,24 +50,32 @@ export default function Login() {
   const {
     control,
     handleSubmit,
-    reset,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = form;
 
   const onSubmit = async (values: LoginSchema) => {
+    clearErrors();
     try {
       await dispatch(
-      loginThunk({
-        email: values.email,
-        password: values.password,
-      })
-    ).unwrap()
-    .then(() => dispatch(fetchMeThunk()));
+        loginThunk({
+          email: values.email,
+          password: values.password,
+        }),
+      )
+        .unwrap()
+        .then(() => dispatch(fetchMeThunk()));
 
       const hasInviteToken = await AsyncStorage.getItem("inviteToken");
       navigation.replace(hasInviteToken ? "invite" : "dashboard");
     } catch (err) {
       console.error("Login failed", err);
+      const message =
+        typeof err === "string" && err !== "Invalid credentials"
+          ? err
+          : "Incorrect email or password.";
+      setError("password", { type: "server", message });
       dispatch(logoutThunk());
     }
   };
@@ -76,15 +85,27 @@ export default function Login() {
   const textColor = useColorModeValue("text", "textDark");
   const muted = useColorModeValue("muted", "mutedDark");
 
+  if (authStatus === "idle" || authStatus === "loading") {
+    return (
+      <Box flex={1} bg={bg} justifyContent="center" alignItems="center">
+        <Text color={muted}>Loading…</Text>
+      </Box>
+    );
+  }
+
+  if (authStatus === "authenticated") {
+    return null;
+  }
+
   return (
     <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
       <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
         <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-          Login
+          AV Call Button
         </Text>
 
         <Text fontSize="sm" color={muted}>
-          Status: {authStatus}
+          Sign in to continue
         </Text>
 
         {/* Email */}
@@ -120,9 +141,9 @@ export default function Login() {
 
         {/* Reset */}
         <BaseButton
-          title="Signup"
+          title="Create account"
           variety="secondary"
-          onPress={() => navigation.navigate("signup" as never)}
+          onPress={() => navigation.navigate("signup")}
         />
 
         {/* Theme Toggle */}

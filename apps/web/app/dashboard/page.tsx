@@ -18,11 +18,14 @@ import { fetchWorkspacesThunk, setActiveWorkspace } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { workspaceDisplayName } from "@/lib/workspaceDisplayName";
+import { resolveViewMode } from "@/lib/viewMode";
+import { useViewMode } from "@/hooks/useViewMode";
 import { logoutThunk } from "@av/store/src/auth";
 
 export default function DashboardPage() {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const { viewMode } = useViewMode();
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -160,7 +163,12 @@ export default function DashboardPage() {
                 cursor="pointer"
                 onClick={() => {
                   dispatch(setActiveWorkspace(ws.workspaceId));
-                  router.push(`/workspace/${ws.workspaceId}`);
+                  const mode = resolveViewMode(ws.roleRank, viewMode);
+                  router.push(
+                    mode === "admin"
+                      ? `/workspace/${ws.workspaceId}`
+                      : `/crew/workspace/${ws.workspaceId}`,
+                  );
                 }}
                 borderWidth={isActive ? 2 : 0}
                 borderColor={isActive ? "blue.500" : "transparent"}

@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, VStack, Text, HStack, Flex } from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { signup } from "../../../../../packages/auth-client/src";
 
@@ -19,7 +19,15 @@ import {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { colorMode, toggleColorMode } = useColorMode();
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      sessionStorage.setItem("inviteToken", token);
+    }
+  }, [searchParams]);
 
   const form = useAppForm(signupSchema, {
     email: "",

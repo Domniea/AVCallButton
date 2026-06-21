@@ -1,5 +1,7 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
+import { cognitoUserExists } from "./cognito";
+
 const ses = new SESClient({ region: "us-east-1" });
 
 export function normalizeEmail(value: unknown): string {
@@ -17,7 +19,11 @@ export async function sendInviteEmail(params: {
   inviterEmail: string;
   token: string;
 }) {
-  const inviteUrl = `${process.env.APP_URL}/invite?token=${params.token}`;
+  const hasAccount = await cognitoUserExists(params.to);
+  const path = hasAccount
+    ? `/invite?token=${params.token}`
+    : `/auth/signup?token=${params.token}`;
+  const inviteUrl = `${process.env.APP_URL}${path}`;
 
   const command = new SendEmailCommand({
     Source: process.env.SES_FROM_EMAIL!,

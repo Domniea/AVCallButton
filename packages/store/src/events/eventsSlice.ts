@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { logoutThunk } from "../auth/auth.thunks";
-import { fetchEventsThunk } from "./events.thunks";
+import { fetchEventsThunk, createEventThunk } from "./events.thunks";
 import type { EventSummary } from "../api/events.api";
 
 export type EventsFetchStatus = "idle" | "loading" | "succeeded" | "failed";
@@ -49,6 +49,14 @@ const eventsSlice = createSlice({
         state.fetchStatus = "failed";
         state.fetchError = action.payload ?? "Could not load events";
         state.events = [];
+      })
+      .addCase(createEventThunk.fulfilled, (state, action) => {
+        const { workspaceId, event } = action.payload;
+        if (state.workspaceId === workspaceId) {
+          state.events = [event, ...state.events];
+          state.fetchStatus = "succeeded";
+          state.fetchError = null;
+        }
       })
       .addCase(logoutThunk.fulfilled, () => initialState);
   },

@@ -33,25 +33,34 @@ export default function LoginPage() {
   const {
     control,
     handleSubmit,
+    setError,
+    clearErrors,
     formState: { isSubmitting },
   } = form;
 
   const onSubmit = async (values: LoginSchema) => {
-  try {
-    await dispatch(
-      loginThunk({
-        email: values.email,
-        password: values.password,
-      })
-    ).unwrap()
-    .then(() => dispatch(fetchMeThunk()));
+    clearErrors();
+    try {
+      await dispatch(
+        loginThunk({
+          email: values.email,
+          password: values.password,
+        }),
+      )
+        .unwrap()
+        .then(() => dispatch(fetchMeThunk()));
 
-    const inviteToken = sessionStorage.getItem("inviteToken");
-    router.replace(inviteToken ? "/invite" : "/dashboard");
-  } catch (err) {
-    console.error("Login failed:", err);
-  }
-};
+      const inviteToken = sessionStorage.getItem("inviteToken");
+      router.replace(inviteToken ? "/invite" : "/dashboard");
+    } catch (err) {
+      console.error("Login failed:", err);
+      const message =
+        typeof err === "string" && err !== "Invalid credentials"
+          ? err
+          : "Incorrect email or password.";
+      setError("password", { type: "server", message });
+    }
+  };
 
   const onSignup = () => {
     router.push("/auth/signup");

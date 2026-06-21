@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   VStack,
@@ -15,8 +15,8 @@ import type { RouteProp } from "@react-navigation/native";
 
 import type { AppDispatch, RootState } from "@av/store";
 import {
+  fetchMyWorkspaceEventsThunk,
   fetchWorkspacesThunk,
-  fetchEventsThunk,
   setActiveWorkspace,
 } from "@av/store";
 import { BaseButton } from "../components/BaseButton";
@@ -24,24 +24,33 @@ import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
 import { ViewModeToggle } from "./components/ViewModeToggle";
 import { useViewMode } from "./hooks/useViewMode";
-import {
-  canAccessAdminDash,
-  resolveViewMode,
-} from "./lib/viewMode";
+import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
-import CreateEventModal from "./CreateEventModal";
 import type { RootStackParamList } from "./navigation/types";
 
-type WorkspaceNav = NativeStackNavigationProp<RootStackParamList, "workspace">;
-type WorkspaceRoute = RouteProp<RootStackParamList, "workspace">;
+type CrewWorkspaceNav = NativeStackNavigationProp<
+  RootStackParamList,
+  "crewWorkspace"
+>;
+type CrewWorkspaceRoute = RouteProp<RootStackParamList, "crewWorkspace">;
 
-export default function WorkspaceScreen() {
+function coverageLabel(zoneCount: number, roomCount: number): string {
+  const parts: string[] = [];
+  if (zoneCount > 0) {
+    parts.push(`${zoneCount} zone${zoneCount === 1 ? "" : "s"}`);
+  }
+  if (roomCount > 0) {
+    parts.push(`${roomCount} room${roomCount === 1 ? "" : "s"}`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : "No coverage assigned";
+}
+
+export default function CrewWorkspaceScreen() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<WorkspaceNav>();
-  const route = useRoute<WorkspaceRoute>();
+  const navigation = useNavigation<CrewWorkspaceNav>();
+  const route = useRoute<CrewWorkspaceRoute>();
   const { workspaceId } = route.params;
   const { viewMode, setViewMode } = useViewMode();
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const workspaces = useSelector(
@@ -50,16 +59,14 @@ export default function WorkspaceScreen() {
   const workspaceFetchStatus = useSelector(
     (state: RootState) => state.workspace.fetchStatus,
   );
-  const eventsWorkspaceId = useSelector(
-    (state: RootState) => state.events.workspaceId,
+  const crewWorkspaceId = useSelector(
+    (state: RootState) => state.crewDash.workspaceId,
   );
-  const events = useSelector((state: RootState) => state.events.events);
-  const eventsFetchStatus = useSelector(
-    (state: RootState) => state.events.fetchStatus,
+  const listEvents = useSelector((state: RootState) => state.crewDash.listEvents);
+  const listStatus = useSelector(
+    (state: RootState) => state.crewDash.listStatus,
   );
-  const eventsFetchError = useSelector(
-    (state: RootState) => state.events.fetchError,
-  );
+  const listError = useSelector((state: RootState) => state.crewDash.listError);
 
   const bg = useColorModeValue("bg", "bgDark");
   const textColor = useColorModeValue("text", "textDark");
@@ -67,7 +74,7 @@ export default function WorkspaceScreen() {
   const rowBorder = useColorModeValue("cardBorder", "cardBorderDark");
 
   const eventsMatchRoute =
-    eventsWorkspaceId === workspaceId && eventsFetchStatus === "succeeded";
+    crewWorkspaceId === workspaceId && listStatus === "succeeded";
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -94,8 +101,21 @@ export default function WorkspaceScreen() {
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !workspaceId) return;
-    void dispatch(fetchEventsThunk(workspaceId));
+    void dispatch(fetchMyWorkspaceEventsThunk(workspaceId));
   }, [authStatus, workspaceId, dispatch]);
+
+  const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
+  const canToggleAdmin = workspace
+    ? canAccessAdminDash(workspace.roleRank)
+    : false;
+  const effectiveViewMode = workspace
+    ? resolveViewMode(workspace.roleRank, viewMode)
+    : "crew";
+
+  const onSwitchToAdmin = () => {
+    void setViewMode("admin");
+    navigation.replace("workspace", { workspaceId });
+  };
 
   if (authStatus === "idle" || authStatus === "loading") {
     return (
@@ -108,19 +128,6 @@ export default function WorkspaceScreen() {
   if (authStatus === "unauthenticated") {
     return null;
   }
-
-  const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
-  const canToggleAdmin = workspace
-    ? canAccessAdminDash(workspace.roleRank)
-    : false;
-  const effectiveViewMode = workspace
-    ? resolveViewMode(workspace.roleRank, viewMode)
-    : "admin";
-
-  const onSwitchToCrew = () => {
-    void setViewMode("crew");
-    navigation.replace("crewWorkspace", { workspaceId });
-  };
 
   if (workspaceFetchStatus === "loading" && workspaces.length === 0) {
     return (
@@ -154,26 +161,16 @@ export default function WorkspaceScreen() {
     );
   }
 
-  const canCreateShow = workspace ? canAccessAdminDash(workspace.roleRank) : false;
-
   return (
     <Box flex={1} bg={bg}>
-      <CreateEventModal
-        isOpen={isCreateEventOpen}
-        workspaceId={workspaceId}
-        onClose={() => setIsCreateEventOpen(false)}
-      />
       <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
         <VStack space={4} maxW="720" alignSelf="center" w="100%">
           {canToggleAdmin && (
-            <ViewModeToggle
-              viewMode={effectiveViewMode}
-              onToggle={onSwitchToCrew}
-            />
+            <ViewModeToggle viewMode={effectiveViewMode} onToggle={onSwitchToAdmin} />
           )}
 
           <BaseCard
-            title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
+            title={workspace ? workspaceDisplayName(workspace) : "My events"}
             titleAlign="start"
             variant="elevated"
           >
@@ -185,61 +182,50 @@ export default function WorkspaceScreen() {
                 ) : (
                   <BasePill label="Role pending" variant="outline" />
                 )}
-                <Text fontSize="sm" color={muted}>
-                  {workspace.eventCount} event
-                  {workspace.eventCount === 1 ? "" : "s"}
-                </Text>
               </HStack>
             )}
 
             <Text fontSize="sm" fontWeight="semibold" color={textColor} mb={2}>
-              Events
+              Your assigned events
             </Text>
 
-            {canCreateShow && (
-              <Box mb={3}>
-                <BaseButton
-                  title="Create show"
-                  onPress={() => setIsCreateEventOpen(true)}
-                />
-              </Box>
-            )}
-
-            {eventsFetchStatus === "loading" && (
+            {listStatus === "loading" && (
               <Text fontSize="sm" color={muted}>
-                Loading events…
+                Loading your events…
               </Text>
             )}
 
-            {eventsFetchStatus === "failed" && eventsFetchError && (
+            {listStatus === "failed" && listError && (
               <VStack space={2} alignItems="flex-start">
                 <Text fontSize="sm" color={muted}>
-                  {eventsFetchError}
+                  {listError}
                 </Text>
                 <BaseButton
                   title="Retry"
                   variety="tertiary"
                   btnWidth="auto"
-                  onPress={() => void dispatch(fetchEventsThunk(workspaceId))}
+                  onPress={() =>
+                    void dispatch(fetchMyWorkspaceEventsThunk(workspaceId))
+                  }
                 />
               </VStack>
             )}
 
-            {eventsMatchRoute && events.length === 0 && (
+            {eventsMatchRoute && listEvents.length === 0 && (
               <Text fontSize="sm" color={muted}>
-                No events yet.
+                You are not assigned to any events in this workspace yet.
               </Text>
             )}
 
-            {eventsMatchRoute && events.length > 0 && (
+            {eventsMatchRoute && listEvents.length > 0 && (
               <VStack space={2}>
-                {events.map((ev) => (
+                {listEvents.map(({ event, assignment, coverageSummary }) => (
                   <Pressable
-                    key={ev.id}
+                    key={event.id}
                     onPress={() =>
-                      navigation.navigate("event", {
+                      navigation.navigate("crewEvent", {
                         workspaceId,
-                        eventId: ev.id,
+                        eventId: event.id,
                       })
                     }
                   >
@@ -251,15 +237,26 @@ export default function WorkspaceScreen() {
                       py={2}
                     >
                       <Text fontSize="sm" fontWeight="medium" color={textColor}>
-                        {ev.name}
+                        {event.name}
                       </Text>
                       <Text fontSize="xs" color={muted}>
-                        {ev.status}
-                        {ev.startTime
-                          ? ` · ${new Date(ev.startTime).toLocaleString()}`
+                        {event.status}
+                        {event.startTime
+                          ? ` · ${new Date(event.startTime).toLocaleString()}`
                           : ""}
-                        {` · ${ev.zones.length} zone${ev.zones.length === 1 ? "" : "s"}`}
-                        {` · ${ev.rooms.length} room${ev.rooms.length === 1 ? "" : "s"}`}
+                      </Text>
+                      <HStack space={2} mt={2} flexWrap="wrap">
+                        <BasePill label={assignment.roleName} variant="outline" />
+                        <BasePill
+                          label={`Rank ${assignment.eventRank}`}
+                          variant="outline"
+                        />
+                      </HStack>
+                      <Text fontSize="xs" color={muted} mt={2}>
+                        {coverageLabel(
+                          coverageSummary.zoneCount,
+                          coverageSummary.roomCount,
+                        )}
                       </Text>
                     </Box>
                   </Pressable>
@@ -267,6 +264,7 @@ export default function WorkspaceScreen() {
               </VStack>
             )}
           </BaseCard>
+
           <BaseButton
             title="Back"
             variety="tertiary"

@@ -3,6 +3,7 @@ import { authReducer } from "./auth/authSlice";
 import { workspaceReducer } from "./workspace/workspaceSlice";
 import { eventsReducer } from "./events/eventsSlice";
 import { rosterReducer } from "./roster/rosterSlice";
+import { crewDashReducer } from "./crewDash/crewDashSlice";
 
 export const createStore = () =>
   configureStore({
@@ -11,6 +12,7 @@ export const createStore = () =>
       workspace: workspaceReducer,
       events: eventsReducer,
       roster: rosterReducer,
+      crewDash: crewDashReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({

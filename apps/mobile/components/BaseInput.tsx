@@ -43,6 +43,7 @@ export const BaseInput: React.FC<BaseInputProps> = ({
   const border = useColorModeValue(inputTokens.border[0], inputTokens.border[1]);
   const placeholder = useColorModeValue(inputTokens.placeholder[0], inputTokens.placeholder[1]);
   const focusBorder = useColorModeValue(inputTokens.focusBorder[0], inputTokens.focusBorder[1]);
+  const helperColor = useColorModeValue("textMuted", "textMutedDark");
 
   const isError = Boolean(error);
 
@@ -52,7 +53,7 @@ export const BaseInput: React.FC<BaseInputProps> = ({
   return (
     <VStack w="100%" space="md">
       {label && (
-        <Text fontFamily="heading" fontSize="xl" color={fg}>
+        <Text fontFamily="heading" fontSize="sm" fontWeight="medium" color={fg}>
           {label}
         </Text>
       )}
@@ -96,7 +97,7 @@ export const BaseInput: React.FC<BaseInputProps> = ({
       {isError ? (
         <Text color="error.500">{error}</Text>
       ) : helperText ? (
-        <Text color="textMuted">{helperText}</Text>
+        <Text color={helperColor}>{helperText}</Text>
       ) : null}
     </VStack>
   );

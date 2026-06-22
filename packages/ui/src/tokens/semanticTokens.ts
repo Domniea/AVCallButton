@@ -9,8 +9,15 @@ export const semanticTokens = {
 
     textMuted: {
       value: {
-        _light: "{colors.secondary.500}",
-        _dark: "{colors.secondary.300}",
+        _light: "{colors.secondary.600}",
+        _dark: "{colors.secondary.200}",
+      },
+    },
+
+    muted: {
+      value: {
+        _light: "{colors.secondary.600}",
+        _dark: "{colors.secondary.200}",
       },
     },
 
@@ -86,8 +93,8 @@ export const semanticTokens = {
 
     inputPlaceholder: {
       value: {
-        _light: "{colors.secondary.500}",
-        _dark: "{colors.secondary.400}",
+        _light: "{colors.secondary.600}",
+        _dark: "{colors.secondary.300}",
       },
     },
 

@@ -1,21 +1,37 @@
 {
   "cli": {
-    "version": ">= 7.0.0"
+    "version": ">= 7.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_API_URL": "https://i1ki31avn0.execute-api.us-east-1.amazonaws.com"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_APP_ENV": "development",
+        "EXPO_PUBLIC_API_URL": "https://i1ki31avn0.execute-api.us-east-1.amazonaws.com"
       }
     },
     "production": {
       "distribution": "store",
       "autoIncrement": true,
       "env": {
-          "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://i1ki31avn0.execute-api.us-east-1.amazonaws.com"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }

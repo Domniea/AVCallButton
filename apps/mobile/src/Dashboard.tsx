@@ -1,13 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  ScrollView,
-  Pressable,
-  useColorModeValue,
-} from "native-base";
+import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -18,6 +10,10 @@ import { logoutThunk } from "@av/store/src/auth";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
+import { ListRow } from "../components/ListRow";
+import { LoadingScreen } from "../components/LoadingScreen";
+import { ScreenLayout } from "../components/ScreenLayout";
+import { useThemeColors } from "../hooks/useThemeColors";
 import { useViewMode } from "./hooks/useViewMode";
 import { resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
@@ -29,6 +25,7 @@ export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<DashboardNav>();
   const { viewMode } = useViewMode();
+  const { text, muted, primary } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -44,11 +41,6 @@ export default function Dashboard() {
   const fetchError = useSelector(
     (state: RootState) => state.workspace.fetchError,
   );
-
-  const bg = useColorModeValue("bg", "bgDark");
-  const textColor = useColorModeValue("text", "textDark");
-  const muted = useColorModeValue("muted", "mutedDark");
-  const activeBorder = useColorModeValue("blue.500", "blue.400");
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -72,11 +64,7 @@ export default function Dashboard() {
   };
 
   if (authStatus === "idle" || authStatus === "loading") {
-    return (
-      <Box flex={1} bg={bg} justifyContent="center" alignItems="center">
-        <Text color={muted}>Checking session…</Text>
-      </Box>
-    );
+    return <LoadingScreen message="Checking session…" />;
   }
 
   if (authStatus === "unauthenticated") {
@@ -87,124 +75,97 @@ export default function Dashboard() {
     (w) => w.workspaceId === activeWorkspaceId,
   );
 
+  const subtitleParts = [user?.email ?? user?.id].filter(Boolean);
+  if (activeWorkspace) {
+    subtitleParts.push(`Active: ${workspaceDisplayName(activeWorkspace)}`);
+  }
+
   return (
-    <Box flex={1} bg={bg}>
-      <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
-        <VStack space={6} maxW="960" alignSelf="center" w="100%">
-          <VStack space={1}>
-            <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-              Dashboard
+    <ScreenLayout title="Dashboard" subtitle={subtitleParts.join(" · ")}>
+      <HStack space={2} flexWrap="wrap">
+        <BaseButton
+          title="Account"
+          variety="tertiary"
+          btnWidth="auto"
+          onPress={() => navigation.navigate("home")}
+        />
+        <BaseButton
+          title="Log out"
+          variety="secondary"
+          btnWidth="auto"
+          onPress={onLogout}
+        />
+      </HStack>
+
+      {fetchStatus === "loading" && (
+        <Text color={muted} fontSize="sm">
+          Loading workspaces…
+        </Text>
+      )}
+
+      {fetchStatus === "failed" && fetchError && (
+        <BaseCard variant="outline" title="Something went wrong">
+          <Text color={text} mb={4} fontSize="sm">
+            {fetchError}
+          </Text>
+          <BaseButton
+            title="Retry"
+            onPress={() => void dispatch(fetchWorkspacesThunk())}
+          />
+        </BaseCard>
+      )}
+
+      {fetchStatus !== "loading" &&
+        fetchStatus !== "failed" &&
+        workspaces.length === 0 && (
+          <BaseCard variant="outline" title="No workspaces yet">
+            <Text color={muted} fontSize="sm">
+              When you join or create a workspace, it will show up here.
             </Text>
-            {user && (
-              <Text fontSize="sm" color={muted}>
-                {user.email ?? user.id}
-              </Text>
-            )}
-            {activeWorkspace && (
-              <Text fontSize="xs" color={muted}>
-                Active workspace:{" "}
-                <Text fontWeight="medium" color={textColor}>
-                  {workspaceDisplayName(activeWorkspace)}
-                </Text>
-              </Text>
-            )}
-          </VStack>
+          </BaseCard>
+        )}
 
-          <HStack space={2} flexWrap="wrap">
-            <BaseButton
-              title="Account"
-              variety="tertiary"
-              btnWidth="auto"
-              onPress={() => navigation.navigate("home")}
-            />
-            <BaseButton
-              title="Log out"
-              variety="secondary"
-              btnWidth="auto"
-              onPress={onLogout}
-            />
-          </HStack>
+      <VStack space={3}>
+        {workspaces.map((ws) => {
+          const isActive = ws.workspaceId === activeWorkspaceId;
+          const eventLabel =
+            ws.eventCount === 0
+              ? "No events yet"
+              : `${ws.eventCount} event${ws.eventCount === 1 ? "" : "s"}`;
 
-          {fetchStatus === "loading" && (
-            <Text color={muted}>Loading workspaces…</Text>
-          )}
-
-          {fetchStatus === "failed" && fetchError && (
-            <BaseCard variant="outline" title="Something went wrong">
-              <Text color={textColor} mb={4}>
-                {fetchError}
-              </Text>
-              <BaseButton
-                title="Retry"
-                onPress={() => void dispatch(fetchWorkspacesThunk())}
-              />
-            </BaseCard>
-          )}
-
-          {fetchStatus !== "loading" &&
-            fetchStatus !== "failed" &&
-            workspaces.length === 0 && (
-              <BaseCard title="No workspaces yet">
-                <Text color={muted}>
-                  When you join or create a workspace, it will show up here.
-                </Text>
-              </BaseCard>
-            )}
-
-          <VStack space={4}>
-            {workspaces.map((ws) => {
-              const isActive = ws.workspaceId === activeWorkspaceId;
-              return (
-                <Pressable
-                  key={ws.workspaceId}
-                  onPress={() => {
-                    dispatch(setActiveWorkspace(ws.workspaceId));
-                    const mode = resolveViewMode(ws.roleRank, viewMode);
-                    if (mode === "admin") {
-                      navigation.navigate("workspace", {
-                        workspaceId: ws.workspaceId,
-                      });
-                    } else {
-                      navigation.navigate("crewWorkspace", {
-                        workspaceId: ws.workspaceId,
-                      });
-                    }
-                  }}
-                >
-                  <Box
-                    borderWidth={isActive ? 2 : 0}
-                    borderColor={activeBorder}
-                    borderRadius="xl"
-                  >
-                    <BaseCard
-                      title={workspaceDisplayName(ws)}
-                      titleAlign="start"
-                      variant="elevated"
-                    >
-                      <HStack space={2} flexWrap="wrap" mb={3}>
-                        <BasePill label={ws.type} />
-                        {ws.role != null ? (
-                          <BasePill label={ws.role} variant="blue" />
-                        ) : (
-                          <BasePill label="Role pending" variant="outline" />
-                        )}
-                      </HStack>
-                      <Text fontSize="sm" color={muted}>
-                        {ws.eventCount === 0
-                          ? "No events yet"
-                          : `${ws.eventCount} event${ws.eventCount === 1 ? "" : "s"}`}
-                      </Text>
-                      <Text fontSize="xs" color={muted} mt={3}>
-                        Open to view events and details
-                      </Text>
-                    </BaseCard>
-                  </Box>
-                </Pressable>
-              );
-            })}
-          </VStack>
-        </VStack>
-      </ScrollView>
-    </Box>
+          return (
+            <ListRow
+              key={ws.workspaceId}
+              title={workspaceDisplayName(ws)}
+              subtitle={eventLabel}
+              meta="Open to view events and details"
+              accentColor={isActive ? primary : undefined}
+              onPress={() => {
+                dispatch(setActiveWorkspace(ws.workspaceId));
+                const mode = resolveViewMode(ws.roleRank, viewMode);
+                if (mode === "admin") {
+                  navigation.navigate("workspace", {
+                    workspaceId: ws.workspaceId,
+                  });
+                } else {
+                  navigation.navigate("crewWorkspace", {
+                    workspaceId: ws.workspaceId,
+                  });
+                }
+              }}
+            >
+              <HStack space={2} flexWrap="wrap" mt={2}>
+                <BasePill label={ws.type} />
+                {ws.role != null ? (
+                  <BasePill label={ws.role} variant="primary" />
+                ) : (
+                  <BasePill label="Role pending" variant="warning" />
+                )}
+              </HStack>
+            </ListRow>
+          );
+        })}
+      </VStack>
+    </ScreenLayout>
   );
 }

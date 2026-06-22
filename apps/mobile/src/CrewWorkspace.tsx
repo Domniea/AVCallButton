@@ -1,13 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  ScrollView,
-  Pressable,
-  useColorModeValue,
-} from "native-base";
+import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -22,6 +14,11 @@ import {
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
+import { ListRow } from "../components/ListRow";
+import { LoadingScreen } from "../components/LoadingScreen";
+import { ScreenLayout } from "../components/ScreenLayout";
+import { SectionHeader } from "../components/SectionHeader";
+import { useThemeColors } from "../hooks/useThemeColors";
 import { ViewModeToggle } from "./components/ViewModeToggle";
 import { useViewMode } from "./hooks/useViewMode";
 import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
@@ -51,6 +48,7 @@ export default function CrewWorkspaceScreen() {
   const route = useRoute<CrewWorkspaceRoute>();
   const { workspaceId } = route.params;
   const { viewMode, setViewMode } = useViewMode();
+  const { muted } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const workspaces = useSelector(
@@ -67,11 +65,6 @@ export default function CrewWorkspaceScreen() {
     (state: RootState) => state.crewDash.listStatus,
   );
   const listError = useSelector((state: RootState) => state.crewDash.listError);
-
-  const bg = useColorModeValue("bg", "bgDark");
-  const textColor = useColorModeValue("text", "textDark");
-  const muted = useColorModeValue("muted", "mutedDark");
-  const rowBorder = useColorModeValue("cardBorder", "cardBorderDark");
 
   const eventsMatchRoute =
     crewWorkspaceId === workspaceId && listStatus === "succeeded";
@@ -118,11 +111,7 @@ export default function CrewWorkspaceScreen() {
   };
 
   if (authStatus === "idle" || authStatus === "loading") {
-    return (
-      <Box flex={1} bg={bg} justifyContent="center" alignItems="center">
-        <Text color={muted}>Checking session…</Text>
-      </Box>
-    );
+    return <LoadingScreen message="Checking session…" />;
   }
 
   if (authStatus === "unauthenticated") {
@@ -130,149 +119,131 @@ export default function CrewWorkspaceScreen() {
   }
 
   if (workspaceFetchStatus === "loading" && workspaces.length === 0) {
-    return (
-      <Box flex={1} bg={bg} px={6} py={6}>
-        <Text color={muted}>Loading workspace…</Text>
-      </Box>
-    );
+    return <LoadingScreen message="Loading workspace…" />;
   }
 
   if (workspaceFetchStatus === "succeeded" && !workspace) {
     return (
-      <Box flex={1} bg={bg} px={6} py={6}>
-        <VStack space={4}>
+      <ScreenLayout maxW="720">
+        <BaseButton
+          title="Back to dashboard"
+          variety="tertiary"
+          btnWidth="auto"
+          onPress={() => navigation.navigate("dashboard")}
+        />
+        <BaseCard title="Workspace not found" variant="outline">
+          <Text color={muted} mb={4} fontSize="sm">
+            You do not have access to this workspace, or the link is invalid.
+          </Text>
           <BaseButton
             title="Back to dashboard"
-            variety="tertiary"
-            btnWidth="auto"
             onPress={() => navigation.navigate("dashboard")}
           />
-          <BaseCard title="Workspace not found" variant="outline">
-            <Text color={muted} mb={4}>
-              You do not have access to this workspace, or the link is invalid.
-            </Text>
-            <BaseButton
-              title="Back to dashboard"
-              onPress={() => navigation.navigate("dashboard")}
-            />
-          </BaseCard>
-        </VStack>
-      </Box>
+        </BaseCard>
+      </ScreenLayout>
     );
   }
 
   return (
-    <Box flex={1} bg={bg}>
-      <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
-        <VStack space={4} maxW="720" alignSelf="center" w="100%">
-          {canToggleAdmin && (
-            <ViewModeToggle viewMode={effectiveViewMode} onToggle={onSwitchToAdmin} />
+    <ScreenLayout
+      title={workspace ? workspaceDisplayName(workspace) : "My events"}
+      subtitle="Your assigned events"
+      maxW="720"
+    >
+      {canToggleAdmin && (
+        <ViewModeToggle viewMode={effectiveViewMode} onToggle={onSwitchToAdmin} />
+      )}
+
+      {workspace ? (
+        <HStack space={2} flexWrap="wrap" alignItems="center">
+          <BasePill label={workspace.type} />
+          {workspace.role != null ? (
+            <BasePill label={workspace.role} variant="primary" />
+          ) : (
+            <BasePill label="Role pending" variant="warning" />
           )}
+        </HStack>
+      ) : null}
 
-          <BaseCard
-            title={workspace ? workspaceDisplayName(workspace) : "My events"}
-            titleAlign="start"
-            variant="elevated"
-          >
-            {workspace && (
-              <HStack space={2} flexWrap="wrap" mb={4} alignItems="center">
-                <BasePill label={workspace.type} />
-                {workspace.role != null ? (
-                  <BasePill label={workspace.role} variant="blue" />
-                ) : (
-                  <BasePill label="Role pending" variant="outline" />
-                )}
-              </HStack>
-            )}
+      <BaseCard variant="outline">
+        <SectionHeader>Assigned events</SectionHeader>
 
-            <Text fontSize="sm" fontWeight="semibold" color={textColor} mb={2}>
-              Your assigned events
+        {listStatus === "loading" && (
+          <Text fontSize="sm" color={muted}>
+            Loading your events…
+          </Text>
+        )}
+
+        {listStatus === "failed" && listError && (
+          <VStack space={2} alignItems="flex-start">
+            <Text fontSize="sm" color={muted}>
+              {listError}
             </Text>
+            <BaseButton
+              title="Retry"
+              variety="tertiary"
+              btnWidth="auto"
+              onPress={() =>
+                void dispatch(fetchMyWorkspaceEventsThunk(workspaceId))
+              }
+            />
+          </VStack>
+        )}
 
-            {listStatus === "loading" && (
-              <Text fontSize="sm" color={muted}>
-                Loading your events…
-              </Text>
-            )}
+        {eventsMatchRoute && listEvents.length === 0 && (
+          <Text fontSize="sm" color={muted}>
+            You are not assigned to any events in this workspace yet.
+          </Text>
+        )}
 
-            {listStatus === "failed" && listError && (
-              <VStack space={2} alignItems="flex-start">
-                <Text fontSize="sm" color={muted}>
-                  {listError}
-                </Text>
-                <BaseButton
-                  title="Retry"
-                  variety="tertiary"
-                  btnWidth="auto"
+        {eventsMatchRoute && listEvents.length > 0 && (
+          <VStack space={2} mt={2}>
+            {listEvents.map(({ event, assignment, coverageSummary }) => {
+              const subtitle = [
+                event.status,
+                event.startTime
+                  ? new Date(event.startTime).toLocaleString()
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ");
+
+              return (
+                <ListRow
+                  key={event.id}
+                  title={event.name}
+                  subtitle={subtitle}
+                  meta={coverageLabel(
+                    coverageSummary.zoneCount,
+                    coverageSummary.roomCount,
+                  )}
                   onPress={() =>
-                    void dispatch(fetchMyWorkspaceEventsThunk(workspaceId))
+                    navigation.navigate("crewEvent", {
+                      workspaceId,
+                      eventId: event.id,
+                    })
                   }
-                />
-              </VStack>
-            )}
+                >
+                  <HStack space={2} mt={2} flexWrap="wrap">
+                    <BasePill label={assignment.roleName} variant="primary" />
+                    <BasePill
+                      label={`Rank ${assignment.eventRank}`}
+                      variant="outline"
+                    />
+                  </HStack>
+                </ListRow>
+              );
+            })}
+          </VStack>
+        )}
+      </BaseCard>
 
-            {eventsMatchRoute && listEvents.length === 0 && (
-              <Text fontSize="sm" color={muted}>
-                You are not assigned to any events in this workspace yet.
-              </Text>
-            )}
-
-            {eventsMatchRoute && listEvents.length > 0 && (
-              <VStack space={2}>
-                {listEvents.map(({ event, assignment, coverageSummary }) => (
-                  <Pressable
-                    key={event.id}
-                    onPress={() =>
-                      navigation.navigate("crewEvent", {
-                        workspaceId,
-                        eventId: event.id,
-                      })
-                    }
-                  >
-                    <Box
-                      borderWidth={1}
-                      borderColor={rowBorder}
-                      borderRadius="md"
-                      px={3}
-                      py={2}
-                    >
-                      <Text fontSize="sm" fontWeight="medium" color={textColor}>
-                        {event.name}
-                      </Text>
-                      <Text fontSize="xs" color={muted}>
-                        {event.status}
-                        {event.startTime
-                          ? ` · ${new Date(event.startTime).toLocaleString()}`
-                          : ""}
-                      </Text>
-                      <HStack space={2} mt={2} flexWrap="wrap">
-                        <BasePill label={assignment.roleName} variant="outline" />
-                        <BasePill
-                          label={`Rank ${assignment.eventRank}`}
-                          variant="outline"
-                        />
-                      </HStack>
-                      <Text fontSize="xs" color={muted} mt={2}>
-                        {coverageLabel(
-                          coverageSummary.zoneCount,
-                          coverageSummary.roomCount,
-                        )}
-                      </Text>
-                    </Box>
-                  </Pressable>
-                ))}
-              </VStack>
-            )}
-          </BaseCard>
-
-          <BaseButton
-            title="Back"
-            variety="tertiary"
-            btnWidth="auto"
-            onPress={() => navigation.navigate("dashboard")}
-          />
-        </VStack>
-      </ScrollView>
-    </Box>
+      <BaseButton
+        title="Back"
+        variety="tertiary"
+        btnWidth="auto"
+        onPress={() => navigation.navigate("dashboard")}
+      />
+    </ScreenLayout>
   );
 }

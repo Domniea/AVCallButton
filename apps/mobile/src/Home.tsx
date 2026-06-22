@@ -1,17 +1,12 @@
-import React, { useEffect } from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  Switch,
-  useColorMode,
-  useColorModeValue,
-} from "native-base";
+import React from "react";
+import { VStack, Text } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
+import { AuthLayout } from "../components/AuthLayout";
+import { ThemeToggle } from "../components/ThemeToggle";
+import { useThemeColors } from "../hooks/useThemeColors";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch, RootState } from "@av/store";
@@ -25,7 +20,7 @@ type HomeNav = NativeStackNavigationProp<RootStackParamList, "home">;
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<HomeNav>();
-  const { colorMode, toggleColorMode } = useColorMode();
+  const { text, muted } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -40,71 +35,24 @@ export default function Home() {
     }
   };
 
-  const bg = useColorModeValue("bg", "bgDark");
-  const surface = useColorModeValue("surface", "surfaceDark");
-  const textColor = useColorModeValue("text", "textDark");
-  const muted = useColorModeValue("muted", "mutedDark");
-
-// useEffect(() => {
-//   let mounted = true;
-
-//   const loadSession = async () => {
-//     const session = await fetchAuthSession();
-//     if (!mounted) return;
-//     console.log("ID TOKEN:", session.tokens?.idToken?.toString());
-//   };
-
-//   loadSession();
-
-//   return () => {
-//     mounted = false;
-//   };
-// }, []);
-  
   return (
-    <Box flex={1} bg={bg} px="6" py="6" justifyContent="center">
-      <VStack shadow="card" bg={surface} borderRadius="xl" p="8" space="6">
-        <VStack space="1">
-          <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-            Home
-          </Text>
+    <AuthLayout title="Account" subtitle={`Status: ${authStatus}`}>
+      {user?.email ? (
+        <BaseCard variant="outline" p={4}>
+          <VStack space={1}>
+            <Text fontSize="xs" color={muted}>
+              Signed in as
+            </Text>
+            <Text fontSize="md" fontWeight="medium" color={text}>
+              {user.email}
+            </Text>
+          </VStack>
+        </BaseCard>
+      ) : null}
 
-          <Text fontSize="sm" color={muted}>
-            Status: {authStatus}
-          </Text>
-        </VStack>
+      <BaseButton title="Log out" variety="secondary" onPress={onLogout} />
 
-        {/* User Info */}
-        {user?.email && (
-          <BaseCard p="4">
-            <VStack space="1">
-              <Text fontSize="sm" color={muted}>
-                Signed in as
-              </Text>
-              <Text fontSize="md" fontWeight="medium" color={textColor}>
-                {user.email}
-              </Text>
-            </VStack>
-          </BaseCard>
-        )}
-
-        {/* Actions */}
-        <BaseButton title="Logout" variety="secondary" onPress={onLogout} />
-
-        {/* Theme Toggle */}
-        <HStack alignItems="center" justifyContent="space-between" pt="6">
-          <Text fontSize="lg" color={textColor}>
-            {colorMode === "light" ? "Light Mode" : "Dark Mode"}
-          </Text>
-
-          <BaseCard variant="elevated" p="4">
-            <Switch
-              isChecked={colorMode === "dark"}
-              onToggle={toggleColorMode}
-            />
-          </BaseCard>
-        </HStack>
-      </VStack>
-    </Box>
+      <ThemeToggle />
+    </AuthLayout>
   );
 }

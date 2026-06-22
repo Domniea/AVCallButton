@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-  ScrollView,
-  Pressable,
-  useColorModeValue,
-} from "native-base";
+import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -22,12 +14,14 @@ import {
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
+import { ListRow } from "../components/ListRow";
+import { LoadingScreen } from "../components/LoadingScreen";
+import { ScreenLayout } from "../components/ScreenLayout";
+import { SectionHeader } from "../components/SectionHeader";
+import { useThemeColors } from "../hooks/useThemeColors";
 import { ViewModeToggle } from "./components/ViewModeToggle";
 import { useViewMode } from "./hooks/useViewMode";
-import {
-  canAccessAdminDash,
-  resolveViewMode,
-} from "./lib/viewMode";
+import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
 import CreateEventModal from "./CreateEventModal";
 import type { RootStackParamList } from "./navigation/types";
@@ -42,6 +36,7 @@ export default function WorkspaceScreen() {
   const { workspaceId } = route.params;
   const { viewMode, setViewMode } = useViewMode();
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const { muted } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const workspaces = useSelector(
@@ -60,11 +55,6 @@ export default function WorkspaceScreen() {
   const eventsFetchError = useSelector(
     (state: RootState) => state.events.fetchError,
   );
-
-  const bg = useColorModeValue("bg", "bgDark");
-  const textColor = useColorModeValue("text", "textDark");
-  const muted = useColorModeValue("muted", "mutedDark");
-  const rowBorder = useColorModeValue("cardBorder", "cardBorderDark");
 
   const eventsMatchRoute =
     eventsWorkspaceId === workspaceId && eventsFetchStatus === "succeeded";
@@ -98,11 +88,7 @@ export default function WorkspaceScreen() {
   }, [authStatus, workspaceId, dispatch]);
 
   if (authStatus === "idle" || authStatus === "loading") {
-    return (
-      <Box flex={1} bg={bg} justifyContent="center" alignItems="center">
-        <Text color={muted}>Checking session…</Text>
-      </Box>
-    );
+    return <LoadingScreen message="Checking session…" />;
   }
 
   if (authStatus === "unauthenticated") {
@@ -123,158 +109,141 @@ export default function WorkspaceScreen() {
   };
 
   if (workspaceFetchStatus === "loading" && workspaces.length === 0) {
-    return (
-      <Box flex={1} bg={bg} px={6} py={6}>
-        <Text color={muted}>Loading workspace…</Text>
-      </Box>
-    );
+    return <LoadingScreen message="Loading workspace…" />;
   }
 
   if (workspaceFetchStatus === "succeeded" && !workspace) {
     return (
-      <Box flex={1} bg={bg} px={6} py={6}>
-        <VStack space={4}>
+      <ScreenLayout maxW="720">
+        <BaseButton
+          title="Back to dashboard"
+          variety="tertiary"
+          btnWidth="auto"
+          onPress={() => navigation.navigate("dashboard")}
+        />
+        <BaseCard title="Workspace not found" variant="outline">
+          <Text color={muted} mb={4} fontSize="sm">
+            You do not have access to this workspace, or the link is invalid.
+          </Text>
           <BaseButton
             title="Back to dashboard"
-            variety="tertiary"
-            btnWidth="auto"
             onPress={() => navigation.navigate("dashboard")}
           />
-          <BaseCard title="Workspace not found" variant="outline">
-            <Text color={muted} mb={4}>
-              You do not have access to this workspace, or the link is invalid.
-            </Text>
-            <BaseButton
-              title="Back to dashboard"
-              onPress={() => navigation.navigate("dashboard")}
-            />
-          </BaseCard>
-        </VStack>
-      </Box>
+        </BaseCard>
+      </ScreenLayout>
     );
   }
 
   const canCreateShow = workspace ? canAccessAdminDash(workspace.roleRank) : false;
 
   return (
-    <Box flex={1} bg={bg}>
+    <>
       <CreateEventModal
         isOpen={isCreateEventOpen}
         workspaceId={workspaceId}
         onClose={() => setIsCreateEventOpen(false)}
       />
-      <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
-        <VStack space={4} maxW="720" alignSelf="center" w="100%">
-          {canToggleAdmin && (
-            <ViewModeToggle
-              viewMode={effectiveViewMode}
-              onToggle={onSwitchToCrew}
+      <ScreenLayout
+        title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
+        maxW="720"
+      >
+        {canToggleAdmin && (
+          <ViewModeToggle
+            viewMode={effectiveViewMode}
+            onToggle={onSwitchToCrew}
+          />
+        )}
+
+        {workspace ? (
+          <HStack space={2} flexWrap="wrap" alignItems="center">
+            <BasePill label={workspace.type} />
+            {workspace.role != null ? (
+              <BasePill label={workspace.role} variant="primary" />
+            ) : (
+              <BasePill label="Role pending" variant="warning" />
+            )}
+            <Text fontSize="sm" color={muted}>
+              {workspace.eventCount} event
+              {workspace.eventCount === 1 ? "" : "s"}
+            </Text>
+          </HStack>
+        ) : null}
+
+        <BaseCard variant="outline">
+          <SectionHeader>Events</SectionHeader>
+
+          {canCreateShow && (
+            <BaseButton
+              title="Create show"
+              onPress={() => setIsCreateEventOpen(true)}
             />
           )}
 
-          <BaseCard
-            title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
-            titleAlign="start"
-            variant="elevated"
-          >
-            {workspace && (
-              <HStack space={2} flexWrap="wrap" mb={4} alignItems="center">
-                <BasePill label={workspace.type} />
-                {workspace.role != null ? (
-                  <BasePill label={workspace.role} variant="blue" />
-                ) : (
-                  <BasePill label="Role pending" variant="outline" />
-                )}
-                <Text fontSize="sm" color={muted}>
-                  {workspace.eventCount} event
-                  {workspace.eventCount === 1 ? "" : "s"}
-                </Text>
-              </HStack>
-            )}
-
-            <Text fontSize="sm" fontWeight="semibold" color={textColor} mb={2}>
-              Events
+          {eventsFetchStatus === "loading" && (
+            <Text fontSize="sm" color={muted} mt={canCreateShow ? 3 : 0}>
+              Loading events…
             </Text>
+          )}
 
-            {canCreateShow && (
-              <Box mb={3}>
-                <BaseButton
-                  title="Create show"
-                  onPress={() => setIsCreateEventOpen(true)}
-                />
-              </Box>
-            )}
-
-            {eventsFetchStatus === "loading" && (
+          {eventsFetchStatus === "failed" && eventsFetchError && (
+            <VStack space={2} alignItems="flex-start" mt={3}>
               <Text fontSize="sm" color={muted}>
-                Loading events…
+                {eventsFetchError}
               </Text>
-            )}
+              <BaseButton
+                title="Retry"
+                variety="tertiary"
+                btnWidth="auto"
+                onPress={() => void dispatch(fetchEventsThunk(workspaceId))}
+              />
+            </VStack>
+          )}
 
-            {eventsFetchStatus === "failed" && eventsFetchError && (
-              <VStack space={2} alignItems="flex-start">
-                <Text fontSize="sm" color={muted}>
-                  {eventsFetchError}
-                </Text>
-                <BaseButton
-                  title="Retry"
-                  variety="tertiary"
-                  btnWidth="auto"
-                  onPress={() => void dispatch(fetchEventsThunk(workspaceId))}
-                />
-              </VStack>
-            )}
+          {eventsMatchRoute && events.length === 0 && (
+            <Text fontSize="sm" color={muted} mt={canCreateShow ? 3 : 0}>
+              No events yet.
+            </Text>
+          )}
 
-            {eventsMatchRoute && events.length === 0 && (
-              <Text fontSize="sm" color={muted}>
-                No events yet.
-              </Text>
-            )}
+          {eventsMatchRoute && events.length > 0 && (
+            <VStack space={2} mt={3}>
+              {events.map((ev) => {
+                const subtitle = [
+                  ev.status,
+                  ev.startTime
+                    ? new Date(ev.startTime).toLocaleString()
+                    : null,
+                  `${ev.zones.length} zone${ev.zones.length === 1 ? "" : "s"}`,
+                  `${ev.rooms.length} room${ev.rooms.length === 1 ? "" : "s"}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
 
-            {eventsMatchRoute && events.length > 0 && (
-              <VStack space={2}>
-                {events.map((ev) => (
-                  <Pressable
+                return (
+                  <ListRow
                     key={ev.id}
+                    title={ev.name}
+                    subtitle={subtitle}
                     onPress={() =>
                       navigation.navigate("event", {
                         workspaceId,
                         eventId: ev.id,
                       })
                     }
-                  >
-                    <Box
-                      borderWidth={1}
-                      borderColor={rowBorder}
-                      borderRadius="md"
-                      px={3}
-                      py={2}
-                    >
-                      <Text fontSize="sm" fontWeight="medium" color={textColor}>
-                        {ev.name}
-                      </Text>
-                      <Text fontSize="xs" color={muted}>
-                        {ev.status}
-                        {ev.startTime
-                          ? ` · ${new Date(ev.startTime).toLocaleString()}`
-                          : ""}
-                        {` · ${ev.zones.length} zone${ev.zones.length === 1 ? "" : "s"}`}
-                        {` · ${ev.rooms.length} room${ev.rooms.length === 1 ? "" : "s"}`}
-                      </Text>
-                    </Box>
-                  </Pressable>
-                ))}
-              </VStack>
-            )}
-          </BaseCard>
-          <BaseButton
-            title="Back"
-            variety="tertiary"
-            btnWidth="auto"
-            onPress={() => navigation.navigate("dashboard")}
-          />
-        </VStack>
-      </ScrollView>
-    </Box>
+                  />
+                );
+              })}
+            </VStack>
+          )}
+        </BaseCard>
+
+        <BaseButton
+          title="Back"
+          variety="tertiary"
+          btnWidth="auto"
+          onPress={() => navigation.navigate("dashboard")}
+        />
+      </ScreenLayout>
+    </>
   );
 }

@@ -21,6 +21,7 @@ export const nativeTheme = extendTheme({
   space: mobileTokens.spacing,
   radii: mobileTokens.radii,
   shadows: mobileTokens.shadows,
+  fontSizes: mobileTokens.fontSizes,
   fontConfig: nativeFontConfig,
 
   fontWeights: nativeFontWeights,

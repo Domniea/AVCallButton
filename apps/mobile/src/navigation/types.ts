@@ -8,6 +8,9 @@ export type RootStackParamList = {
   dashboard: undefined;
   workspace: { workspaceId: string };
   event: { workspaceId: string; eventId: string };
+  eventZones: { workspaceId: string; eventId: string };
+  zoneDetail: { workspaceId: string; eventId: string; zoneId: string };
+  roomDetail: { workspaceId: string; eventId: string; roomId: string };
   crewWorkspace: { workspaceId: string };
   crewEvent: { workspaceId: string; eventId: string };
 };

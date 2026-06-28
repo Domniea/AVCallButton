@@ -9,6 +9,7 @@ export const Prisma = prismaPackage.Prisma;
 export const MembershipStatus = prismaPackage.MembershipStatus;
 export const InviteStatus = prismaPackage.InviteStatus;
 export const EventInviteStatus = prismaPackage.EventInviteStatus;
+export const EventStatus = prismaPackage.EventStatus;
 export const MembershipType = prismaPackage.MembershipType;
 
 export type * from "@prisma/client";

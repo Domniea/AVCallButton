@@ -20,7 +20,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "check-types": "turbo run check-types",
     "android": "yarn --cwd apps/mobile android",
-    "ios": "yarn --cwd apps/mobile ios"
+    "ios": "yarn --cwd apps/mobile ios",
+    "prisma:migrate": "yarn workspace @av/backend prisma:migrate",
+    "prisma:generate": "yarn workspace @av/backend prisma:generate"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.4.2",

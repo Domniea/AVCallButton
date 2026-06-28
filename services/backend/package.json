@@ -11,6 +11,8 @@
     "deploy": "sst deploy --stage dev",
     "deploy:prod": "sst deploy --stage prod",
     "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "remove:local": "sst remove --stage local",
     "remove:dev": "sst remove --stage dev",
     "remove:prod": "sst remove --stage prod"

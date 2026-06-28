@@ -7,6 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+}
+
 enum EventInviteStatus {
   PENDING
   ACCEPTED
@@ -29,6 +35,23 @@ enum MembershipType {
 enum MembershipStatus {
   ACTIVE
   INACTIVE
+}
+
+enum EventStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum AlertStatus {
+  OPEN
+  CANCELLED
+  CLOSED
+  COMPLETED
+  RESOLVED
+  REOPENED
+  REJECTED
 }
 
 model Workspace {
@@ -112,7 +135,7 @@ model Invite {
 model Event {
   id          String    @id @default(uuid())
   name        String
-  status      String
+  status      EventStatus @default(DRAFT)
   location    String?
   venue       String?
   startTime   DateTime?
@@ -124,6 +147,7 @@ model Event {
 
   logs             Log[]
   messages         Message[]
+  alerts           Alert[]
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
   zones            EventZone[]
@@ -195,6 +219,7 @@ model EventRoom {
   id        String   @id @default(uuid())
   eventId   String
   zoneId    String?
+  callToken String  @unique @default(uuid())
   name      String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
@@ -203,6 +228,7 @@ model EventRoom {
   event    Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   zone     EventZone?         @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   coverage EventRoomCoverage[]
+  alerts   Alert[]
 
   @@index([eventId])
   @@index([zoneId])
@@ -241,6 +267,37 @@ model EventZoneCoverage {
   @@index([zoneId])
   @@index([zoneId, eventRank])
   @@index([membershipId])
+}
+
+/// Room help request from a public QR scan (v1: single kind "HELP").
+model Alert {
+  id        String   @id @default(uuid())
+  eventId   String
+  roomId    String
+  kind      String   @default("HELP")
+  message   String?
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  room  EventRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, status, createdAt])
+  @@index([roomId, createdAt])
+  @@index([status])
+}
+
+/// Expo push token for notifying crew on mobile (one row per device install).
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  DevicePlatform
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Log {

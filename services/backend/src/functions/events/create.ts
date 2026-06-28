@@ -1,6 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
 import { prisma } from "../lib/prisma";
+import { EventStatus } from "../lib/prismaClient";
 import { authorize } from "../lib/authorization";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
@@ -43,7 +44,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       const newEvent = await tx.event.create({
         data: {
           name: name.trim(),
-          status: "draft",
+          status: EventStatus.DRAFT,
           location: location ?? null,
           venue: venue ?? null,
           startTime: startTime ? new Date(startTime) : null,

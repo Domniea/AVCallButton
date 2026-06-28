@@ -11,7 +11,10 @@
     "android:start": "expo start --dev-client --android",
     "prebuild": "expo prebuild",
     "prebuild:clean": "expo prebuild --clean",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "eas:preview:ios": "eas build --profile preview --platform ios",
+    "eas:preview:android": "eas build --profile preview --platform android",
+    "eas:dev:ios": "eas build --profile development --platform ios"
   },
   "dependencies": {
     "@av/forms": "1.0.0",

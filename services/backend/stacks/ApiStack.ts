@@ -41,7 +41,7 @@ export function ApiStack({ stack }: StackContext) {
 
     routes: {
       // Auth
-      "GET /me": "src/functions/me.handler",
+      "GET /me": "src/functions/me/index.handler",
       "DELETE /account": "src/functions/account/delete.handler",
 
       // Me (crew / self-scoped)
@@ -126,6 +126,16 @@ export function ApiStack({ stack }: StackContext) {
       "POST /invites/accept": "src/functions/invites/accept.handler",
       "PATCH /workspaces/{workspaceId}/invites/{inviteId}/revoke":
         "src/functions/invites/revoke.handler",
+
+      // Public (no auth) — guest QR call flow
+      "GET /public/call/{callToken}/meta": {
+        function: "src/functions/public/call/getQRMeta.handler",
+        authorizer: "none",
+      },
+      "POST /public/call/{callToken}/alerts": {
+        function: "src/functions/public/call/createAlert.handler",
+        authorizer: "none",
+      },
     },
   });
 

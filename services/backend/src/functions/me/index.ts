@@ -2,7 +2,7 @@ import type {
   APIGatewayProxyHandlerV2WithJWTAuthorizer,
 } from "aws-lambda";
 
-import { normalizeEmail } from "./lib/email";
+import { normalizeEmail } from "../lib/email";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer =
   async (event) => {

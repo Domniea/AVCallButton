@@ -25,3 +25,10 @@ export function serverError(message: string) {
     body: JSON.stringify({ error: message }),
   };
 }
+
+export function tooManyRequests(message: string) {
+  return {
+    statusCode: 429,
+    body: JSON.stringify({ error: message }),
+  };
+}

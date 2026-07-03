@@ -45,10 +45,11 @@ enum EventStatus {
 }
 
 enum AlertStatus {
-  OPEN
+  ACKNOWLEDGED
   CANCELLED
   CLOSED
   COMPLETED
+  OPEN
   RESOLVED
   REOPENED
   REJECTED
@@ -94,8 +95,8 @@ model Membership {
   status          MembershipStatus @default(ACTIVE)
   joinedAt        DateTime         @default(now())
 
-  workspace        Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  workspaceRole    WorkspaceRole         @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
+  workspace        Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceRole    WorkspaceRole       @relation(fields: [workspaceRoleId], references: [uuid], onDelete: Restrict)
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
   roomCoverage     EventRoomCoverage[]
@@ -133,14 +134,14 @@ model Invite {
 }
 
 model Event {
-  id          String    @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   status      EventStatus @default(DRAFT)
   location    String?
   venue       String?
   startTime   DateTime?
   endTime     DateTime?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime    @default(now())
   workspaceId String
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -219,14 +220,14 @@ model EventRoom {
   id        String   @id @default(uuid())
   eventId   String
   zoneId    String?
-  callToken String  @unique @default(uuid())
+  callToken String   @unique @default(uuid())
   name      String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event    Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  zone     EventZone?         @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  event    Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  zone     EventZone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   coverage EventRoomCoverage[]
   alerts   Alert[]
 
@@ -260,8 +261,8 @@ model EventZoneCoverage {
   assignedBy   String
   createdAt    DateTime @default(now())
 
-  zone       EventZone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-  membership Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  zone       EventZone  @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
   @@unique([zoneId, membershipId])
   @@index([zoneId])
@@ -290,12 +291,12 @@ model Alert {
 
 /// Expo push token for notifying crew on mobile (one row per device install).
 model DeviceToken {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   userId    String
-  token     String   @unique
+  token     String         @unique
   platform  DevicePlatform
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   @@index([userId])
 }

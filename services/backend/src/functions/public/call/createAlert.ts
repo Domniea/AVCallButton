@@ -2,6 +2,7 @@ import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 
 import { isEventAcceptingCalls } from "../../lib/events/eventCallStatus";
 import { prisma } from "../../lib/prisma";
+import { notifyUsers } from "../../lib/push/notifyUsers";
 import { resolveAlertRecipients } from "../../lib/resolvers/alerts/resolveAlertRecipients";
 import {
   badRequest,
@@ -30,22 +31,19 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     if (!callToken) return badRequest("Missing call token");
     if (!event.body) return badRequest("Missing request body");
 
-    let parsed: unknown;
+    let requestBody: unknown;
     try {
-      parsed = JSON.parse(event.body);
+      requestBody = JSON.parse(event.body);
     } catch {
       return badRequest("Invalid JSON");
     }
-    if (typeof parsed !== "object" || parsed === null) {
+    if (typeof requestBody !== "object" || requestBody === null) {
       return badRequest("Invalid body");
     }
 
-    const message = parseMessage((parsed as Record<string, unknown>).message);
-    if (
-      (parsed as Record<string, unknown>).message != null &&
-      (parsed as Record<string, unknown>).message !== "" &&
-      message === null
-    ) {
+    const body = requestBody as Record<string, unknown>;
+    const message = parseMessage(body.message);
+    if (body.message != null && body.message !== "" && message === null) {
       return badRequest("Invalid message");
     }
 
@@ -53,6 +51,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       where: { callToken },
       select: {
         id: true,
+        name: true,
         eventId: true,
         zoneId: true,
         event: { select: { status: true, endTime: true } },
@@ -85,6 +84,22 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       eventId: room.eventId,
       roomId: room.id,
       zoneId: room.zoneId,
+    });
+
+    const userIds = [...new Set(recipients.map((recipient) => recipient.userId))];
+    void notifyUsers({
+      userIds,
+      notification: {
+        title: `Help — ${room.name}`,
+        body: message ?? "A guest requested help",
+        data: {
+          alertId: alert.id,
+          eventId: room.eventId,
+          roomId: room.id,
+        },
+      },
+    }).catch((error) => {
+      console.error("Failed to send alert push notifications:", error);
     });
 
     return {

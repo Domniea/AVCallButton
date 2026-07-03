@@ -4,6 +4,7 @@ import { AmplifyProvider } from "./AmplifyProvider.native";
 import { ReduxProvider } from "./ReduxProvider.native";
 import { NativeBaseProviderWrapper } from "./NativeBaseProvider.native";
 import { AuthBootstrapProvider } from "./AuthBootstrapProvider";
+import { PushRegistrationProvider } from "./PushRegistrationProvider";
 import { ApiProvider } from "./ApiProvider";
 
 export function ClientProviders({ children }: PropsWithChildren) {
@@ -12,7 +13,9 @@ export function ClientProviders({ children }: PropsWithChildren) {
       <AmplifyProvider>
         <ApiProvider>
           <ReduxProvider>
-            <AuthBootstrapProvider>{children}</AuthBootstrapProvider>
+            <AuthBootstrapProvider>
+              <PushRegistrationProvider>{children}</PushRegistrationProvider>
+            </AuthBootstrapProvider>
           </ReduxProvider>
         </ApiProvider>
       </AmplifyProvider>

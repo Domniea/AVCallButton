@@ -18,6 +18,15 @@ export default function ({ config }: ConfigContext): ExpoConfig {
     userInterfaceStyle: "light",
     newArchEnabled: true,
 
+    plugins: [
+      [
+        "expo-notifications",
+        {
+          color: "#ffffff",
+        },
+      ],
+    ],
+
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",

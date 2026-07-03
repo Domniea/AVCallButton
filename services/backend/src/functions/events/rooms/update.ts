@@ -24,14 +24,14 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     if (!roomId) return badRequest("Missing room id");
     if (!event.body) return badRequest("Missing request body");
 
-    let parsed: unknown;
+    let requestBody: unknown;
     try {
-      parsed = JSON.parse(event.body);
+      requestBody = JSON.parse(event.body);
     } catch {
       return badRequest("Invalid JSON");
     }
-    if (typeof parsed !== "object" || parsed === null) return badRequest("Invalid body");
-    const body = parsed as Record<string, unknown>;
+    if (typeof requestBody !== "object" || requestBody === null) return badRequest("Invalid body");
+    const body = requestBody as Record<string, unknown>;
 
     const room = await prisma.eventRoom.findFirst({
       where: { id: roomId, eventId },

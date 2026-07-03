@@ -27,6 +27,8 @@
     "@react-navigation/native-stack": "6",
     "expo": "~54.0.24",
     "expo-dev-client": "^6.0.18",
+    "expo-device": "~8.0.10",
+    "expo-notifications": "~0.32.17",
     "expo-status-bar": "~3.0.8",
     "native-base": "3.4.28",
     "patch-package": "^8.0.1",

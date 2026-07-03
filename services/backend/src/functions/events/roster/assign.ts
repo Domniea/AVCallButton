@@ -66,18 +66,18 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Missing request body");
     }
 
-    let parsed: unknown;
+    let requestBody: unknown;
     try {
-      parsed = JSON.parse(event.body);
+      requestBody = JSON.parse(event.body);
     } catch {
       return badRequest("Invalid JSON");
     }
 
-    if (typeof parsed !== "object" || parsed === null) {
+    if (typeof requestBody !== "object" || requestBody === null) {
       return badRequest("Invalid body");
     }
 
-    const body = parsed as Record<string, unknown>;
+    const body = requestBody as Record<string, unknown>;
     const email = body.email;
 
     const eventRank = parseWorkspaceRoleRank(body.eventRank);

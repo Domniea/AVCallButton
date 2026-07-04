@@ -87,20 +87,22 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     });
 
     const userIds = [...new Set(recipients.map((recipient) => recipient.userId))];
-    void notifyUsers({
-      userIds,
-      notification: {
-        title: `Help — ${room.name}`,
-        body: message ?? "A guest requested help",
-        data: {
-          alertId: alert.id,
-          eventId: room.eventId,
-          roomId: room.id,
+    try {
+      await notifyUsers({
+        userIds,
+        notification: {
+          title: `Help — ${room.name}`,
+          body: message ?? "A guest requested help",
+          data: {
+            alertId: alert.id,
+            eventId: room.eventId,
+            roomId: room.id,
+          },
         },
-      },
-    }).catch((error) => {
+      });
+    } catch (error) {
       console.error("Failed to send alert push notifications:", error);
-    });
+    }
 
     return {
       statusCode: 201,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { Badge, Box, Grid, HStack, Text, VStack } from "@chakra-ui/react";
@@ -27,7 +28,6 @@ import {
 } from "@av/store";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { BaseButton } from "@/components/reusable/BaseButton";
-import { RoomCallLinkActions } from "@/components/reusable/RoomCallLinkActions";
 
 function DetailRow({
   label,
@@ -193,24 +193,26 @@ function CoverageList({
 }
 
 function RoomCoverageSection({
+  workspaceId,
+  eventId,
   room,
-  eventName,
-  zoneName,
   rows,
   roster,
   onAddStaff,
   onRemove,
   removingMembershipId,
 }: {
+  workspaceId: string;
+  eventId: string;
   room: { id: string; name: string; callToken: string };
-  eventName: string;
-  zoneName?: string | null;
   rows: RoomCoverage[];
   roster: RosterAssignment[];
   onAddStaff: () => void;
   onRemove?: (membershipId: string) => void;
   removingMembershipId?: string | null;
 }) {
+  const roomHref = `/workspace/${workspaceId}/event/${eventId}/room/${room.id}`;
+
   return (
     <Box
       borderWidth={1}
@@ -222,15 +224,21 @@ function RoomCoverageSection({
     >
       <HStack justify="space-between" align="start" gap={2}>
         <Box minW={0} flex={1}>
-          <Text fontSize="sm" fontWeight="medium" color="text">
-            {room.name}
-          </Text>
-          <RoomCallLinkActions
-            roomName={room.name}
-            callToken={room.callToken}
-            eventName={eventName}
-            zoneName={zoneName}
-          />
+          <Link href={roomHref} style={{ textDecoration: "none" }}>
+            <Text
+              fontSize="sm"
+              fontWeight="medium"
+              color="text"
+              _hover={{ color: "blue.500", textDecoration: "underline" }}
+            >
+              {room.name}
+            </Text>
+          </Link>
+          <Link href={roomHref}>
+            <Text fontSize="xs" color="gray.500" mt={0.5} _hover={{ color: "blue.500" }}>
+              QR, PDF, room details →
+            </Text>
+          </Link>
         </Box>
         <BaseButton
           variety="tertiary"
@@ -889,9 +897,9 @@ export default function EventPage() {
                               {zoneRooms.map((room) => (
                                 <RoomCoverageSection
                                   key={room.id}
+                                  workspaceId={workspaceId}
+                                  eventId={eventId}
                                   room={room}
-                                  eventName={event.name}
-                                  zoneName={zone.name}
                                   rows={roomCoverage[room.id] ?? []}
                                   roster={
                                     rosterMatchesEvent ? assignments : []
@@ -947,8 +955,9 @@ export default function EventPage() {
                           .map((room) => (
                             <RoomCoverageSection
                               key={room.id}
+                              workspaceId={workspaceId}
+                              eventId={eventId}
                               room={room}
-                              eventName={event.name}
                               rows={roomCoverage[room.id] ?? []}
                               roster={rosterMatchesEvent ? assignments : []}
                               onAddStaff={() =>

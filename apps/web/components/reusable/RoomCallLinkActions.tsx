@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { HStack } from "@chakra-ui/react";
+import { HStack, Text, VStack } from "@chakra-ui/react";
 import QRCode from "qrcode";
 
 import { BaseButton } from "@/components/reusable/BaseButton";
@@ -13,6 +13,8 @@ type RoomCallLinkActionsProps = {
   callToken: string;
   eventName: string;
   zoneName?: string | null;
+  /** When true, show the guest URL and use a vertical layout (room detail page). */
+  expanded?: boolean;
 };
 
 export function RoomCallLinkActions({
@@ -20,6 +22,7 @@ export function RoomCallLinkActions({
   callToken,
   eventName,
   zoneName,
+  expanded = false,
 }: RoomCallLinkActionsProps) {
   const [copyLabel, setCopyLabel] = useState("Copy link");
   const [isDownloadingQr, setIsDownloadingQr] = useState(false);
@@ -67,6 +70,38 @@ export function RoomCallLinkActions({
       setIsDownloadingPdf(false);
     }
   }, [callToken, eventName, roomName, zoneName]);
+
+  if (expanded) {
+    return (
+      <VStack align="stretch" gap={3}>
+        <Text fontSize="sm" color="gray.500" wordBreak="break-all">
+          {callUrl}
+        </Text>
+        <HStack gap={2} flexWrap="wrap">
+          <BaseButton
+            variety="secondary"
+            title={copyLabel}
+            btnWidth="auto"
+            onClick={handleCopyLink}
+          />
+          <BaseButton
+            variety="tertiary"
+            title={isDownloadingQr ? "Saving…" : "Download QR"}
+            btnWidth="auto"
+            disabled={isDownloadingQr}
+            onClick={handleDownloadQr}
+          />
+          <BaseButton
+            variety="tertiary"
+            title={isDownloadingPdf ? "Saving…" : "Download PDF sign"}
+            btnWidth="auto"
+            disabled={isDownloadingPdf}
+            onClick={handleDownloadPdf}
+          />
+        </HStack>
+      </VStack>
+    );
+  }
 
   return (
     <HStack gap={2} flexWrap="wrap" mt={2}>

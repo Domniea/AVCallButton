@@ -1,22 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useParams } from "next/navigation";
-import {
-  Box,
-  HStack,
-  Spinner,
-  Text,
-  Textarea,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import axios from "axios";
 
 import { createHelpAlert, fetchCallMeta, type CallMeta } from "@av/store";
+import { RHFInput } from "@av/forms/src/controllers/RHFInput";
+import { useAppForm } from "@av/forms/src/useAppForm";
+import {
+  GUEST_HELP_MESSAGE_MAX_LENGTH,
+  guestHelpRequestSchema,
+  type GuestHelpRequestSchema,
+} from "@av/forms/src/schemas/public/guestHelpRequestSchema";
 
 import { BaseButton } from "@/components/reusable/BaseButton";
-
-const MESSAGE_MAX_LENGTH = 500;
+import { BaseInput } from "@/components/reusable/BaseInput";
 
 const SAFE_TOP = "max(12px, env(safe-area-inset-top))";
 const SAFE_BOTTOM = "max(16px, env(safe-area-inset-bottom))";
@@ -41,9 +40,6 @@ export default function GuestCallPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
 
-  const [message, setMessage] = useState("");
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [didSend, setDidSend] = useState(false);
 
   useEffect(() => {
@@ -72,24 +68,6 @@ export default function GuestCallPage() {
       cancelled = true;
     };
   }, [callToken]);
-
-  const handleSubmit = useCallback(async () => {
-    if (!callToken || !meta?.acceptingCalls) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      await createHelpAlert(callToken, {
-        message: message.trim() || undefined,
-      });
-      setDidSend(true);
-      setMessage("");
-    } catch (error) {
-      setSubmitError(parseApiError(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [callToken, message, meta?.acceptingCalls]);
 
   if (isLoadingMeta) {
     return (
@@ -122,34 +100,9 @@ export default function GuestCallPage() {
     );
   }
 
-  const showForm = meta.acceptingCalls && !didSend;
-
   return (
-    <PageShell
-      footer={
-        showForm ? (
-          <MobileActionBar>
-            {submitError ? (
-              <NoticePanel tone="error">
-                <Text fontSize="sm" color="red.500">
-                  {submitError}
-                </Text>
-              </NoticePanel>
-            ) : null}
-            <BaseButton
-              btnHeight="60px"
-              disabled={isSubmitting}
-              onClick={handleSubmit}
-            >
-              <Text fontSize={{ base: "xl", md: "lg" }} fontWeight="bold">
-                {isSubmitting ? "Sending…" : "Request help"}
-              </Text>
-            </BaseButton>
-          </MobileActionBar>
-        ) : undefined
-      }
-    >
-      <VStack align="stretch" gap={6} flex={1} w="full" pb={showForm ? 4 : 0}>
+    <PageShell>
+      <VStack align="stretch" gap={6} flex={1} w="full">
         <LocationHero meta={meta} />
 
         {!meta.acceptingCalls ? (
@@ -191,45 +144,97 @@ export default function GuestCallPage() {
             />
           </VStack>
         ) : (
-          <VStack align="stretch" gap={4}>
-            <Text fontSize="md" color="gray.500" lineHeight="tall">
-              Tap the button below and our crew will be notified right away.
-            </Text>
-
-            <Box>
-              <HStack justify="space-between" mb={2}>
-                <Text fontSize="md" fontWeight="medium" color="text">
-                  Optional message
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  {message.length}/{MESSAGE_MAX_LENGTH}
-                </Text>
-              </HStack>
-              <Textarea
-                value={message}
-                onChange={(event) => setMessage(event.target.value)}
-                placeholder="e.g. No sound from the projector…"
-                rows={3}
-                maxLength={MESSAGE_MAX_LENGTH}
-                bg="surface"
-                borderColor="cardBorder"
-                borderRadius="xl"
-                fontSize="16px"
-                lineHeight="tall"
-                py={3}
-                px={4}
-                minH="96px"
-                resize="none"
-                _focusVisible={{
-                  borderColor: "blue.400",
-                  boxShadow: "0 0 0 2px var(--chakra-colors-blue-400)",
-                }}
-              />
-            </Box>
-          </VStack>
+          <GuestHelpForm
+            key="guest-help-form"
+            callToken={callToken}
+            onSent={() => setDidSend(true)}
+          />
         )}
       </VStack>
     </PageShell>
+  );
+}
+
+function GuestHelpForm({
+  callToken,
+  onSent,
+}: {
+  callToken: string;
+  onSent: () => void;
+}) {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const form = useAppForm(guestHelpRequestSchema, { message: "" });
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting },
+  } = form;
+
+  const messageLength = watch("message")?.length ?? 0;
+
+  const onSubmit = async (values: GuestHelpRequestSchema) => {
+    setSubmitError(null);
+    try {
+      await createHelpAlert(callToken, {
+        message: values.message.trim() || undefined,
+      });
+      onSent();
+    } catch (error) {
+      setSubmitError(parseApiError(error));
+    }
+  };
+
+  return (
+    <Box as="form" onSubmit={handleSubmit(onSubmit)} w="full">
+      <VStack align="stretch" gap={4}>
+        <Text fontSize="md" color="gray.500" lineHeight="tall">
+          Tap Request help or press send on your keyboard. Leave the message
+          blank if you just need someone to come by.
+        </Text>
+
+        <Box>
+          <HStack justify="space-between" mb={2}>
+            <Text fontSize="md" fontWeight="medium" color="text">
+              Optional message
+            </Text>
+            <Text fontSize="sm" color="gray.500">
+              {messageLength}/{GUEST_HELP_MESSAGE_MAX_LENGTH}
+            </Text>
+          </HStack>
+          <RHFInput
+            control={control}
+            name="message"
+            Component={BaseInput}
+            componentProps={{
+              placeholder: "e.g. No sound from the projector",
+              type: "text",
+              enterKeyHint: "send",
+              autoComplete: "off",
+              autoCorrect: "off",
+              maxLength: GUEST_HELP_MESSAGE_MAX_LENGTH,
+              fontSize: "16px",
+              disabled: isSubmitting,
+            }}
+          />
+        </Box>
+
+        {submitError ? (
+          <NoticePanel tone="error">
+            <Text fontSize="sm" color="red.500">
+              {submitError}
+            </Text>
+          </NoticePanel>
+        ) : null}
+
+        <BaseButton type="submit" btnHeight="60px" disabled={isSubmitting}>
+          <Text fontSize={{ base: "xl", md: "lg" }} fontWeight="bold">
+            {isSubmitting ? "Sending…" : "Request help"}
+          </Text>
+        </BaseButton>
+      </VStack>
+    </Box>
   );
 }
 
@@ -347,53 +352,7 @@ function NoticePanel({
   );
 }
 
-function MobileActionBar({ children }: { children: ReactNode }) {
-  return (
-    <Box
-      position="sticky"
-      bottom={0}
-      left={0}
-      right={0}
-      zIndex={10}
-      pt={4}
-      pb={SAFE_BOTTOM}
-      mt="auto"
-      bg="bg"
-      borderTopWidth={1}
-      borderTopColor="cardBorder"
-      mx={{ base: -4, md: 0 }}
-      px={{ base: 4, md: 0 }}
-      style={{
-        paddingBottom: SAFE_BOTTOM,
-        WebkitTapHighlightColor: "transparent",
-      }}
-      _before={{
-        content: '""',
-        position: "absolute",
-        top: "-24px",
-        left: 0,
-        right: 0,
-        height: "24px",
-        bgGradient: "to-t",
-        gradientFrom: "bg",
-        gradientTo: "transparent",
-        pointerEvents: "none",
-      }}
-    >
-      <VStack align="stretch" gap={3} w="full">
-        {children}
-      </VStack>
-    </Box>
-  );
-}
-
-function PageShell({
-  children,
-  footer,
-}: {
-  children: ReactNode;
-  footer?: ReactNode;
-}) {
+function PageShell({ children }: { children: ReactNode }) {
   return (
     <Box
       minH="100svh"
@@ -404,11 +363,12 @@ function PageShell({
       flexDirection="column"
       px={SAFE_X}
       pt={SAFE_TOP}
-      pb={footer ? 0 : SAFE_BOTTOM}
+      pb={SAFE_BOTTOM}
       style={{
         paddingTop: SAFE_TOP,
         paddingLeft: SAFE_X,
         paddingRight: SAFE_X,
+        paddingBottom: SAFE_BOTTOM,
         WebkitTapHighlightColor: "transparent",
       }}
     >
@@ -453,19 +413,15 @@ function PageShell({
           {children}
         </Box>
 
-        {footer}
-
-        {!footer ? (
-          <Text
-            fontSize="xs"
-            color="gray.500"
-            textAlign="center"
-            py={4}
-            flexShrink={0}
-          >
-            For technical assistance in this room only.
-          </Text>
-        ) : null}
+        <Text
+          fontSize="xs"
+          color="gray.500"
+          textAlign="center"
+          py={4}
+          flexShrink={0}
+        >
+          For technical assistance in this room only.
+        </Text>
       </Box>
     </Box>
   );

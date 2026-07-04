@@ -13,6 +13,7 @@ export type EventZoneRef = {
 export type EventRoom = {
   id: string;
   name: string;
+  callToken: string;
   sortOrder: number;
   eventId: string;
   zoneId: string | null;

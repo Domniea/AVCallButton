@@ -21,11 +21,13 @@ import {
   fetchZoneCoverage,
   removeRoomCoverage,
   removeZoneCoverage,
+  type EventRoom,
   type RoomCoverage,
   type ZoneCoverage,
 } from "@av/store";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { BaseButton } from "@/components/reusable/BaseButton";
+import { RoomCallLinkActions } from "@/components/reusable/RoomCallLinkActions";
 
 function DetailRow({
   label,
@@ -95,10 +97,7 @@ function pendingSubtitle(p: RosterPendingInvite) {
   return parts.join(" · ");
 }
 
-function roomsForZone(
-  rooms: Array<{ id: string; name: string; zoneId: string | null }>,
-  zoneId: string,
-) {
+function roomsForZone(rooms: EventRoom[], zoneId: string) {
   return rooms.filter((room) => room.zoneId === zoneId);
 }
 
@@ -195,13 +194,17 @@ function CoverageList({
 
 function RoomCoverageSection({
   room,
+  eventName,
+  zoneName,
   rows,
   roster,
   onAddStaff,
   onRemove,
   removingMembershipId,
 }: {
-  room: { id: string; name: string };
+  room: { id: string; name: string; callToken: string };
+  eventName: string;
+  zoneName?: string | null;
   rows: RoomCoverage[];
   roster: RosterAssignment[];
   onAddStaff: () => void;
@@ -217,10 +220,18 @@ function RoomCoverageSection({
       py={3}
       bg="surface"
     >
-      <HStack justify="space-between" align="center" gap={2}>
-        <Text fontSize="sm" fontWeight="medium" color="text">
-          {room.name}
-        </Text>
+      <HStack justify="space-between" align="start" gap={2}>
+        <Box minW={0} flex={1}>
+          <Text fontSize="sm" fontWeight="medium" color="text">
+            {room.name}
+          </Text>
+          <RoomCallLinkActions
+            roomName={room.name}
+            callToken={room.callToken}
+            eventName={eventName}
+            zoneName={zoneName}
+          />
+        </Box>
         <BaseButton
           variety="tertiary"
           title="Add staff"
@@ -879,6 +890,8 @@ export default function EventPage() {
                                 <RoomCoverageSection
                                   key={room.id}
                                   room={room}
+                                  eventName={event.name}
+                                  zoneName={zone.name}
                                   rows={roomCoverage[room.id] ?? []}
                                   roster={
                                     rosterMatchesEvent ? assignments : []
@@ -935,6 +948,7 @@ export default function EventPage() {
                             <RoomCoverageSection
                               key={room.id}
                               room={room}
+                              eventName={event.name}
                               rows={roomCoverage[room.id] ?? []}
                               roster={rosterMatchesEvent ? assignments : []}
                               onAddStaff={() =>

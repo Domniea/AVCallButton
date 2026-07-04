@@ -16,4 +16,5 @@ export * from "./api/zones.api";
 export * from "./api/rooms.api";
 export * from "./api/coverage.api";
 export * from "./api/deviceTokens.api";
+export * from "./api/publicCall.api";
 

@@ -13,6 +13,7 @@ interface BaseButtonProps {
   rightIcon?: React.ReactNode;
   children?: React.ReactNode;
   onPress?: () => void;
+  isDisabled?: boolean;
 }
 
 

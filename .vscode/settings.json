@@ -25,6 +25,8 @@
     "typescriptreact"
   ],
 
-  "typescript.format.enable": false,
-  "javascript.format.enable": false
+  "js/ts.format.enabled": false,
+
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true
 }

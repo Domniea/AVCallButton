@@ -16,13 +16,12 @@
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@av/ui": [
-        "packages/ui"
+        "./packages/ui"
       ],
       "@av/ui/*": [
-        "packages/ui/src/*"
+        "./packages/ui/src/*"
       ]
     }
   },

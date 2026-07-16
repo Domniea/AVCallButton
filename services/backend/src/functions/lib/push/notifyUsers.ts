@@ -1,6 +1,7 @@
 import { prisma } from "../prisma";
 import { DevicePlatform } from "../prismaClient";
 import { sendExpoPush } from "./expoPush";
+import { sendWebPush } from "./webPush";
 import type { PushNotification } from "./types";
 
 export type NotifyUsersParams = {
@@ -33,11 +34,15 @@ export async function notifyUsers(params: NotifyUsersParams): Promise<void> {
     )
     .map((row) => row.token);
 
-  const { staleTokens: staleExpoTokens } = await sendExpoPush(
-    expoTokens,
-    params.notification,
-  );
-  await deleteStaleDeviceTokens(staleExpoTokens);
+  const webTokens = deviceTokens
+    .filter((row) => row.platform === DevicePlatform.WEB)
+    .map((row) => row.token);
 
-  // WEB: send via webPush.ts once VAPID + web-push are wired up.
+  const [{ staleTokens: staleExpoTokens }, { staleTokens: staleWebTokens }] =
+    await Promise.all([
+      sendExpoPush(expoTokens, params.notification),
+      sendWebPush(webTokens, params.notification),
+    ]);
+
+  await deleteStaleDeviceTokens([...staleExpoTokens, ...staleWebTokens]);
 }

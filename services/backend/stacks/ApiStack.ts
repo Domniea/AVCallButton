@@ -11,7 +11,10 @@ export function ApiStack({ stack }: StackContext) {
     cors: {
       allowHeaders: ["Authorization", "Content-Type"],
       allowMethods: ["GET", "POST", "DELETE", "PATCH", "OPTIONS"],
-      allowOrigins: ["http://localhost:3000", "https://av-call-button-web.vercel.app"],
+      allowOrigins: [
+        "http://localhost:3000",
+        "https://av-call-button-web.vercel.app",
+      ],
     },
 
     authorizers: {
@@ -32,6 +35,10 @@ export function ApiStack({ stack }: StackContext) {
           COGNITO_USER_POOL_ID,
           COGNITO_CLIENT_ID,
           DATABASE_URL: process.env.DATABASE_URL!,
+          VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY ?? "",
+          VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY ?? "",
+          VAPID_SUBJECT:
+            process.env.VAPID_SUBJECT ?? "mailto:domniea@gmail.com",
           SES_FROM_EMAIL: "domniea@gmail.com",
           APP_URL,
         },
@@ -47,10 +54,8 @@ export function ApiStack({ stack }: StackContext) {
       // Me (crew / self-scoped)
       "GET /me/workspaces/{workspaceId}/events":
         "src/functions/me/workspaces/events/list.handler",
-      "GET /me/events/{eventId}":
-        "src/functions/me/events/detail.handler",
-      "POST /me/device-tokens":
-        "src/functions/me/deviceTokens/upsert.handler",
+      "GET /me/events/{eventId}": "src/functions/me/events/detail.handler",
+      "POST /me/device-tokens": "src/functions/me/deviceTokens/upsert.handler",
       "DELETE /me/device-tokens/{deviceTokenId}":
         "src/functions/me/deviceTokens/delete.handler",
 

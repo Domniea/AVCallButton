@@ -1,6 +1,5 @@
 /** Production guest web app — QR / call links always target this unless overridden. */
-// const DEFAULT_GUEST_APP_URL = "https://av-call-button-web.vercel.app";
-const DEFAULT_GUEST_APP_URL = "https://localhost:3000";
+const DEFAULT_GUEST_APP_URL = "https://av-call-button-web.vercel.app";
 
 /** Public guest URL for a room's QR / call link. */
 export function buildGuestCallUrl(callToken: string): string {

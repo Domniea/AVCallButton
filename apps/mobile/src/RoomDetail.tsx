@@ -1,14 +1,15 @@
 import React from "react";
-import { Text } from "native-base";
+import { Text, VStack } from "native-base";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 
 import { BaseCard } from "../components/BaseCard";
 import { LoadingScreen } from "../components/LoadingScreen";
+import { RoomCallLinkActions } from "../components/RoomCallLinkActions";
 import { ScreenLayout } from "../components/ScreenLayout";
 import { useThemeColors } from "../hooks/useThemeColors";
 import AssignCoverageModal from "./AssignCoverageModal";
-import { CoverageList } from "./event/EventUi";
+import { CoverageList, DetailRow } from "./event/EventUi";
 import { removingMembershipIdFor } from "./event/eventHelpers";
 import { useEventCoverage } from "./event/useEventCoverage";
 import { useEventScreenData } from "./event/useEventScreenData";
@@ -78,6 +79,22 @@ export default function RoomDetailScreen() {
             {coverageActionError}
           </Text>
         ) : null}
+
+        <BaseCard title="Room details" titleAlign="start" variant="outline">
+          <VStack space={3}>
+            <DetailRow label="Room name" value={room.name} />
+            <DetailRow label="Zone" value={zone?.name ?? "Unassigned"} />
+          </VStack>
+        </BaseCard>
+
+        <BaseCard title="Guest help link" titleAlign="start" variant="outline">
+          <RoomCallLinkActions
+            roomName={room.name}
+            callToken={room.callToken}
+            eventName={event.name}
+            zoneName={zone?.name}
+          />
+        </BaseCard>
 
         <BaseCard variant="outline">
           <CoverageList

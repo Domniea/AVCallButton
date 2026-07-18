@@ -48,10 +48,16 @@ function configureVapid(): boolean {
 }
 
 function buildPayload(notification: PushNotification): string {
-  const data: Record<string, string> = { url: "/dashboard" };
-  if (notification.data) {
+  const data: Record<string, string> = {
+    url: notification.data?.url ?? "/dashboard",
+  };
+  if (notification.data?.alertId) {
     data.alertId = notification.data.alertId;
+  }
+  if (notification.data?.eventId) {
     data.eventId = notification.data.eventId;
+  }
+  if (notification.data?.roomId) {
     data.roomId = notification.data.roomId;
   }
 

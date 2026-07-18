@@ -28,3 +28,29 @@ export async function upsertDeviceToken(
   );
   return res.data.deviceToken;
 }
+
+export type TestPushResult = {
+  sent: number;
+  staleRemoved: number;
+  webSent?: number;
+  nativeSent?: number;
+};
+
+/** Ask the API to send a diagnostic push to this user's registered devices. */
+export async function sendTestPush(
+  authToken: string,
+): Promise<TestPushResult> {
+  const api = getApiClient();
+  const res = await api.post<TestPushResult>(
+    "/me/push/test",
+    {},
+    {
+      headers: { Authorization: `Bearer ${authToken}` },
+    },
+  );
+  return res.data;
+}
+
+/** @deprecated Prefer sendTestPush — same endpoint, all platforms. */
+export const sendTestWebPush = sendTestPush;
+export type TestWebPushResult = TestPushResult;

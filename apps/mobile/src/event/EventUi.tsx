@@ -16,14 +16,13 @@ export function DetailRow({
   const muted = useColorModeValue("muted", "mutedDark");
   const textColor = useColorModeValue("text", "textDark");
 
-  if (!value) return null;
   return (
     <Box>
       <Text fontSize="xs" color={muted} mb={0.5}>
         {label}
       </Text>
       <Text fontSize="sm" color={textColor}>
-        {value}
+        {value?.trim() ? value : "—"}
       </Text>
     </Box>
   );

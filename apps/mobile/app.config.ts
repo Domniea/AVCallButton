@@ -58,6 +58,9 @@ export default function ({ config }: ConfigContext): ExpoConfig {
     extra: {
       APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
       API_URL: process.env.EXPO_PUBLIC_API_URL,
+      APP_URL:
+        process.env.EXPO_PUBLIC_APP_URL ??
+        "https://av-call-button-web.vercel.app",
       eas: {
         projectId:
           process.env.EXPO_PUBLIC_PROJECT_ID ??

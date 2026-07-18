@@ -58,6 +58,7 @@ export function ApiStack({ stack }: StackContext) {
       "POST /me/device-tokens": "src/functions/me/deviceTokens/upsert.handler",
       "DELETE /me/device-tokens/{deviceTokenId}":
         "src/functions/me/deviceTokens/delete.handler",
+      "POST /me/push/test": "src/functions/me/push/test.handler",
 
       // Dashboard
       "GET /dashboard": "src/functions/dashboard/list.handler",

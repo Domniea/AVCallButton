@@ -14,6 +14,12 @@ Notifications.setNotificationHandler({
   }),
 });
 
+export type PushRegistrationResult = {
+  permission: string;
+  registered: boolean;
+  reason?: string;
+};
+
 function resolveDevicePlatform(): DevicePlatform | null {
   if (Platform.OS === "ios") return "IOS";
   if (Platform.OS === "android") return "ANDROID";
@@ -40,22 +46,34 @@ async function ensureAndroidNotificationChannel(): Promise<void> {
 /** Request permission, obtain Expo push token, and register it with the backend. */
 export async function registerForPushNotifications(
   authToken: string,
-): Promise<void> {
+): Promise<PushRegistrationResult> {
   if (!Device.isDevice) {
     console.warn("Push registration skipped: not a physical device");
-    return;
+    return {
+      permission: "undetermined",
+      registered: false,
+      reason: "Push requires a physical device (not a simulator).",
+    };
   }
 
   const platform = resolveDevicePlatform();
   if (!platform) {
     console.warn("Push registration skipped: unsupported platform");
-    return;
+    return {
+      permission: "undetermined",
+      registered: false,
+      reason: "Unsupported platform.",
+    };
   }
 
   const projectId = resolveProjectId();
   if (!projectId) {
     console.warn("Push registration skipped: missing EAS projectId");
-    return;
+    return {
+      permission: "undetermined",
+      registered: false,
+      reason: "Missing EAS projectId in app config.",
+    };
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -68,7 +86,12 @@ export async function registerForPushNotifications(
 
   if (finalStatus !== "granted") {
     console.warn("Push registration skipped: notification permission denied");
-    return;
+    return {
+      permission: finalStatus,
+      registered: false,
+      reason:
+        "Notification permission denied. Enable it in system Settings for this app.",
+    };
   }
 
   await ensureAndroidNotificationChannel();
@@ -79,4 +102,6 @@ export async function registerForPushNotifications(
     platform,
     token: pushToken.data,
   });
+
+  return { permission: finalStatus, registered: true };
 }

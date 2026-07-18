@@ -81,7 +81,7 @@ export async function fetchMyEventDetail(
   eventId: string,
 ): Promise<MyEventDetail> {
   const api = getApiClient();
-  const res = await api.get<MyEventDetail>(`/me/event/${eventId}`, {
+  const res = await api.get<MyEventDetail>(`/me/events/${eventId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;

@@ -1,7 +1,11 @@
 import React from "react";
 import { VStack } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { BaseInput } from "../components/BaseInput";
@@ -17,16 +21,16 @@ import {
 } from "@av/forms/src/schemas/auth/confirmEmailSchema";
 
 import { confirmSignup } from "@av/auth-client";
+import type { AuthStackParamList } from "./navigation/types";
 
-type SignupConfirmParams = { email: string };
 type SignupConfirmNav = NativeStackNavigationProp<
-  { signupConfirm: SignupConfirmParams; invite: undefined; login: undefined },
+  AuthStackParamList,
   "signupConfirm"
 >;
 
 export default function SignupConfirm() {
   const navigation = useNavigation<SignupConfirmNav>();
-  const route = useRoute<RouteProp<{ params: SignupConfirmParams }, "params">>();
+  const route = useRoute<RouteProp<AuthStackParamList, "signupConfirm">>();
   const email = route.params?.email ?? "";
 
   const form = useAppForm(confirmEmailSchema, {

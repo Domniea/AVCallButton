@@ -13,17 +13,14 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 
 import type { AppDispatch, RootState } from "@av/store";
-import {
-  clearCrewDashDetail,
-  fetchMyEventDetailThunk,
-} from "@av/store";
+import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
-type CrewEventNav = NativeStackNavigationProp<RootStackParamList, "crewEvent">;
-type CrewEventRoute = RouteProp<RootStackParamList, "crewEvent">;
+type CrewEventNav = NativeStackNavigationProp<MainStackParamList, "crewEvent">;
+type CrewEventRoute = RouteProp<MainStackParamList, "crewEvent">;
 
 function DetailRow({
   label,
@@ -60,7 +57,9 @@ export default function CrewEventScreen() {
   const { workspaceId, eventId } = route.params;
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
-  const detailEventId = useSelector((state: RootState) => state.crewDash.eventId);
+  const detailEventId = useSelector(
+    (state: RootState) => state.crewDash.eventId,
+  );
   const detail = useSelector((state: RootState) => state.crewDash.eventDetail);
   const detailStatus = useSelector(
     (state: RootState) => state.crewDash.detailStatus,
@@ -77,12 +76,6 @@ export default function CrewEventScreen() {
 
   const detailMatchesRoute =
     detailEventId === eventId && detailStatus === "succeeded";
-
-  useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !eventId) return;
@@ -158,7 +151,11 @@ export default function CrewEventScreen() {
                 </VStack>
               </BaseCard>
 
-              <BaseCard title="Your coverage" titleAlign="start" variant="elevated">
+              <BaseCard
+                title="Your coverage"
+                titleAlign="start"
+                variant="elevated"
+              >
                 {detail.zones.length === 0 &&
                 detail.roomsWithoutZone.length === 0 ? (
                   <Text fontSize="sm" color={muted}>
@@ -182,7 +179,11 @@ export default function CrewEventScreen() {
                           flexWrap="wrap"
                           space={2}
                         >
-                          <Text fontSize="sm" fontWeight="medium" color={textColor}>
+                          <Text
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color={textColor}
+                          >
                             {zone.name}
                           </Text>
                           <HStack space={2} flexWrap="wrap">
@@ -222,7 +223,11 @@ export default function CrewEventScreen() {
 
                     {detail.roomsWithoutZone.length > 0 ? (
                       <VStack space={2}>
-                        <Text fontSize="sm" fontWeight="semibold" color={textColor}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color={textColor}
+                        >
                           Rooms (no zone)
                         </Text>
                         {detail.roomsWithoutZone.map((room) => (

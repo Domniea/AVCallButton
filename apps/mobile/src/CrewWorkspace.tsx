@@ -11,6 +11,7 @@ import {
   fetchWorkspacesThunk,
   setActiveWorkspace,
 } from "@av/store";
+
 import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
@@ -23,13 +24,14 @@ import { ViewModeToggle } from "./components/ViewModeToggle";
 import { useViewMode } from "./hooks/useViewMode";
 import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
+import { navigateToDashboard } from "./navigation/navigateToDashboard";
 
 type CrewWorkspaceNav = NativeStackNavigationProp<
-  RootStackParamList,
+  MainStackParamList,
   "crewWorkspace"
 >;
-type CrewWorkspaceRoute = RouteProp<RootStackParamList, "crewWorkspace">;
+type CrewWorkspaceRoute = RouteProp<MainStackParamList, "crewWorkspace">;
 
 function coverageLabel(zoneCount: number, roomCount: number): string {
   const parts: string[] = [];
@@ -60,7 +62,9 @@ export default function CrewWorkspaceScreen() {
   const crewWorkspaceId = useSelector(
     (state: RootState) => state.crewDash.workspaceId,
   );
-  const listEvents = useSelector((state: RootState) => state.crewDash.listEvents);
+  const listEvents = useSelector(
+    (state: RootState) => state.crewDash.listEvents,
+  );
   const listStatus = useSelector(
     (state: RootState) => state.crewDash.listStatus,
   );
@@ -68,12 +72,6 @@ export default function CrewWorkspaceScreen() {
 
   const eventsMatchRoute =
     crewWorkspaceId === workspaceId && listStatus === "succeeded";
-
-  useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
 
   useEffect(() => {
     if (
@@ -129,7 +127,7 @@ export default function CrewWorkspaceScreen() {
           title="Back to dashboard"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("dashboard")}
+          onPress={() => navigateToDashboard(navigation)}
         />
         <BaseCard title="Workspace not found" variant="outline">
           <Text color={muted} mb={4} fontSize="sm">
@@ -137,7 +135,7 @@ export default function CrewWorkspaceScreen() {
           </Text>
           <BaseButton
             title="Back to dashboard"
-            onPress={() => navigation.navigate("dashboard")}
+            onPress={() => navigateToDashboard(navigation)}
           />
         </BaseCard>
       </ScreenLayout>
@@ -151,7 +149,10 @@ export default function CrewWorkspaceScreen() {
       maxW="720"
     >
       {canToggleAdmin && (
-        <ViewModeToggle viewMode={effectiveViewMode} onToggle={onSwitchToAdmin} />
+        <ViewModeToggle
+          viewMode={effectiveViewMode}
+          onToggle={onSwitchToAdmin}
+        />
       )}
 
       {workspace ? (
@@ -242,7 +243,7 @@ export default function CrewWorkspaceScreen() {
         title="Back"
         variety="tertiary"
         btnWidth="auto"
-        onPress={() => navigation.navigate("dashboard")}
+        onPress={() => navigateToDashboard(navigation)}
       />
     </ScreenLayout>
   );

@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { VStack } from "native-base";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,21 +18,15 @@ import {
 
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchMeThunk, logoutThunk, loginThunk } from "@av/store/src/auth";
-import type { RootStackParamList } from "./navigation/types";
+import type { AuthStackParamList } from "./navigation/types";
 
-type LoginNav = NativeStackNavigationProp<RootStackParamList, "login">;
+type LoginNav = NativeStackNavigationProp<AuthStackParamList, "login">;
 
 export default function Login() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<LoginNav>();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
-
-  useEffect(() => {
-    if (authStatus === "authenticated") {
-      navigation.replace("dashboard");
-    }
-  }, [authStatus, navigation]);
 
   const form = useAppForm(loginSchema, {
     email: "",
@@ -59,9 +52,8 @@ export default function Login() {
       )
         .unwrap()
         .then(() => dispatch(fetchMeThunk()));
-
-      const hasInviteToken = await AsyncStorage.getItem("inviteToken");
-      navigation.replace(hasInviteToken ? "invite" : "dashboard");
+      // RootNavigator ternary switches to MainNavigator on authenticated.
+      // PendingInviteRedirect opens invite if a token is stored.
     } catch (err) {
       console.error("Login failed", err);
       const message =

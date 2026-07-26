@@ -15,10 +15,13 @@ import { CoverageList } from "./event/EventUi";
 import { removingMembershipIdFor, roomsForZone } from "./event/eventHelpers";
 import { useEventCoverage } from "./event/useEventCoverage";
 import { useEventScreenData } from "./event/useEventScreenData";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
-type ZoneDetailNav = NativeStackNavigationProp<RootStackParamList, "zoneDetail">;
-type ZoneDetailRoute = RouteProp<RootStackParamList, "zoneDetail">;
+type ZoneDetailNav = NativeStackNavigationProp<
+  MainStackParamList,
+  "zoneDetail"
+>;
+type ZoneDetailRoute = RouteProp<MainStackParamList, "zoneDetail">;
 
 export default function ZoneDetailScreen() {
   const navigation = useNavigation<ZoneDetailNav>();

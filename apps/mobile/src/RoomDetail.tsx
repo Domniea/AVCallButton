@@ -13,9 +13,9 @@ import { CoverageList, DetailRow } from "./event/EventUi";
 import { removingMembershipIdFor } from "./event/eventHelpers";
 import { useEventCoverage } from "./event/useEventCoverage";
 import { useEventScreenData } from "./event/useEventScreenData";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
-type RoomDetailRoute = RouteProp<RootStackParamList, "roomDetail">;
+type RoomDetailRoute = RouteProp<MainStackParamList, "roomDetail">;
 
 export default function RoomDetailScreen() {
   const route = useRoute<RoomDetailRoute>();
@@ -69,7 +69,9 @@ export default function RoomDetailScreen() {
     : null;
   const roster = rosterMatchesEvent ? assignments : [];
   const roomTarget = { kind: "room" as const, id: room.id, name: room.name };
-  const subtitle = zone ? `${event.name} · ${zone.name}` : `${event.name} · Unassigned`;
+  const subtitle = zone
+    ? `${event.name} · ${zone.name}`
+    : `${event.name} · Unassigned`;
 
   return (
     <>

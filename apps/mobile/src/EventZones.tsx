@@ -16,10 +16,13 @@ import CreateZoneModal from "./CreateZoneModal";
 import { roomsForZone, unassignedRooms } from "./event/eventHelpers";
 import { useEventCoverage } from "./event/useEventCoverage";
 import { useEventScreenData } from "./event/useEventScreenData";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
-type EventZonesNav = NativeStackNavigationProp<RootStackParamList, "eventZones">;
-type EventZonesRoute = RouteProp<RootStackParamList, "eventZones">;
+type EventZonesNav = NativeStackNavigationProp<
+  MainStackParamList,
+  "eventZones"
+>;
+type EventZonesRoute = RouteProp<MainStackParamList, "eventZones">;
 
 export default function EventZonesScreen() {
   const navigation = useNavigation<EventZonesNav>();
@@ -30,11 +33,10 @@ export default function EventZonesScreen() {
   const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
   const [isCreateZoneOpen, setIsCreateZoneOpen] = useState(false);
 
-  const {
-    authStatus,
-    event,
-    eventsFetchStatus,
-  } = useEventScreenData(workspaceId, eventId);
+  const { authStatus, event, eventsFetchStatus } = useEventScreenData(
+    workspaceId,
+    eventId,
+  );
 
   const { zoneCoverage, roomCoverage, coverageLoading } = useEventCoverage(
     eventId,
@@ -57,11 +59,7 @@ export default function EventZonesScreen() {
 
   return (
     <>
-      <ScreenLayout
-        title="Zones & rooms"
-        subtitle={event.name}
-        maxW="720"
-      >
+      <ScreenLayout title="Zones & rooms" subtitle={event.name} maxW="720">
         <HStack space={2} flexWrap="wrap">
           <BaseButton
             title="Create zone"

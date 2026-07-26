@@ -17,7 +17,7 @@ import { createEventThunk, fetchWorkspacesThunk } from "@av/store";
 
 import { BaseButton } from "../components/BaseButton";
 import { BaseInput } from "../components/BaseInput";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
 type CreateEventModalProps = {
   isOpen: boolean;
@@ -25,7 +25,7 @@ type CreateEventModalProps = {
   onClose: () => void;
 };
 
-type WorkspaceNav = NativeStackNavigationProp<RootStackParamList, "workspace">;
+type WorkspaceNav = NativeStackNavigationProp<MainStackParamList, "workspace">;
 
 export default function CreateEventModal({
   isOpen,
@@ -91,7 +91,12 @@ export default function CreateEventModal({
   };
 
   return (
-    <RNModal visible={isOpen} transparent animationType="fade" onRequestClose={onClose}>
+    <RNModal
+      visible={isOpen}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
       <RNPressable style={styles.overlay} onPress={onClose}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -132,7 +137,11 @@ export default function CreateEventModal({
                   onPress={() => void onSubmit()}
                   isDisabled={isSubmitting}
                 />
-                <BaseButton title="Cancel" variety="secondary" onPress={onClose} />
+                <BaseButton
+                  title="Cancel"
+                  variety="secondary"
+                  onPress={onClose}
+                />
               </VStack>
             </Box>
           </RNPressable>

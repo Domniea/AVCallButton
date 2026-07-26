@@ -21,10 +21,10 @@ import {
 } from "./event/eventHelpers";
 import { DetailRow, StaffRow } from "./event/EventUi";
 import { useEventScreenData } from "./event/useEventScreenData";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
 
-type EventNav = NativeStackNavigationProp<RootStackParamList, "event">;
-type EventRoute = RouteProp<RootStackParamList, "event">;
+type EventNav = NativeStackNavigationProp<MainStackParamList, "event">;
+type EventRoute = RouteProp<MainStackParamList, "event">;
 
 export default function EventScreen() {
   const navigation = useNavigation<EventNav>();
@@ -68,18 +68,14 @@ export default function EventScreen() {
   const zonesSubtitle = [
     `${event.zones.length} zone${event.zones.length === 1 ? "" : "s"}`,
     `${event.rooms.length} room${event.rooms.length === 1 ? "" : "s"}`,
-    unassignedCount > 0
-      ? `${unassignedCount} unassigned`
-      : null,
+    unassignedCount > 0 ? `${unassignedCount} unassigned` : null,
   ]
     .filter(Boolean)
     .join(" · ");
 
   const staffSubtitle = rosterMatchesEvent
     ? `${assignments.length} on roster${
-        pendingInvites.length > 0
-          ? ` · ${pendingInvites.length} pending`
-          : ""
+        pendingInvites.length > 0 ? ` · ${pendingInvites.length} pending` : ""
       }`
     : "View and assign event staff";
 
@@ -89,10 +85,7 @@ export default function EventScreen() {
         <HStack space={2} flexWrap="wrap">
           <BasePill label={event.status} variant="primary" />
           {rosterMatchesEvent && assignments.length > 0 ? (
-            <BasePill
-              label={`${assignments.length} staff`}
-              variant="outline"
-            />
+            <BasePill label={`${assignments.length} staff`} variant="outline" />
           ) : null}
         </HStack>
 

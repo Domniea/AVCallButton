@@ -1,24 +1,17 @@
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import { useColorModeValue } from "native-base";
+import { useSelector } from "react-redux";
 
-import Login from "../Login";
-import SignUp from "../SignUp";
-import SignupConfirm from "../SignupConfirm";
-import Home from "../Home";
-import Invite from "../Invite";
-import Dashboard from "../Dashboard";
-import WorkspaceScreen from "../Workspace";
-import EventScreen from "../Event";
-import EventZonesScreen from "../EventZones";
-import ZoneDetailScreen from "../ZoneDetail";
-import RoomDetailScreen from "../RoomDetail";
-import CrewWorkspaceScreen from "../CrewWorkspace";
-import CrewEventScreen from "../CrewEvent";
-import type { RootStackParamList } from "./types";
+import type { RootState } from "@av/store";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import AuthNavigator from "./AuthNavigator";
+import MainNavigator from "./MainNavigator";
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
+// Auth and Main trees swap via ternary; linking covers both route maps.
 const linking = {
   prefixes: [
     "avcallbutton://",
@@ -28,8 +21,15 @@ const linking = {
   config: {
     screens: {
       login: "login",
-      home: "home",
-      dashboard: "dashboard",
+      signup: "signup",
+      signupConfirm: "signup-confirm",
+      invite: "invite",
+      MainTabs: {
+        screens: {
+          dashboard: "dashboard",
+          home: "home",
+        },
+      },
       workspace: "workspace/:workspaceId",
       event: "workspace/:workspaceId/event/:eventId",
       eventZones: "workspace/:workspaceId/event/:eventId/zones",
@@ -37,95 +37,12 @@ const linking = {
       roomDetail: "workspace/:workspaceId/event/:eventId/room/:roomId",
       crewWorkspace: "crew/workspace/:workspaceId",
       crewEvent: "crew/workspace/:workspaceId/event/:eventId",
-      invite: "invite",
-      signup: "signup",
-      signupConfirm: "signup-confirm",
     },
   },
-};
-
-function ThemedStack() {
-  const headerBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
-  const contentBg = useColorModeValue("#F2F2F2", "#002624");
-
-  return (
-    <Stack.Navigator
-      initialRouteName="login"
-      screenOptions={{
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
-        headerShadowVisible: false,
-        contentStyle: { backgroundColor: contentBg },
-      }}
-    >
-      <Stack.Screen
-        name="login"
-        component={Login}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="signup"
-        component={SignUp}
-        options={{ title: "Create Account" }}
-      />
-      <Stack.Screen
-        name="signupConfirm"
-        component={SignupConfirm}
-        options={{ title: "Confirm Email" }}
-      />
-      <Stack.Screen
-        name="dashboard"
-        component={Dashboard}
-        options={{ title: "Dashboard" }}
-      />
-      <Stack.Screen
-        name="workspace"
-        component={WorkspaceScreen}
-        options={{ title: "Workspace" }}
-      />
-      <Stack.Screen
-        name="event"
-        component={EventScreen}
-        options={{ title: "Event" }}
-      />
-      <Stack.Screen
-        name="eventZones"
-        component={EventZonesScreen}
-        options={{ title: "Zones & rooms" }}
-      />
-      <Stack.Screen
-        name="zoneDetail"
-        component={ZoneDetailScreen}
-        options={{ title: "Zone" }}
-      />
-      <Stack.Screen
-        name="roomDetail"
-        component={RoomDetailScreen}
-        options={{ title: "Room" }}
-      />
-      <Stack.Screen
-        name="crewWorkspace"
-        component={CrewWorkspaceScreen}
-        options={{ title: "My events" }}
-      />
-      <Stack.Screen
-        name="crewEvent"
-        component={CrewEventScreen}
-        options={{ title: "My event" }}
-      />
-      <Stack.Screen name="home" component={Home} options={{ title: "Account" }} />
-      <Stack.Screen
-        name="invite"
-        component={Invite}
-        options={{ title: "Invite" }}
-      />
-    </Stack.Navigator>
-  );
-}
+} as const;
 
 export default function RootNavigator() {
+  const authStatus = useSelector((state: RootState) => state.auth.status);
   const isDark = useColorModeValue(false, true);
   const navTheme = isDark
     ? {
@@ -152,8 +69,14 @@ export default function RootNavigator() {
       };
 
   return (
-    <NavigationContainer linking={linking} theme={navTheme}>
-      <ThemedStack />
+    <NavigationContainer linking={linking as any} theme={navTheme}>
+      {authStatus === "idle" || authStatus === "loading" ? (
+        <LoadingScreen message="Checking session…" />
+      ) : authStatus === "authenticated" ? (
+        <MainNavigator />
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 }

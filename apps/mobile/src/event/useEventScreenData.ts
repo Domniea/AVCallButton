@@ -1,17 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchEventsThunk, fetchRosterThunk } from "@av/store";
-import type { RootStackParamList } from "../navigation/types";
-
-type EventNav = NativeStackNavigationProp<RootStackParamList>;
 
 export function useEventScreenData(workspaceId: string, eventId: string) {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<EventNav>();
   const rosterAutoRetriedRef = useRef(false);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -38,12 +32,6 @@ export function useEventScreenData(workspaceId: string, eventId: string) {
 
   const rosterMatchesEvent =
     rosterEventId === eventId && rosterFetchStatus === "succeeded";
-
-  useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !workspaceId) return;

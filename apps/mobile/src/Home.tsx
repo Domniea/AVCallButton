@@ -3,6 +3,8 @@ import { Linking, Platform } from "react-native";
 import { HStack, Text, VStack, useColorMode } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -17,9 +19,12 @@ import { BaseCard } from "../components/BaseCard";
 import { ScreenLayout } from "../components/ScreenLayout";
 import { useThemeColors } from "../hooks/useThemeColors";
 import { registerForPushNotifications } from "./push/registerForPushNotifications";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList, MainTabParamList } from "./navigation/types";
 
-type HomeNav = NativeStackNavigationProp<RootStackParamList, "home">;
+type HomeNav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "home">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 export default function Home() {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,12 +42,6 @@ export default function Home() {
   const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
-
-  useEffect(() => {
     void (async () => {
       const { status } = await Notifications.getPermissionsAsync();
       setPermission(status);
@@ -53,7 +52,7 @@ export default function Home() {
     try {
       await dispatch(logoutThunk()).unwrap();
       await AsyncStorage.removeItem("inviteToken");
-      navigation.replace("login");
+      // RootNavigator ternary switches to AuthNavigator.
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -150,24 +149,12 @@ export default function Home() {
     }
   }, []);
 
-  if (authStatus === "idle" || authStatus === "loading") {
-    return (
-      <ScreenLayout>
-        <Text color={muted}>Checking session…</Text>
-      </ScreenLayout>
-    );
-  }
-
   if (authStatus === "unauthenticated") {
     return null;
   }
 
   return (
-    <ScreenLayout
-      title="Account"
-      subtitle={user?.email ?? user?.id}
-      maxW="640"
-    >
+    <ScreenLayout title="Account" subtitle={user?.email ?? user?.id} maxW="640">
       <HStack space={2} flexWrap="wrap">
         <BaseButton
           title="Back to dashboard"

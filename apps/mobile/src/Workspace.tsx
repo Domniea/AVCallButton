@@ -24,10 +24,11 @@ import { useViewMode } from "./hooks/useViewMode";
 import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
 import CreateEventModal from "./CreateEventModal";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList } from "./navigation/types";
+import { navigateToDashboard } from "./navigation/navigateToDashboard";
 
-type WorkspaceNav = NativeStackNavigationProp<RootStackParamList, "workspace">;
-type WorkspaceRoute = RouteProp<RootStackParamList, "workspace">;
+type WorkspaceNav = NativeStackNavigationProp<MainStackParamList, "workspace">;
+type WorkspaceRoute = RouteProp<MainStackParamList, "workspace">;
 
 export default function WorkspaceScreen() {
   const dispatch = useDispatch<AppDispatch>();
@@ -58,12 +59,6 @@ export default function WorkspaceScreen() {
 
   const eventsMatchRoute =
     eventsWorkspaceId === workspaceId && eventsFetchStatus === "succeeded";
-
-  useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
 
   useEffect(() => {
     if (
@@ -119,7 +114,7 @@ export default function WorkspaceScreen() {
           title="Back to dashboard"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("dashboard")}
+          onPress={() => navigateToDashboard(navigation)}
         />
         <BaseCard title="Workspace not found" variant="outline">
           <Text color={muted} mb={4} fontSize="sm">
@@ -127,14 +122,16 @@ export default function WorkspaceScreen() {
           </Text>
           <BaseButton
             title="Back to dashboard"
-            onPress={() => navigation.navigate("dashboard")}
+            onPress={() => navigateToDashboard(navigation)}
           />
         </BaseCard>
       </ScreenLayout>
     );
   }
 
-  const canCreateShow = workspace ? canAccessAdminDash(workspace.roleRank) : false;
+  const canCreateShow = workspace
+    ? canAccessAdminDash(workspace.roleRank)
+    : false;
 
   return (
     <>
@@ -210,9 +207,7 @@ export default function WorkspaceScreen() {
               {events.map((ev) => {
                 const subtitle = [
                   ev.status,
-                  ev.startTime
-                    ? new Date(ev.startTime).toLocaleString()
-                    : null,
+                  ev.startTime ? new Date(ev.startTime).toLocaleString() : null,
                   `${ev.zones.length} zone${ev.zones.length === 1 ? "" : "s"}`,
                   `${ev.rooms.length} room${ev.rooms.length === 1 ? "" : "s"}`,
                 ]
@@ -241,7 +236,7 @@ export default function WorkspaceScreen() {
           title="Back"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("dashboard")}
+          onPress={() => navigateToDashboard(navigation)}
         />
       </ScreenLayout>
     </>

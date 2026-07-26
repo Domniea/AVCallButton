@@ -3,17 +3,26 @@ import { Box, Text, VStack, useColorModeValue } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { fetchAuthSession } from "aws-amplify/auth";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import {
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootState } from "@av/store";
-import type { RootStackParamList } from "./navigation/types";
+import type { AuthStackParamList, MainStackParamList } from "./navigation/types";
+import { navigateToDashboard } from "./navigation/navigateToDashboard";
 
-type InviteNav = NativeStackNavigationProp<RootStackParamList, "invite">;
+type InviteParams = AuthStackParamList["invite"];
+type InviteNav = NativeStackNavigationProp<
+  AuthStackParamList & MainStackParamList,
+  "invite"
+>;
 
 export default function Invite() {
   const navigation = useNavigation<InviteNav>();
-  const route = useRoute<RouteProp<RootStackParamList, "invite">>();
+  const route = useRoute<RouteProp<{ invite: InviteParams }, "invite">>();
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,8 +60,8 @@ export default function Invite() {
           const msg = data.message || data.error;
 
           if (msg?.includes("already a member")) {
-            await AsyncStorage.removeItem("inviteToken"); // consumed; won’t trigger invite again
-            navigation.replace("dashboard");
+            await AsyncStorage.removeItem("inviteToken");
+            navigateToDashboard(navigation);
             return;
           }
 
@@ -60,13 +69,13 @@ export default function Invite() {
           return;
         }
 
-        await AsyncStorage.removeItem("inviteToken"); // consumed; won’t trigger invite again
-        navigation.replace("dashboard");
+        await AsyncStorage.removeItem("inviteToken");
+        navigateToDashboard(navigation);
       } catch {
         setError("Something went wrong");
       }
     },
-    [apiUrl, navigation]
+    [apiUrl, navigation],
   );
 
   useEffect(() => {
@@ -93,17 +102,20 @@ export default function Invite() {
     run();
   }, [authStatus, acceptInvite, navigation, tokenFromParams]);
 
-  // Redirect after error; clear token so bad/invalid token doesn’t keep sending to invite
   useEffect(() => {
     if (!error) return;
 
     const timeout = setTimeout(async () => {
       await AsyncStorage.removeItem("inviteToken");
-      navigation.replace("dashboard");
+      if (authStatus === "authenticated") {
+        navigateToDashboard(navigation);
+      } else {
+        navigation.replace("login");
+      }
     }, 4000);
 
     return () => clearTimeout(timeout);
-  }, [error, navigation]);
+  }, [error, navigation, authStatus]);
 
   const bg = useColorModeValue("bg", "bgDark");
   const textColor = useColorModeValue("text", "textDark");

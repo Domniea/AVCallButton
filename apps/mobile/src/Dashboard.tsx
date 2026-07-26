@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { AppDispatch, RootState } from "@av/store";
@@ -11,15 +13,17 @@ import { BaseButton } from "../components/BaseButton";
 import { BaseCard } from "../components/BaseCard";
 import { BasePill } from "../components/BasePill";
 import { ListRow } from "../components/ListRow";
-import { LoadingScreen } from "../components/LoadingScreen";
 import { ScreenLayout } from "../components/ScreenLayout";
 import { useThemeColors } from "../hooks/useThemeColors";
 import { useViewMode } from "./hooks/useViewMode";
 import { resolveViewMode } from "./lib/viewMode";
 import { workspaceDisplayName } from "./lib/workspaceDisplayName";
-import type { RootStackParamList } from "./navigation/types";
+import type { MainStackParamList, MainTabParamList } from "./navigation/types";
 
-type DashboardNav = NativeStackNavigationProp<RootStackParamList, "dashboard">;
+type DashboardNav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "dashboard">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 export default function Dashboard() {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,12 +47,6 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    if (authStatus === "unauthenticated") {
-      navigation.replace("login");
-    }
-  }, [authStatus, navigation]);
-
-  useEffect(() => {
     if (authStatus === "authenticated") {
       void dispatch(fetchWorkspacesThunk());
     }
@@ -57,19 +55,11 @@ export default function Dashboard() {
   const onLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
-      navigation.replace("login");
+      // RootNavigator ternary switches to AuthNavigator.
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
-
-  if (authStatus === "idle" || authStatus === "loading") {
-    return <LoadingScreen message="Checking session…" />;
-  }
-
-  if (authStatus === "unauthenticated") {
-    return null;
-  }
 
   const activeWorkspace = workspaces.find(
     (w) => w.workspaceId === activeWorkspaceId,

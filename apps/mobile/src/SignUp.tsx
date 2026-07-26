@@ -2,7 +2,6 @@ import React from "react";
 import { VStack } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { ParamListBase } from "@react-navigation/native";
 
 import { BaseInput } from "../components/BaseInput";
 import { BaseButton } from "../components/BaseButton";
@@ -17,11 +16,9 @@ import {
 } from "@av/forms/src/schemas/auth/signupSchema";
 
 import { signup } from "@av/auth-client";
+import type { AuthStackParamList } from "./navigation/types";
 
-type SignupNav = NativeStackNavigationProp<
-  ParamListBase & { signupConfirm: { email: string } },
-  "signup"
->;
+type SignupNav = NativeStackNavigationProp<AuthStackParamList, "signup">;
 
 export default function SignUp() {
   const navigation = useNavigation<SignupNav>();

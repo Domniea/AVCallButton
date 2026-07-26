@@ -108,9 +108,7 @@ export function CoverageList({
           ) : (
             <Box flex={1} />
           )}
-          {onAdd ? (
-            <InlineAction title={addLabel} onPress={onAdd} />
-          ) : null}
+          {onAdd ? <InlineAction title={addLabel} onPress={onAdd} /> : null}
         </HStack>
       ) : null}
       {rows.length === 0 ? (
@@ -134,7 +132,12 @@ export function CoverageList({
                 borderRadius="lg"
                 bg={surface}
               >
-                <Text fontSize="sm" color={textColor} flex={1} numberOfLines={2}>
+                <Text
+                  fontSize="sm"
+                  color={textColor}
+                  flex={1}
+                  numberOfLines={2}
+                >
                   {coverageLabel(row, roster)}
                 </Text>
                 {onRemove ? (

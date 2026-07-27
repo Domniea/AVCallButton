@@ -11,31 +11,31 @@ import {
   fetchEventsThunk,
   setActiveWorkspace,
 } from "@av/store";
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { BasePill } from "../components/BasePill";
-import { ListRow } from "../components/ListRow";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { SectionHeader } from "../components/SectionHeader";
-import { useThemeColors } from "../hooks/useThemeColors";
-import { ViewModeToggle } from "./components/ViewModeToggle";
-import { useViewMode } from "./hooks/useViewMode";
-import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
-import { workspaceDisplayName } from "./lib/workspaceDisplayName";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { BasePill } from "../../components/BasePill";
+import { ListRow } from "../../components/ListRow";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { SectionHeader } from "../../components/SectionHeader";
+import { useThemeColors } from "../../hooks/useThemeColors";
+import { canAccessAdminDash } from "../lib/viewMode";
+import { workspaceDisplayName } from "../lib/workspaceDisplayName";
 import CreateEventModal from "./CreateEventModal";
-import type { MainStackParamList } from "./navigation/types";
-import { navigateToDashboard } from "./navigation/navigateToDashboard";
+import type { MainStackParamList } from "../navigation/types";
+import {
+  navigateToEventHome,
+  navigateToWorkspaceSelector,
+} from "../navigation/navigateToWorkspaceSelector";
 
-type WorkspaceNav = NativeStackNavigationProp<MainStackParamList, "workspace">;
-type WorkspaceRoute = RouteProp<MainStackParamList, "workspace">;
+type EventSelectorNav = NativeStackNavigationProp<MainStackParamList, "eventSelector">;
+type EventSelectorRoute = RouteProp<MainStackParamList, "eventSelector">;
 
-export default function WorkspaceScreen() {
+export default function EventSelector() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<WorkspaceNav>();
-  const route = useRoute<WorkspaceRoute>();
+  const navigation = useNavigation<EventSelectorNav>();
+  const route = useRoute<EventSelectorRoute>();
   const { workspaceId } = route.params;
-  const { viewMode, setViewMode } = useViewMode();
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const { muted } = useThemeColors();
 
@@ -91,17 +91,6 @@ export default function WorkspaceScreen() {
   }
 
   const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
-  const canToggleAdmin = workspace
-    ? canAccessAdminDash(workspace.roleRank)
-    : false;
-  const effectiveViewMode = workspace
-    ? resolveViewMode(workspace.roleRank, viewMode)
-    : "admin";
-
-  const onSwitchToCrew = () => {
-    void setViewMode("crew");
-    navigation.replace("crewWorkspace", { workspaceId });
-  };
 
   if (workspaceFetchStatus === "loading" && workspaces.length === 0) {
     return <LoadingScreen message="Loading workspace…" />;
@@ -111,18 +100,18 @@ export default function WorkspaceScreen() {
     return (
       <ScreenLayout maxW="720">
         <BaseButton
-          title="Back to dashboard"
+          title="Select a Workspace"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigateToDashboard(navigation)}
+          onPress={() => navigateToWorkspaceSelector(navigation)}
         />
         <BaseCard title="Workspace not found" variant="outline">
           <Text color={muted} mb={4} fontSize="sm">
             You do not have access to this workspace, or the link is invalid.
           </Text>
           <BaseButton
-            title="Back to dashboard"
-            onPress={() => navigateToDashboard(navigation)}
+            title="Select a Workspace"
+            onPress={() => navigateToWorkspaceSelector(navigation)}
           />
         </BaseCard>
       </ScreenLayout>
@@ -141,16 +130,9 @@ export default function WorkspaceScreen() {
         onClose={() => setIsCreateEventOpen(false)}
       />
       <ScreenLayout
-        title={workspace ? workspaceDisplayName(workspace) : "Workspace"}
+        subtitle={workspace ? workspaceDisplayName(workspace) : undefined}
         maxW="720"
       >
-        {canToggleAdmin && (
-          <ViewModeToggle
-            viewMode={effectiveViewMode}
-            onToggle={onSwitchToCrew}
-          />
-        )}
-
         {workspace ? (
           <HStack space={2} flexWrap="wrap" alignItems="center">
             <BasePill label={workspace.type} />
@@ -219,12 +201,9 @@ export default function WorkspaceScreen() {
                     key={ev.id}
                     title={ev.name}
                     subtitle={subtitle}
-                    onPress={() =>
-                      navigation.navigate("event", {
-                        workspaceId,
-                        eventId: ev.id,
-                      })
-                    }
+                      onPress={() =>
+                        navigateToEventHome(navigation, workspaceId, ev.id)
+                      }
                   />
                 );
               })}
@@ -236,7 +215,7 @@ export default function WorkspaceScreen() {
           title="Back"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigateToDashboard(navigation)}
+          onPress={() => navigateToWorkspaceSelector(navigation)}
         />
       </ScreenLayout>
     </>

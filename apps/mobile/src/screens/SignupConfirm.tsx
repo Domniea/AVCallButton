@@ -8,10 +8,10 @@ import {
 } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { BaseInput } from "../components/BaseInput";
-import { BaseButton } from "../components/BaseButton";
-import { AuthLayout } from "../components/AuthLayout";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { BaseInput } from "../../components/BaseInput";
+import { BaseButton } from "../../components/BaseButton";
+import { AuthLayout } from "../../components/AuthLayout";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
@@ -21,7 +21,7 @@ import {
 } from "@av/forms/src/schemas/auth/confirmEmailSchema";
 
 import { confirmSignup } from "@av/auth-client";
-import type { AuthStackParamList } from "./navigation/types";
+import type { AuthStackParamList } from "../navigation/types";
 
 type SignupConfirmNav = NativeStackNavigationProp<
   AuthStackParamList,

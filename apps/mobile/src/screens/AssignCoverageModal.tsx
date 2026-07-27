@@ -20,7 +20,7 @@ import type {
 } from "@av/store";
 import { assignRoomCoverage, assignZoneCoverage } from "@av/store";
 
-import { BaseButton } from "../components/BaseButton";
+import { BaseButton } from "../../components/BaseButton";
 
 export type CoverageTarget = {
   kind: "room" | "zone";

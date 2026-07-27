@@ -12,26 +12,26 @@ import {
   setActiveWorkspace,
 } from "@av/store";
 
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { BasePill } from "../components/BasePill";
-import { ListRow } from "../components/ListRow";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { SectionHeader } from "../components/SectionHeader";
-import { useThemeColors } from "../hooks/useThemeColors";
-import { ViewModeToggle } from "./components/ViewModeToggle";
-import { useViewMode } from "./hooks/useViewMode";
-import { canAccessAdminDash, resolveViewMode } from "./lib/viewMode";
-import { workspaceDisplayName } from "./lib/workspaceDisplayName";
-import type { MainStackParamList } from "./navigation/types";
-import { navigateToDashboard } from "./navigation/navigateToDashboard";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { BasePill } from "../../components/BasePill";
+import { ListRow } from "../../components/ListRow";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { SectionHeader } from "../../components/SectionHeader";
+import { useThemeColors } from "../../hooks/useThemeColors";
+import { workspaceDisplayName } from "../lib/workspaceDisplayName";
+import type { MainStackParamList } from "../navigation/types";
+import {
+  navigateToEventHome,
+  navigateToWorkspaceSelector,
+} from "../navigation/navigateToWorkspaceSelector";
 
-type CrewWorkspaceNav = NativeStackNavigationProp<
+type CrewEventSelectorNav = NativeStackNavigationProp<
   MainStackParamList,
-  "crewWorkspace"
+  "crewEventSelector"
 >;
-type CrewWorkspaceRoute = RouteProp<MainStackParamList, "crewWorkspace">;
+type CrewEventSelectorRoute = RouteProp<MainStackParamList, "crewEventSelector">;
 
 function coverageLabel(zoneCount: number, roomCount: number): string {
   const parts: string[] = [];
@@ -44,12 +44,11 @@ function coverageLabel(zoneCount: number, roomCount: number): string {
   return parts.length > 0 ? parts.join(" · ") : "No coverage assigned";
 }
 
-export default function CrewWorkspaceScreen() {
+export default function CrewEventSelector() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<CrewWorkspaceNav>();
-  const route = useRoute<CrewWorkspaceRoute>();
+  const navigation = useNavigation<CrewEventSelectorNav>();
+  const route = useRoute<CrewEventSelectorRoute>();
   const { workspaceId } = route.params;
-  const { viewMode, setViewMode } = useViewMode();
   const { muted } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -96,17 +95,6 @@ export default function CrewWorkspaceScreen() {
   }, [authStatus, workspaceId, dispatch]);
 
   const workspace = workspaces.find((w) => w.workspaceId === workspaceId);
-  const canToggleAdmin = workspace
-    ? canAccessAdminDash(workspace.roleRank)
-    : false;
-  const effectiveViewMode = workspace
-    ? resolveViewMode(workspace.roleRank, viewMode)
-    : "crew";
-
-  const onSwitchToAdmin = () => {
-    void setViewMode("admin");
-    navigation.replace("workspace", { workspaceId });
-  };
 
   if (authStatus === "idle" || authStatus === "loading") {
     return <LoadingScreen message="Checking session…" />;
@@ -124,18 +112,18 @@ export default function CrewWorkspaceScreen() {
     return (
       <ScreenLayout maxW="720">
         <BaseButton
-          title="Back to dashboard"
+          title="Select a Workspace"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigateToDashboard(navigation)}
+          onPress={() => navigateToWorkspaceSelector(navigation)}
         />
         <BaseCard title="Workspace not found" variant="outline">
           <Text color={muted} mb={4} fontSize="sm">
             You do not have access to this workspace, or the link is invalid.
           </Text>
           <BaseButton
-            title="Back to dashboard"
-            onPress={() => navigateToDashboard(navigation)}
+            title="Select a Workspace"
+            onPress={() => navigateToWorkspaceSelector(navigation)}
           />
         </BaseCard>
       </ScreenLayout>
@@ -144,17 +132,9 @@ export default function CrewWorkspaceScreen() {
 
   return (
     <ScreenLayout
-      title={workspace ? workspaceDisplayName(workspace) : "My events"}
-      subtitle="Your assigned events"
+      subtitle={workspace ? workspaceDisplayName(workspace) : "Your assigned events"}
       maxW="720"
     >
-      {canToggleAdmin && (
-        <ViewModeToggle
-          viewMode={effectiveViewMode}
-          onToggle={onSwitchToAdmin}
-        />
-      )}
-
       {workspace ? (
         <HStack space={2} flexWrap="wrap" alignItems="center">
           <BasePill label={workspace.type} />
@@ -219,10 +199,7 @@ export default function CrewWorkspaceScreen() {
                     coverageSummary.roomCount,
                   )}
                   onPress={() =>
-                    navigation.navigate("crewEvent", {
-                      workspaceId,
-                      eventId: event.id,
-                    })
+                    navigateToEventHome(navigation, workspaceId, event.id)
                   }
                 >
                   <HStack space={2} mt={2} flexWrap="wrap">
@@ -243,7 +220,7 @@ export default function CrewWorkspaceScreen() {
         title="Back"
         variety="tertiary"
         btnWidth="auto"
-        onPress={() => navigateToDashboard(navigation)}
+        onPress={() => navigateToWorkspaceSelector(navigation)}
       />
     </ScreenLayout>
   );

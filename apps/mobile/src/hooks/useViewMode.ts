@@ -6,6 +6,7 @@ import {
   type ViewMode,
 } from "../lib/viewMode";
 
+/** Local AsyncStorage-backed admin/crew preference (for testing). */
 export function useViewMode() {
   const [viewMode, setViewModeState] = useState<ViewMode>("admin");
   const [loaded, setLoaded] = useState(false);

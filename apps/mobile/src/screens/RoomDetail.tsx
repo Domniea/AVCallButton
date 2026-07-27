@@ -3,17 +3,17 @@ import { Text, VStack } from "native-base";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 
-import { BaseCard } from "../components/BaseCard";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { RoomCallLinkActions } from "../components/RoomCallLinkActions";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { useThemeColors } from "../hooks/useThemeColors";
+import { BaseCard } from "../../components/BaseCard";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { RoomCallLinkActions } from "../../components/RoomCallLinkActions";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { useThemeColors } from "../../hooks/useThemeColors";
 import AssignCoverageModal from "./AssignCoverageModal";
-import { CoverageList, DetailRow } from "./event/EventUi";
-import { removingMembershipIdFor } from "./event/eventHelpers";
-import { useEventCoverage } from "./event/useEventCoverage";
-import { useEventScreenData } from "./event/useEventScreenData";
-import type { MainStackParamList } from "./navigation/types";
+import { CoverageList, DetailRow } from "../event/EventUi";
+import { removingMembershipIdFor } from "../event/eventHelpers";
+import { useEventCoverage } from "../event/useEventCoverage";
+import { useEventScreenData } from "../event/useEventScreenData";
+import type { MainStackParamList } from "../navigation/types";
 
 type RoomDetailRoute = RouteProp<MainStackParamList, "roomDetail">;
 

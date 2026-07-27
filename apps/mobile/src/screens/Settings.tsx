@@ -3,37 +3,37 @@ import { Linking, Platform } from "react-native";
 import { HStack, Text, VStack, useColorMode } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import type { CompositeNavigationProp } from "@react-navigation/native";
-import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAuthSession } from "aws-amplify/auth";
 import * as Notifications from "expo-notifications";
 
 import type { AppDispatch, RootState } from "@av/store";
-import { sendTestPush } from "@av/store";
+import { fetchWorkspacesThunk, sendTestPush } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { useThemeColors } from "../hooks/useThemeColors";
-import { registerForPushNotifications } from "./push/registerForPushNotifications";
-import type { MainStackParamList, MainTabParamList } from "./navigation/types";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { useThemeColors } from "../../hooks/useThemeColors";
+import { registerForPushNotifications } from "../push/registerForPushNotifications";
+import { clearLastSession } from "../lib/lastSession";
+import type { MainStackParamList } from "../navigation/types";
+import { navigateToWorkspaceSelector } from "../navigation/navigateToWorkspaceSelector";
 
-type HomeNav = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, "home">,
-  NativeStackNavigationProp<MainStackParamList>
->;
+type SettingsNav = NativeStackNavigationProp<MainStackParamList>;
 
-export default function Home() {
+export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<HomeNav>();
+  const navigation = useNavigation<SettingsNav>();
   const { colorMode, setColorMode } = useColorMode();
   const { text, muted } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces,
+  );
 
   const [permission, setPermission] = useState<string>("undetermined");
   const [enableStatus, setEnableStatus] = useState<string | null>(null);
@@ -48,10 +48,17 @@ export default function Home() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (authStatus === "authenticated" && workspaces.length === 0) {
+      void dispatch(fetchWorkspacesThunk());
+    }
+  }, [authStatus, workspaces.length, dispatch]);
+
   const onLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
       await AsyncStorage.removeItem("inviteToken");
+      await clearLastSession();
       // RootNavigator ternary switches to AuthNavigator.
     } catch (err) {
       console.error("Logout failed:", err);
@@ -154,13 +161,13 @@ export default function Home() {
   }
 
   return (
-    <ScreenLayout title="Account" subtitle={user?.email ?? user?.id} maxW="640">
+    <ScreenLayout subtitle={user?.email ?? user?.id} maxW="640">
       <HStack space={2} flexWrap="wrap">
         <BaseButton
-          title="Back to dashboard"
+          title="Select a Workspace"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("dashboard")}
+          onPress={() => navigateToWorkspaceSelector(navigation)}
         />
         <BaseButton
           title="Log out"
@@ -238,6 +245,18 @@ export default function Home() {
             </Text>
           ) : null}
         </VStack>
+      </BaseCard>
+
+      <BaseCard title="Developer" titleAlign="start" variant="outline">
+        <Text fontSize="sm" color={muted} mb={4}>
+          Testing tools such as admin/crew view switching.
+        </Text>
+        <BaseButton
+          title="Open developer menu"
+          variety="tertiary"
+          btnWidth="auto"
+          onPress={() => navigation.navigate("devMenu")}
+        />
       </BaseCard>
 
       <BaseCard title="More coming soon" titleAlign="start" variant="outline">

@@ -11,8 +11,8 @@ import {
 } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootState } from "@av/store";
-import type { AuthStackParamList, MainStackParamList } from "./navigation/types";
-import { navigateToDashboard } from "./navigation/navigateToDashboard";
+import type { AuthStackParamList, MainStackParamList } from "../navigation/types";
+import { navigateToWorkspaceSelector } from "../navigation/navigateToWorkspaceSelector";
 
 type InviteParams = AuthStackParamList["invite"];
 type InviteNav = NativeStackNavigationProp<
@@ -61,7 +61,7 @@ export default function Invite() {
 
           if (msg?.includes("already a member")) {
             await AsyncStorage.removeItem("inviteToken");
-            navigateToDashboard(navigation);
+            navigateToWorkspaceSelector(navigation);
             return;
           }
 
@@ -70,7 +70,7 @@ export default function Invite() {
         }
 
         await AsyncStorage.removeItem("inviteToken");
-        navigateToDashboard(navigation);
+        navigateToWorkspaceSelector(navigation);
       } catch {
         setError("Something went wrong");
       }
@@ -108,7 +108,7 @@ export default function Invite() {
     const timeout = setTimeout(async () => {
       await AsyncStorage.removeItem("inviteToken");
       if (authStatus === "authenticated") {
-        navigateToDashboard(navigation);
+        navigateToWorkspaceSelector(navigation);
       } else {
         navigation.replace("login");
       }

@@ -2,32 +2,28 @@ import React, { useEffect } from "react";
 import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import type { CompositeNavigationProp } from "@react-navigation/native";
-import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchWorkspacesThunk, setActiveWorkspace } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { BasePill } from "../components/BasePill";
-import { ListRow } from "../components/ListRow";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { useThemeColors } from "../hooks/useThemeColors";
-import { useViewMode } from "./hooks/useViewMode";
-import { resolveViewMode } from "./lib/viewMode";
-import { workspaceDisplayName } from "./lib/workspaceDisplayName";
-import type { MainStackParamList, MainTabParamList } from "./navigation/types";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { BasePill } from "../../components/BasePill";
+import { ListRow } from "../../components/ListRow";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { useThemeColors } from "../../hooks/useThemeColors";
+import { useViewMode } from "../hooks/useViewMode";
+import { resolveViewMode } from "../lib/viewMode";
+import { clearLastSession } from "../lib/lastSession";
+import { workspaceDisplayName } from "../lib/workspaceDisplayName";
+import type { MainStackParamList } from "../navigation/types";
 
-type DashboardNav = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, "dashboard">,
-  NativeStackNavigationProp<MainStackParamList>
->;
+type WorkspaceSelectorNav = NativeStackNavigationProp<MainStackParamList>;
 
-export default function Dashboard() {
+export default function WorkspaceSelector() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<DashboardNav>();
+  const navigation = useNavigation<WorkspaceSelectorNav>();
   const { viewMode } = useViewMode();
   const { text, muted, primary } = useThemeColors();
 
@@ -55,6 +51,7 @@ export default function Dashboard() {
   const onLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
+      await clearLastSession();
       // RootNavigator ternary switches to AuthNavigator.
     } catch (err) {
       console.error("Logout failed:", err);
@@ -71,13 +68,13 @@ export default function Dashboard() {
   }
 
   return (
-    <ScreenLayout title="Dashboard" subtitle={subtitleParts.join(" · ")}>
+    <ScreenLayout subtitle={subtitleParts.join(" · ") || undefined}>
       <HStack space={2} flexWrap="wrap">
         <BaseButton
-          title="Account"
+          title="Settings"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("home")}
+          onPress={() => navigation.navigate("settings")}
         />
         <BaseButton
           title="Log out"
@@ -134,11 +131,11 @@ export default function Dashboard() {
                 dispatch(setActiveWorkspace(ws.workspaceId));
                 const mode = resolveViewMode(ws.roleRank, viewMode);
                 if (mode === "admin") {
-                  navigation.navigate("workspace", {
+                  navigation.navigate("eventSelector", {
                     workspaceId: ws.workspaceId,
                   });
                 } else {
-                  navigation.navigate("crewWorkspace", {
+                  navigation.navigate("crewEventSelector", {
                     workspaceId: ws.workspaceId,
                   });
                 }

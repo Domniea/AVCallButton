@@ -9,7 +9,7 @@ import {
   removeRoomCoverage,
   removeZoneCoverage,
 } from "@av/store";
-import type { CoverageTarget } from "../AssignCoverageModal";
+import type { CoverageTarget } from "../screens/AssignCoverageModal";
 import {
   apiErrorMessage,
   mergeCoverageRow,

@@ -1,34 +1,38 @@
 import React, { useState } from "react";
 import { VStack, Text, HStack } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import type { CompositeNavigationProp, RouteProp } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
 
 import { fetchRosterThunk } from "@av/store";
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { BasePill } from "../components/BasePill";
-import { ListRow } from "../components/ListRow";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { SectionHeader } from "../components/SectionHeader";
-import { useThemeColors } from "../hooks/useThemeColors";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { BasePill } from "../../components/BasePill";
+import { ListRow } from "../../components/ListRow";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { SectionHeader } from "../../components/SectionHeader";
+import { useThemeColors } from "../../hooks/useThemeColors";
 import AssignStaffModal from "./AssignStaffModal";
 import {
   assignmentSubtitle,
   pendingSubtitle,
   unassignedRooms,
-} from "./event/eventHelpers";
-import { DetailRow, StaffRow } from "./event/EventUi";
-import { useEventScreenData } from "./event/useEventScreenData";
-import type { MainStackParamList } from "./navigation/types";
+} from "../event/eventHelpers";
+import { DetailRow, StaffRow } from "../event/EventUi";
+import { useEventScreenData } from "../event/useEventScreenData";
+import type { MainStackParamList, MainTabParamList } from "../navigation/types";
 
-type EventNav = NativeStackNavigationProp<MainStackParamList, "event">;
-type EventRoute = RouteProp<MainStackParamList, "event">;
+type EventDashboardNav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "eventHome">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
+type EventDashboardRoute = RouteProp<MainTabParamList, "eventHome">;
 
-export default function EventScreen() {
-  const navigation = useNavigation<EventNav>();
-  const route = useRoute<EventRoute>();
+export default function EventDashboard() {
+  const navigation = useNavigation<EventDashboardNav>();
+  const route = useRoute<EventDashboardRoute>();
   const { workspaceId, eventId } = route.params;
   const { muted } = useThemeColors();
   const [isAssignStaffOpen, setIsAssignStaffOpen] = useState(false);
@@ -188,10 +192,10 @@ export default function EventScreen() {
         </BaseCard>
 
         <BaseButton
-          title="Back to workspace"
+          title="Select an Event"
           variety="tertiary"
           btnWidth="auto"
-          onPress={() => navigation.navigate("workspace", { workspaceId })}
+          onPress={() => navigation.navigate("eventSelector", { workspaceId })}
         />
       </ScreenLayout>
 

@@ -20,8 +20,8 @@ import {
 import type { AppDispatch, EventZone } from "@av/store";
 import { createRoom, fetchEventsThunk } from "@av/store";
 
-import { BaseInput } from "../components/BaseInput";
-import { BaseButton } from "../components/BaseButton";
+import { BaseInput } from "../../components/BaseInput";
+import { BaseButton } from "../../components/BaseButton";
 
 type AddRoomModalProps = {
   isOpen: boolean;

@@ -4,18 +4,18 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 
-import { BaseCard } from "../components/BaseCard";
-import { ListRow } from "../components/ListRow";
-import { LoadingScreen } from "../components/LoadingScreen";
-import { ScreenLayout } from "../components/ScreenLayout";
-import { SectionHeader } from "../components/SectionHeader";
-import { useThemeColors } from "../hooks/useThemeColors";
+import { BaseCard } from "../../components/BaseCard";
+import { ListRow } from "../../components/ListRow";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { ScreenLayout } from "../../components/ScreenLayout";
+import { SectionHeader } from "../../components/SectionHeader";
+import { useThemeColors } from "../../hooks/useThemeColors";
 import AssignCoverageModal from "./AssignCoverageModal";
-import { CoverageList } from "./event/EventUi";
-import { removingMembershipIdFor, roomsForZone } from "./event/eventHelpers";
-import { useEventCoverage } from "./event/useEventCoverage";
-import { useEventScreenData } from "./event/useEventScreenData";
-import type { MainStackParamList } from "./navigation/types";
+import { CoverageList } from "../event/EventUi";
+import { removingMembershipIdFor, roomsForZone } from "../event/eventHelpers";
+import { useEventCoverage } from "../event/useEventCoverage";
+import { useEventScreenData } from "../event/useEventScreenData";
+import type { MainStackParamList } from "../navigation/types";
 
 type ZoneDetailNav = NativeStackNavigationProp<
   MainStackParamList,

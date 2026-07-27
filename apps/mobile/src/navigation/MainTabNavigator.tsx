@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useColorModeValue } from "native-base";
 
-import Dashboard from "../Dashboard";
-import Home from "../Home";
+import EventHome from "../screens/EventHome";
+import Settings from "../screens/Settings";
 import type { MainTabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -31,14 +31,17 @@ export default function MainTabNavigator() {
       }}
     >
       <Tab.Screen
-        name="dashboard"
-        component={Dashboard}
-        options={{ title: "Dashboard", tabBarLabel: "Dashboard" }}
+        name="eventHome"
+        component={EventHome}
+        options={{
+          title: "Event Dashboard",
+          tabBarLabel: "Event",
+        }}
       />
       <Tab.Screen
-        name="home"
-        component={Home}
-        options={{ title: "Account", tabBarLabel: "Account" }}
+        name="settings"
+        component={Settings}
+        options={{ title: "Settings", tabBarLabel: "Settings" }}
       />
     </Tab.Navigator>
   );

@@ -1,42 +1,57 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useColorModeValue } from "native-base";
+import { useDispatch } from "react-redux";
 
-import WorkspaceScreen from "../Workspace";
-import EventScreen from "../Event";
-import EventZonesScreen from "../EventZones";
-import ZoneDetailScreen from "../ZoneDetail";
-import RoomDetailScreen from "../RoomDetail";
-import CrewWorkspaceScreen from "../CrewWorkspace";
-import CrewEventScreen from "../CrewEvent";
-import Invite from "../Invite";
+import type { AppDispatch } from "@av/store";
+import { setActiveWorkspace } from "@av/store";
+
+import WorkspaceSelector from "../screens/WorkspaceSelector";
+import EventSelector from "../screens/EventSelector";
+import EventZonesScreen from "../screens/EventZones";
+import ZoneDetailScreen from "../screens/ZoneDetail";
+import RoomDetailScreen from "../screens/RoomDetail";
+import CrewEventSelector from "../screens/CrewEventSelector";
+import Settings from "../screens/Settings";
+import DevMenu from "../screens/DevMenu";
+import Invite from "../screens/Invite";
+import { getLastSession } from "../lib/lastSession";
 import MainTabNavigator from "./MainTabNavigator";
+import { navigateToEventHome } from "./navigateToWorkspaceSelector";
 import type { MainStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
-/** After login, open invite accept if a token was stored from a deep link. */
-function PendingInviteRedirect() {
+/**
+ * After login: prefer pending invite, else restore last workspace/event session.
+ */
+function SessionBootstrapRedirect() {
   const navigation =
     useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const dispatch = useDispatch<AppDispatch>();
+  const didRun = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
+    if (didRun.current) return;
+    didRun.current = true;
 
     void (async () => {
-      const token = await AsyncStorage.getItem("inviteToken");
-      if (!cancelled && token) {
-        navigation.navigate("invite", { token });
+      const inviteToken = await AsyncStorage.getItem("inviteToken");
+      if (inviteToken) {
+        navigation.navigate("invite", { token: inviteToken });
+        return;
       }
-    })();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [navigation]);
+      const session = await getLastSession();
+      if (!session) return;
+
+      dispatch(setActiveWorkspace(session.workspaceId));
+      navigateToEventHome(navigation, session.workspaceId, session.eventId);
+    })();
+  }, [navigation, dispatch]);
 
   return null;
 }
@@ -48,9 +63,9 @@ export default function MainNavigator() {
 
   return (
     <>
-      <PendingInviteRedirect />
+      <SessionBootstrapRedirect />
       <Stack.Navigator
-        initialRouteName="MainTabs"
+        initialRouteName="workspaceSelector"
         screenOptions={{
           headerStyle: { backgroundColor: headerBg },
           headerTintColor: headerTint,
@@ -60,9 +75,29 @@ export default function MainNavigator() {
         }}
       >
         <Stack.Screen
-          name="MainTabs"
-          component={MainTabNavigator}
-          options={{ headerShown: false }}
+          name="workspaceSelector"
+          component={WorkspaceSelector}
+          options={{ title: "Select a Workspace" }}
+        />
+        <Stack.Screen
+          name="eventSelector"
+          component={EventSelector}
+          options={{ title: "Select an Event" }}
+        />
+        <Stack.Screen
+          name="crewEventSelector"
+          component={CrewEventSelector}
+          options={{ title: "Select an Event" }}
+        />
+        <Stack.Screen
+          name="settings"
+          component={Settings}
+          options={{ title: "Settings" }}
+        />
+        <Stack.Screen
+          name="devMenu"
+          component={DevMenu}
+          options={{ title: "Developer" }}
         />
         <Stack.Screen
           name="invite"
@@ -70,14 +105,9 @@ export default function MainNavigator() {
           options={{ title: "Invite" }}
         />
         <Stack.Screen
-          name="workspace"
-          component={WorkspaceScreen}
-          options={{ title: "Workspace" }}
-        />
-        <Stack.Screen
-          name="event"
-          component={EventScreen}
-          options={{ title: "Event" }}
+          name="MainTabs"
+          component={MainTabNavigator}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="eventZones"
@@ -93,16 +123,6 @@ export default function MainNavigator() {
           name="roomDetail"
           component={RoomDetailScreen}
           options={{ title: "Room" }}
-        />
-        <Stack.Screen
-          name="crewWorkspace"
-          component={CrewWorkspaceScreen}
-          options={{ title: "My events" }}
-        />
-        <Stack.Screen
-          name="crewEvent"
-          component={CrewEventScreen}
-          options={{ title: "My event" }}
         />
       </Stack.Navigator>
     </>

@@ -15,9 +15,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppDispatch } from "@av/store";
 import { createEventThunk, fetchWorkspacesThunk } from "@av/store";
 
-import { BaseButton } from "../components/BaseButton";
-import { BaseInput } from "../components/BaseInput";
-import type { MainStackParamList } from "./navigation/types";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseInput } from "../../components/BaseInput";
+import type { MainStackParamList } from "../navigation/types";
+import { navigateToEventHome } from "../navigation/navigateToWorkspaceSelector";
 
 type CreateEventModalProps = {
   isOpen: boolean;
@@ -25,7 +26,10 @@ type CreateEventModalProps = {
   onClose: () => void;
 };
 
-type WorkspaceNav = NativeStackNavigationProp<MainStackParamList, "workspace">;
+type EventSelectorNav = NativeStackNavigationProp<
+  MainStackParamList,
+  "eventSelector"
+>;
 
 export default function CreateEventModal({
   isOpen,
@@ -33,7 +37,7 @@ export default function CreateEventModal({
   onClose,
 }: CreateEventModalProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<WorkspaceNav>();
+  const navigation = useNavigation<EventSelectorNav>();
 
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
@@ -77,10 +81,7 @@ export default function CreateEventModal({
 
       void dispatch(fetchWorkspacesThunk());
       onClose();
-      navigation.navigate("event", {
-        workspaceId,
-        eventId: result.event.id,
-      });
+      navigateToEventHome(navigation, workspaceId, result.event.id);
     } catch (err) {
       setSubmitError(
         typeof err === "string" ? err : "Could not create show. Try again.",

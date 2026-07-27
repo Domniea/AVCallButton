@@ -9,18 +9,22 @@ import {
 } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import type { CompositeNavigationProp, RouteProp } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
 
 import type { AppDispatch, RootState } from "@av/store";
 import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
-import { BaseButton } from "../components/BaseButton";
-import { BaseCard } from "../components/BaseCard";
-import { BasePill } from "../components/BasePill";
-import type { MainStackParamList } from "./navigation/types";
+import { BaseButton } from "../../components/BaseButton";
+import { BaseCard } from "../../components/BaseCard";
+import { BasePill } from "../../components/BasePill";
+import type { MainStackParamList, MainTabParamList } from "../navigation/types";
 
-type CrewEventNav = NativeStackNavigationProp<MainStackParamList, "crewEvent">;
-type CrewEventRoute = RouteProp<MainStackParamList, "crewEvent">;
+type CrewEventDashboardNav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, "eventHome">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
+type CrewEventDashboardRoute = RouteProp<MainTabParamList, "eventHome">;
 
 function DetailRow({
   label,
@@ -50,10 +54,10 @@ function formatDateTime(iso: string | null): string | null {
   return new Date(iso).toLocaleString();
 }
 
-export default function CrewEventScreen() {
+export default function CrewEventDashboard() {
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<CrewEventNav>();
-  const route = useRoute<CrewEventRoute>();
+  const navigation = useNavigation<CrewEventDashboardNav>();
+  const route = useRoute<CrewEventDashboardRoute>();
   const { workspaceId, eventId } = route.params;
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -103,7 +107,7 @@ export default function CrewEventScreen() {
   return (
     <Box flex={1} bg={bg}>
       <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
-        <VStack space={4} maxW="720" alignSelf="center" w="100%">
+       <VStack space={4} maxW="720" alignSelf="center" w="100%">
           {detailStatus === "loading" && (
             <Text color={muted}>Loading your event coverage…</Text>
           )}
@@ -263,14 +267,14 @@ export default function CrewEventScreen() {
           )}
 
           <BaseButton
-            title="Back to events"
+            title="Select an Event"
             variety="tertiary"
             btnWidth="auto"
             onPress={() =>
-              navigation.navigate("crewWorkspace", { workspaceId })
+              navigation.navigate("crewEventSelector", { workspaceId })
             }
           />
-        </VStack>
+        </VStack> 
       </ScrollView>
     </Box>
   );

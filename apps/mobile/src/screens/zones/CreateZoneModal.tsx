@@ -22,8 +22,8 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import type { AppDispatch, EventRoom } from "@av/store";
 import { createRoom, createZone, fetchEventsThunk } from "@av/store";
 
-import { BaseButton } from "../../components/BaseButton";
-import { BaseInput } from "../../components/BaseInput";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseInput } from "../../../components/BaseInput";
 
 type CreateZoneModalProps = {
   isOpen: boolean;

@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useColorModeValue } from "native-base";
 
-import Chat from "../screens/Chat";
-import EventHome from "../screens/EventHome";
-import Settings from "../screens/Settings";
+import Chat from "../screens/chat/Chat";
+import EventHome from "../screens/app/EventHome";
+import Settings from "../screens/settings/Settings";
 import type { MainTabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();

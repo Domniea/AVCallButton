@@ -6,23 +6,23 @@ import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { fetchRosterThunk } from "@av/store";
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { BasePill } from "../../components/BasePill";
-import { ListRow } from "../../components/ListRow";
-import { LoadingScreen } from "../../components/LoadingScreen";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { SectionHeader } from "../../components/SectionHeader";
-import { useThemeColors } from "../../hooks/useThemeColors";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { BasePill } from "../../../components/BasePill";
+import { ListRow } from "../../../components/ListRow";
+import { LoadingScreen } from "../../../components/LoadingScreen";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SectionHeader } from "../../../components/SectionHeader";
+import { useThemeColors } from "../../../hooks/useThemeColors";
 import AssignStaffModal from "./AssignStaffModal";
 import {
   assignmentSubtitle,
   pendingSubtitle,
   unassignedRooms,
-} from "../event/eventHelpers";
-import { DetailRow, StaffRow } from "../event/EventUi";
-import { useEventScreenData } from "../event/useEventScreenData";
-import type { MainStackParamList, MainTabParamList } from "../navigation/types";
+} from "../../event/eventHelpers";
+import { DetailRow, StaffRow } from "../../event/EventUi";
+import { useEventScreenData } from "../../event/useEventScreenData";
+import type { MainStackParamList, MainTabParamList } from "../../navigation/types";
 
 type EventDashboardNav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, "eventHome">,

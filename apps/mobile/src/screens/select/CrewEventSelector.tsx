@@ -12,20 +12,20 @@ import {
   setActiveWorkspace,
 } from "@av/store";
 
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { BasePill } from "../../components/BasePill";
-import { ListRow } from "../../components/ListRow";
-import { LoadingScreen } from "../../components/LoadingScreen";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { SectionHeader } from "../../components/SectionHeader";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { workspaceDisplayName } from "../lib/workspaceDisplayName";
-import type { MainStackParamList } from "../navigation/types";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { BasePill } from "../../../components/BasePill";
+import { ListRow } from "../../../components/ListRow";
+import { LoadingScreen } from "../../../components/LoadingScreen";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SectionHeader } from "../../../components/SectionHeader";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import { workspaceDisplayName } from "../../lib/workspaceDisplayName";
+import type { MainStackParamList } from "../../navigation/types";
 import {
   navigateToEventHome,
   navigateToWorkspaceSelector,
-} from "../navigation/navigateToWorkspaceSelector";
+} from "../../navigation/navigateToWorkspaceSelector";
 
 type CrewEventSelectorNav = NativeStackNavigationProp<
   MainStackParamList,

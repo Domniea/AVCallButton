@@ -11,22 +11,22 @@ import {
   fetchEventsThunk,
   setActiveWorkspace,
 } from "@av/store";
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { BasePill } from "../../components/BasePill";
-import { ListRow } from "../../components/ListRow";
-import { LoadingScreen } from "../../components/LoadingScreen";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { SectionHeader } from "../../components/SectionHeader";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { canAccessAdminDash } from "../lib/viewMode";
-import { workspaceDisplayName } from "../lib/workspaceDisplayName";
-import CreateEventModal from "./CreateEventModal";
-import type { MainStackParamList } from "../navigation/types";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { BasePill } from "../../../components/BasePill";
+import { ListRow } from "../../../components/ListRow";
+import { LoadingScreen } from "../../../components/LoadingScreen";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SectionHeader } from "../../../components/SectionHeader";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import { canAccessAdminDash } from "../../lib/viewMode";
+import { workspaceDisplayName } from "../../lib/workspaceDisplayName";
+import CreateEventModal from "../app/CreateEventModal";
+import type { MainStackParamList } from "../../navigation/types";
 import {
   navigateToEventHome,
   navigateToWorkspaceSelector,
-} from "../navigation/navigateToWorkspaceSelector";
+} from "../../navigation/navigateToWorkspaceSelector";
 
 type EventSelectorNav = NativeStackNavigationProp<MainStackParamList, "eventSelector">;
 type EventSelectorRoute = RouteProp<MainStackParamList, "eventSelector">;

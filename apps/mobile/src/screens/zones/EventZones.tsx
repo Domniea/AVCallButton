@@ -4,19 +4,19 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { ListRow } from "../../components/ListRow";
-import { LoadingScreen } from "../../components/LoadingScreen";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { SectionHeader } from "../../components/SectionHeader";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import AddRoomModal from "./AddRoomModal";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { ListRow } from "../../../components/ListRow";
+import { LoadingScreen } from "../../../components/LoadingScreen";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { SectionHeader } from "../../../components/SectionHeader";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import CreateRoomModal from "../rooms/CreateRoomModal";
 import CreateZoneModal from "./CreateZoneModal";
-import { roomsForZone, unassignedRooms } from "../event/eventHelpers";
-import { useEventCoverage } from "../event/useEventCoverage";
-import { useEventScreenData } from "../event/useEventScreenData";
-import type { MainStackParamList } from "../navigation/types";
+import { roomsForZone, unassignedRooms } from "../../event/eventHelpers";
+import { useEventCoverage } from "../../event/useEventCoverage";
+import { useEventScreenData } from "../../event/useEventScreenData";
+import type { MainStackParamList } from "../../navigation/types";
 
 type EventZonesNav = NativeStackNavigationProp<
   MainStackParamList,
@@ -155,7 +155,7 @@ export default function EventZonesScreen() {
         )}
       </ScreenLayout>
 
-      <AddRoomModal
+      <CreateRoomModal
         isOpen={isAddRoomOpen}
         eventId={eventId}
         workspaceId={workspaceId}

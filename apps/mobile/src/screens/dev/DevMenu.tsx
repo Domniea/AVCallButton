@@ -5,14 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { RootState } from "@av/store";
-import { BaseCard } from "../../components/BaseCard";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { ViewModeToggle } from "../components/ViewModeToggle";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { useViewMode } from "../hooks/useViewMode";
-import { canAccessAdminDash } from "../lib/viewMode";
-import type { MainStackParamList } from "../navigation/types";
-import { navigateToWorkspaceSelector } from "../navigation/navigateToWorkspaceSelector";
+import { BaseCard } from "../../../components/BaseCard";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { ViewModeToggle } from "../../components/ViewModeToggle";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import { useViewMode } from "../../hooks/useViewMode";
+import { canAccessAdminDash } from "../../lib/viewMode";
+import type { MainStackParamList } from "../../navigation/types";
+import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
 type DevMenuNav = NativeStackNavigationProp<MainStackParamList, "devMenu">;
 

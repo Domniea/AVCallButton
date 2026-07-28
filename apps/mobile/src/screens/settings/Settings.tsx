@@ -12,14 +12,14 @@ import type { AppDispatch, RootState } from "@av/store";
 import { fetchWorkspacesThunk, sendTestPush } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { registerForPushNotifications } from "../push/registerForPushNotifications";
-import { clearLastSession } from "../lib/lastSession";
-import type { MainStackParamList } from "../navigation/types";
-import { navigateToWorkspaceSelector } from "../navigation/navigateToWorkspaceSelector";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import { registerForPushNotifications } from "../../push/registerForPushNotifications";
+import { clearLastSession } from "../../lib/lastSession";
+import type { MainStackParamList } from "../../navigation/types";
+import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
 type SettingsNav = NativeStackNavigationProp<MainStackParamList>;
 

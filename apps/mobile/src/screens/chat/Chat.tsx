@@ -1,7 +1,7 @@
 import { Text } from "native-base";
 
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { useThemeColors } from "../../hooks/useThemeColors";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { useThemeColors } from "../../../hooks/useThemeColors";
 
 /** Placeholder for event chat (middle tab). */
 export default function Chat() {

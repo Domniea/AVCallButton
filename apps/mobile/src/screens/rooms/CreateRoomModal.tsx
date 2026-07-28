@@ -20,10 +20,10 @@ import {
 import type { AppDispatch, EventZone } from "@av/store";
 import { createRoom, fetchEventsThunk } from "@av/store";
 
-import { BaseInput } from "../../components/BaseInput";
-import { BaseButton } from "../../components/BaseButton";
+import { BaseInput } from "../../../components/BaseInput";
+import { BaseButton } from "../../../components/BaseButton";
 
-type AddRoomModalProps = {
+type CreateRoomModalProps = {
   isOpen: boolean;
   eventId: string;
   workspaceId: string;
@@ -81,13 +81,13 @@ function ZoneOption({
   );
 }
 
-export default function AddRoomModal({
+export default function CreateRoomModal({
   isOpen,
   eventId,
   workspaceId,
   zones,
   onClose,
-}: AddRoomModalProps) {
+}: CreateRoomModalProps) {
   const dispatch = useDispatch<AppDispatch>();
   const textColor = useColorModeValue("text", "textDark");
   const surface = useColorModeValue("surface", "surfaceDark");

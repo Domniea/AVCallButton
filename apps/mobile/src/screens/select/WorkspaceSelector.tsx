@@ -7,17 +7,17 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchWorkspacesThunk, setActiveWorkspace } from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { BasePill } from "../../components/BasePill";
-import { ListRow } from "../../components/ListRow";
-import { ScreenLayout } from "../../components/ScreenLayout";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { useViewMode } from "../hooks/useViewMode";
-import { resolveViewMode } from "../lib/viewMode";
-import { clearLastSession } from "../lib/lastSession";
-import { workspaceDisplayName } from "../lib/workspaceDisplayName";
-import type { MainStackParamList } from "../navigation/types";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { BasePill } from "../../../components/BasePill";
+import { ListRow } from "../../../components/ListRow";
+import { ScreenLayout } from "../../../components/ScreenLayout";
+import { useThemeColors } from "../../../hooks/useThemeColors";
+import { useViewMode } from "../../hooks/useViewMode";
+import { resolveViewMode } from "../../lib/viewMode";
+import { clearLastSession } from "../../lib/lastSession";
+import { workspaceDisplayName } from "../../lib/workspaceDisplayName";
+import type { MainStackParamList } from "../../navigation/types";
 
 type WorkspaceSelectorNav = NativeStackNavigationProp<MainStackParamList>;
 

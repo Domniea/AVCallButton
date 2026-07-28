@@ -1,10 +1,10 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useColorModeValue } from "native-base";
 
-import Login from "../screens/Login";
-import SignUp from "../screens/SignUp";
-import SignupConfirm from "../screens/SignupConfirm";
-import Invite from "../screens/Invite";
+import Login from "../screens/auth/Login";
+import SignUp from "../screens/auth/SignUp";
+import SignupConfirm from "../screens/auth/SignupConfirm";
+import Invite from "../screens/auth/Invite";
 import type { AuthStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();

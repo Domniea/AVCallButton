@@ -15,10 +15,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AppDispatch } from "@av/store";
 import { createEventThunk, fetchWorkspacesThunk } from "@av/store";
 
-import { BaseButton } from "../../components/BaseButton";
-import { BaseInput } from "../../components/BaseInput";
-import type { MainStackParamList } from "../navigation/types";
-import { navigateToEventHome } from "../navigation/navigateToWorkspaceSelector";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseInput } from "../../../components/BaseInput";
+import type { MainStackParamList } from "../../navigation/types";
+import { navigateToEventHome } from "../../navigation/navigateToWorkspaceSelector";
 
 type CreateEventModalProps = {
   isOpen: boolean;

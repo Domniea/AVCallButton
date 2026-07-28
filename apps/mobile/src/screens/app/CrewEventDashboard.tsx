@@ -15,10 +15,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { AppDispatch, RootState } from "@av/store";
 import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
-import { BaseButton } from "../../components/BaseButton";
-import { BaseCard } from "../../components/BaseCard";
-import { BasePill } from "../../components/BasePill";
-import type { MainStackParamList, MainTabParamList } from "../navigation/types";
+import { BaseButton } from "../../../components/BaseButton";
+import { BaseCard } from "../../../components/BaseCard";
+import { BasePill } from "../../../components/BasePill";
+import type { MainStackParamList, MainTabParamList } from "../../navigation/types";
 
 type CrewEventDashboardNav = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, "eventHome">,

@@ -3,11 +3,11 @@ import { VStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { BaseInput } from "../../components/BaseInput";
-import { BaseButton } from "../../components/BaseButton";
-import { AuthLayout } from "../../components/AuthLayout";
-import { ThemeToggle } from "../../components/ThemeToggle";
-import { LoadingScreen } from "../../components/LoadingScreen";
+import { BaseInput } from "../../../components/BaseInput";
+import { BaseButton } from "../../../components/BaseButton";
+import { AuthLayout } from "../../../components/AuthLayout";
+import { ThemeToggle } from "../../../components/ThemeToggle";
+import { LoadingScreen } from "../../../components/LoadingScreen";
 
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
@@ -18,7 +18,7 @@ import {
 
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchMeThunk, logoutThunk, loginThunk } from "@av/store/src/auth";
-import type { AuthStackParamList } from "../navigation/types";
+import type { AuthStackParamList } from "../../navigation/types";
 
 type LoginNav = NativeStackNavigationProp<AuthStackParamList, "login">;
 

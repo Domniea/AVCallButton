@@ -17,8 +17,8 @@ import { assignStaffSchema } from "@av/forms/src/schemas/roster/assignStaffSchem
 import type { AppDispatch, AssignStaffData } from "@av/store";
 import { assignStaffThunk, fetchRosterThunk } from "@av/store";
 
-import { BaseInput } from "../../components/BaseInput";
-import { BaseButton } from "../../components/BaseButton";
+import { BaseInput } from "../../../components/BaseInput";
+import { BaseButton } from "../../../components/BaseButton";
 
 type AssignStaffModalProps = {
   isOpen: boolean;

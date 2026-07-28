@@ -11,8 +11,8 @@ import {
 } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootState } from "@av/store";
-import type { AuthStackParamList, MainStackParamList } from "../navigation/types";
-import { navigateToWorkspaceSelector } from "../navigation/navigateToWorkspaceSelector";
+import type { AuthStackParamList, MainStackParamList } from "../../navigation/types";
+import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
 type InviteParams = AuthStackParamList["invite"];
 type InviteNav = NativeStackNavigationProp<

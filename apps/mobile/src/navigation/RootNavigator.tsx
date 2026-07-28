@@ -32,6 +32,7 @@ const linking = {
       MainTabs: {
         screens: {
           eventHome: "workspace/:workspaceId/event/:eventId",
+          chat: "event/chat",
           settings: "event/settings",
         },
       },

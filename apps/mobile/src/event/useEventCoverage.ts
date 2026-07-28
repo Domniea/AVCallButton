@@ -21,10 +21,10 @@ type EventShape = {
   rooms: Array<{ id: string; name: string; zoneId: string | null }>;
 };
 
-export function useEventCoverage(eventId: string, event: EventShape | undefined) {
-  const [coverageTarget, setCoverageTarget] = useState<CoverageTarget | null>(
-    null,
-  );
+export function useEventCoverage(
+  eventId: string,
+  event: EventShape | undefined,
+) {
   const [roomCoverage, setRoomCoverage] = useState<
     Record<string, RoomCoverage[]>
   >({});
@@ -203,8 +203,6 @@ export function useEventCoverage(eventId: string, event: EventShape | undefined)
   );
 
   return {
-    coverageTarget,
-    setCoverageTarget,
     roomCoverage,
     zoneCoverage,
     removingCoverage,
@@ -213,7 +211,5 @@ export function useEventCoverage(eventId: string, event: EventShape | undefined)
     loadCoverage,
     handleCoverageAssigned,
     handleRemoveCoverage,
-    openCoverageModal: setCoverageTarget,
-    closeCoverageModal: () => setCoverageTarget(null),
   };
 }

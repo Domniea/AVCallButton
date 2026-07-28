@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { VStack, Text } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -28,6 +28,7 @@ export default function ZoneDetailScreen() {
   const route = useRoute<ZoneDetailRoute>();
   const { workspaceId, eventId, zoneId } = route.params;
   const { muted } = useThemeColors();
+  const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
 
   const {
     authStatus,
@@ -41,12 +42,9 @@ export default function ZoneDetailScreen() {
     zoneCoverage,
     roomCoverage,
     coverageActionError,
-    coverageTarget,
     removingCoverage,
     handleCoverageAssigned,
     handleRemoveCoverage,
-    openCoverageModal,
-    closeCoverageModal,
   } = useEventCoverage(eventId, event);
 
   if (authStatus === "idle" || authStatus === "loading") {
@@ -90,7 +88,7 @@ export default function ZoneDetailScreen() {
             rows={zoneCoverage[zone.id] ?? []}
             roster={roster}
             label="Zone coverage"
-            onAdd={() => openCoverageModal(zoneTarget)}
+            onAdd={() => setAssignCoverageModalOpen(true)}
             onRemove={(membershipId) =>
               void handleRemoveCoverage(zoneTarget, membershipId)
             }
@@ -142,10 +140,10 @@ export default function ZoneDetailScreen() {
       </ScreenLayout>
 
       <AssignCoverageModal
-        isOpen={coverageTarget != null}
+        isOpen={assignCoverageModalOpen}
         eventId={eventId}
-        target={coverageTarget}
-        onClose={closeCoverageModal}
+        target={zoneTarget}
+        onClose={() => setAssignCoverageModalOpen(false)}
         onAssigned={handleCoverageAssigned}
       />
     </>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, VStack } from "native-base";
 import { useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -21,6 +21,7 @@ export default function RoomDetailScreen() {
   const route = useRoute<RoomDetailRoute>();
   const { workspaceId, eventId, roomId } = route.params;
   const { muted } = useThemeColors();
+  const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
 
   const {
     authStatus,
@@ -33,12 +34,9 @@ export default function RoomDetailScreen() {
   const {
     roomCoverage,
     coverageActionError,
-    coverageTarget,
     removingCoverage,
     handleCoverageAssigned,
     handleRemoveCoverage,
-    openCoverageModal,
-    closeCoverageModal,
   } = useEventCoverage(eventId, event);
 
   if (authStatus === "idle" || authStatus === "loading") {
@@ -103,7 +101,7 @@ export default function RoomDetailScreen() {
             rows={roomCoverage[room.id] ?? []}
             roster={roster}
             label="Room coverage"
-            onAdd={() => openCoverageModal(roomTarget)}
+            onAdd={() => setAssignCoverageModalOpen(true)}
             onRemove={(membershipId) =>
               void handleRemoveCoverage(roomTarget, membershipId)
             }
@@ -117,10 +115,10 @@ export default function RoomDetailScreen() {
       </ScreenLayout>
 
       <AssignCoverageModal
-        isOpen={coverageTarget != null}
+        isOpen={assignCoverageModalOpen}
         eventId={eventId}
-        target={coverageTarget}
-        onClose={closeCoverageModal}
+        target={roomTarget}
+        onClose={() => setAssignCoverageModalOpen(false)}
         onAssigned={handleCoverageAssigned}
       />
     </>

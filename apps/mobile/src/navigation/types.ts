@@ -11,6 +11,7 @@ export type AuthStackParamList = {
 /** Tabs only after an event is selected. */
 export type MainTabParamList = {
   eventHome: { workspaceId: string; eventId: string };
+  chat: undefined;
   settings: undefined;
 };
 

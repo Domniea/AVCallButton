@@ -1,6 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useColorModeValue } from "native-base";
 
+import Chat from "../screens/Chat";
 import EventHome from "../screens/EventHome";
 import Settings from "../screens/Settings";
 import type { MainTabParamList } from "./types";
@@ -24,6 +26,7 @@ export default function MainTabNavigator() {
         headerTitleStyle: { fontWeight: "600", fontSize: 17 },
         tabBarActiveTintColor: active,
         tabBarInactiveTintColor: inactive,
+        tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: tabBarBg,
           borderTopColor: border,
@@ -35,13 +38,30 @@ export default function MainTabNavigator() {
         component={EventHome}
         options={{
           title: "Event Dashboard",
-          tabBarLabel: "Event",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="chat"
+        component={Chat}
+        options={{
+          title: "Chat",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="settings"
         component={Settings}
-        options={{ title: "Settings", tabBarLabel: "Settings" }}
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );

@@ -9,8 +9,7 @@ import {
 } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import type { CompositeNavigationProp, RouteProp } from "@react-navigation/native";
-import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { AppDispatch, RootState } from "@av/store";
@@ -18,13 +17,15 @@ import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
 import { BaseButton } from "../../../components/BaseButton";
 import { BaseCard } from "../../../components/BaseCard";
 import { BasePill } from "../../../components/BasePill";
-import type { MainStackParamList, MainTabParamList } from "../../navigation/types";
+import type {
+  DashStackParamList,
+  MainStackParamList,
+} from "../../navigation/types";
 
-type CrewEventDashboardNav = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, "eventHome">,
-  NativeStackNavigationProp<MainStackParamList>
+type CrewEventDashboardNav = NativeStackNavigationProp<
+  DashStackParamList & Pick<MainStackParamList, "crewEventSelector">
 >;
-type CrewEventDashboardRoute = RouteProp<MainTabParamList, "eventHome">;
+type CrewEventDashboardRoute = RouteProp<DashStackParamList, "eventHome">;
 
 function DetailRow({
   label,

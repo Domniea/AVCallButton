@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { VStack, Text, HStack } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import type { CompositeNavigationProp, RouteProp } from "@react-navigation/native";
-import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { fetchRosterThunk } from "@av/store";
@@ -22,13 +21,15 @@ import {
 } from "../../event/eventHelpers";
 import { DetailRow, StaffRow } from "../../event/EventUi";
 import { useEventScreenData } from "../../event/useEventScreenData";
-import type { MainStackParamList, MainTabParamList } from "../../navigation/types";
+import type {
+  DashStackParamList,
+  MainStackParamList,
+} from "../../navigation/types";
 
-type EventDashboardNav = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, "eventHome">,
-  NativeStackNavigationProp<MainStackParamList>
+type EventDashboardNav = NativeStackNavigationProp<
+  DashStackParamList & Pick<MainStackParamList, "eventSelector">
 >;
-type EventDashboardRoute = RouteProp<MainTabParamList, "eventHome">;
+type EventDashboardRoute = RouteProp<DashStackParamList, "eventHome">;
 
 export default function EventDashboard() {
   const navigation = useNavigation<EventDashboardNav>();

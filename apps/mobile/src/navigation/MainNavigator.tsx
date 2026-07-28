@@ -11,9 +11,6 @@ import { setActiveWorkspace } from "@av/store";
 
 import WorkspaceSelector from "../screens/select/WorkspaceSelector";
 import EventSelector from "../screens/select/EventSelector";
-import EventZonesScreen from "../screens/zones/EventZones";
-import ZoneDetailScreen from "../screens/zones/ZoneDetail";
-import RoomDetailScreen from "../screens/rooms/RoomDetail";
 import CrewEventSelector from "../screens/select/CrewEventSelector";
 import Settings from "../screens/settings/Settings";
 import DevMenu from "../screens/dev/DevMenu";
@@ -108,21 +105,6 @@ export default function MainNavigator() {
           name="MainTabs"
           component={MainTabNavigator}
           options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="eventZones"
-          component={EventZonesScreen}
-          options={{ title: "Zones & rooms" }}
-        />
-        <Stack.Screen
-          name="zoneDetail"
-          component={ZoneDetailScreen}
-          options={{ title: "Zone" }}
-        />
-        <Stack.Screen
-          name="roomDetail"
-          component={RoomDetailScreen}
-          options={{ title: "Room" }}
         />
       </Stack.Navigator>
     </>

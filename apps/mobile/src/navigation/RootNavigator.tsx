@@ -31,14 +31,27 @@ const linking = {
       crewEventSelector: "crew/workspace/:workspaceId",
       MainTabs: {
         screens: {
-          eventHome: "workspace/:workspaceId/event/:eventId",
-          chat: "event/chat",
-          settings: "event/settings",
+          dash: {
+            screens: {
+              eventHome: "workspace/:workspaceId/event/:eventId",
+              eventZones: "workspace/:workspaceId/event/:eventId/zones",
+              zoneDetail: "workspace/:workspaceId/event/:eventId/zone/:zoneId",
+              roomDetail: "workspace/:workspaceId/event/:eventId/room/:roomId",
+            },
+          },
+          chat: {
+            screens: {
+              chatHome: "event/chat",
+            },
+          },
+          settings: {
+            screens: {
+              settingsHome: "event/settings",
+              devMenu: "event/dev",
+            },
+          },
         },
       },
-      eventZones: "workspace/:workspaceId/event/:eventId/zones",
-      zoneDetail: "workspace/:workspaceId/event/:eventId/zone/:zoneId",
-      roomDetail: "workspace/:workspaceId/event/:eventId/room/:roomId",
     },
   },
 } as const;

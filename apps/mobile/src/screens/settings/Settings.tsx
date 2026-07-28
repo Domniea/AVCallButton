@@ -3,6 +3,7 @@ import { Linking, Platform } from "react-native";
 import { HStack, Text, VStack, useColorMode } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -18,10 +19,16 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { registerForPushNotifications } from "../../push/registerForPushNotifications";
 import { clearLastSession } from "../../lib/lastSession";
-import type { MainStackParamList } from "../../navigation/types";
+import type {
+  MainStackParamList,
+  SettingsStackParamList,
+} from "../../navigation/types";
 import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
-type SettingsNav = NativeStackNavigationProp<MainStackParamList>;
+type SettingsNav = CompositeNavigationProp<
+  NativeStackNavigationProp<SettingsStackParamList, "settingsHome">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();

@@ -2,6 +2,7 @@ import React from "react";
 import { Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import type { RootState } from "@av/store";
@@ -11,10 +12,16 @@ import { ViewModeToggle } from "../../components/ViewModeToggle";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { useViewMode } from "../../hooks/useViewMode";
 import { canAccessAdminDash } from "../../lib/viewMode";
-import type { MainStackParamList } from "../../navigation/types";
+import type {
+  MainStackParamList,
+  SettingsStackParamList,
+} from "../../navigation/types";
 import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
-type DevMenuNav = NativeStackNavigationProp<MainStackParamList, "devMenu">;
+type DevMenuNav = CompositeNavigationProp<
+  NativeStackNavigationProp<SettingsStackParamList, "devMenu">,
+  NativeStackNavigationProp<MainStackParamList>
+>;
 
 /**
  * Testing-only tools. View mode is saved to AsyncStorage; after toggling we

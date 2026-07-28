@@ -16,13 +16,13 @@ import CreateZoneModal from "./CreateZoneModal";
 import { roomsForZone, unassignedRooms } from "../../event/eventHelpers";
 import { useEventCoverage } from "../../event/useEventCoverage";
 import { useEventScreenData } from "../../event/useEventScreenData";
-import type { MainStackParamList } from "../../navigation/types";
+import type { DashStackParamList } from "../../navigation/types";
 
 type EventZonesNav = NativeStackNavigationProp<
-  MainStackParamList,
+  DashStackParamList,
   "eventZones"
 >;
-type EventZonesRoute = RouteProp<MainStackParamList, "eventZones">;
+type EventZonesRoute = RouteProp<DashStackParamList, "eventZones">;
 
 export default function EventZonesScreen() {
   const navigation = useNavigation<EventZonesNav>();

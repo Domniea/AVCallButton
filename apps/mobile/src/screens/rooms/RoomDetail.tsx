@@ -13,9 +13,9 @@ import { CoverageList, DetailRow } from "../../event/EventUi";
 import { removingMembershipIdFor } from "../../event/eventHelpers";
 import { useEventCoverage } from "../../event/useEventCoverage";
 import { useEventScreenData } from "../../event/useEventScreenData";
-import type { MainStackParamList } from "../../navigation/types";
+import type { DashStackParamList } from "../../navigation/types";
 
-type RoomDetailRoute = RouteProp<MainStackParamList, "roomDetail">;
+type RoomDetailRoute = RouteProp<DashStackParamList, "roomDetail">;
 
 export default function RoomDetailScreen() {
   const route = useRoute<RoomDetailRoute>();

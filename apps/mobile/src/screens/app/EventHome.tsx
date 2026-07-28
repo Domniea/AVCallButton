@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@av/store";
 import { useViewMode } from "../../hooks/useViewMode";
 import { resolveViewMode } from "../../lib/viewMode";
-import type { MainTabParamList } from "../../navigation/types";
+import type { DashStackParamList } from "../../navigation/types";
 import EventDashboard from "./EventDashboard";
 import CrewEventDashboard from "./CrewEventDashboard";
 
@@ -12,7 +12,7 @@ import CrewEventDashboard from "./CrewEventDashboard";
  * Post-event tab home: lead vs crew dashboard based on role + stored view mode.
  */
 export default function EventHome() {
-  const route = useRoute<RouteProp<MainTabParamList, "eventHome">>();
+  const route = useRoute<RouteProp<DashStackParamList, "eventHome">>();
   const { workspaceId } = route.params;
   const { viewMode } = useViewMode();
   const workspaces = useSelector(

@@ -2,16 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useColorModeValue } from "native-base";
 
-import Chat from "../screens/chat/Chat";
-import EventHome from "../screens/app/EventHome";
-import Settings from "../screens/settings/Settings";
+import ChatStackNavigator from "./ChatStackNavigator";
+import DashStackNavigator from "./DashStackNavigator";
+import SettingsStackNavigator from "./SettingsStackNavigator";
 import type { MainTabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
   const tabBarBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
   const active = useColorModeValue("#01796F", "#45FFD4");
   const inactive = useColorModeValue("#4E5D6E", "#C4D2E3");
   const border = useColorModeValue("#C4D2E3", "#4E5D6E");
@@ -19,11 +18,7 @@ export default function MainTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        headerShown: true,
-        headerShadowVisible: false,
-        headerStyle: { backgroundColor: tabBarBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
+        headerShown: false,
         tabBarActiveTintColor: active,
         tabBarInactiveTintColor: inactive,
         tabBarShowLabel: false,
@@ -34,10 +29,10 @@ export default function MainTabNavigator() {
       }}
     >
       <Tab.Screen
-        name="eventHome"
-        component={EventHome}
+        name="dash"
+        component={DashStackNavigator}
         options={{
-          title: "Event Dashboard",
+          title: "Event",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -45,7 +40,7 @@ export default function MainTabNavigator() {
       />
       <Tab.Screen
         name="chat"
-        component={Chat}
+        component={ChatStackNavigator}
         options={{
           title: "Chat",
           tabBarIcon: ({ color, size }) => (
@@ -55,7 +50,7 @@ export default function MainTabNavigator() {
       />
       <Tab.Screen
         name="settings"
-        component={Settings}
+        component={SettingsStackNavigator}
         options={{
           title: "Settings",
           tabBarIcon: ({ color, size }) => (

@@ -8,14 +8,17 @@ export function navigateToWorkspaceSelector(navigation: {
   navigation.navigate("workspaceSelector");
 }
 
-/** Enter post-event tabs on the Event home screen. */
+/** Enter post-event tabs on the Dash → Event home screen. */
 export function navigateToEventHome(
   navigation: {
     navigate: (
       screen: "MainTabs",
       params: {
-        screen: "eventHome";
-        params: { workspaceId: string; eventId: string };
+        screen: "dash";
+        params: {
+          screen: "eventHome";
+          params: { workspaceId: string; eventId: string };
+        };
       },
     ) => void;
   },
@@ -24,7 +27,10 @@ export function navigateToEventHome(
 ) {
   void setLastSession(workspaceId, eventId);
   navigation.navigate("MainTabs", {
-    screen: "eventHome",
-    params: { workspaceId, eventId },
+    screen: "dash",
+    params: {
+      screen: "eventHome",
+      params: { workspaceId, eventId },
+    },
   });
 }

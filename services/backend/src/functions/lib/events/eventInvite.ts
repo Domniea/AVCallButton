@@ -6,6 +6,7 @@ import {
   MembershipType,
 } from "../prismaClient";
 
+import { addUserToEventGroupThread } from "../chat/threads";
 import { isWorkspaceRoleRank } from "../permissions";
 import { prisma } from "../prisma";
 import { normalizeEmail, sendInviteEmail } from "../email";
@@ -167,7 +168,7 @@ export async function setEventStaffAssignment(
 
   assertEventRankWithinWorkspaceRoleRank(eventRank, assigneeWorkspaceRole.rank);
 
-  return prisma.eventAssignment.upsert({
+  const assignment = await prisma.eventAssignment.upsert({
     where: { eventId_membershipId: { eventId, membershipId: membership.id } },
     update: {
       eventRank,
@@ -182,6 +183,13 @@ export async function setEventStaffAssignment(
       assignedBy,
     },
   });
+
+  await addUserToEventGroupThread(prisma, {
+    eventId,
+    userId: membership.userId,
+  });
+
+  return assignment;
 }
 
 /** Inactive workspace member: set ACTIVE, then upsert event assignment (same rules as `setEventStaffAssignment`). */
@@ -360,7 +368,7 @@ export type FinalizePendingEventInvitesOnAcceptResult = {
 export async function finalizePendingEventInvitesOnAccept(
   tx: DbClient,
   inviteId: string,
-  membership: { id: string; workspaceRoleId: string },
+  membership: { id: string; workspaceRoleId: string; userId: string },
   pendingRows?: EventInvite[],
 ): Promise<FinalizePendingEventInvitesOnAcceptResult> {
   const pending =
@@ -399,6 +407,11 @@ export async function finalizePendingEventInvitesOnAccept(
         eventRank: ev.eventRank,
         assignedBy: ev.assignedBy,
       },
+    });
+
+    await addUserToEventGroupThread(tx, {
+      eventId: ev.eventId,
+      userId: membership.userId,
     });
 
     assignments.push({

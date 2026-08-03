@@ -3,6 +3,7 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../lib/prisma";
 import { EventStatus } from "../lib/prismaClient";
 import { authorize } from "../lib/authorization";
+import { addUserToEventGroupThread } from "../lib/chat/threads";
 import { badRequest, forbidden, serverError } from "../lib/responses";
 
 export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
@@ -62,6 +63,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           eventRank: rank,
           assignedBy: userId,
         },
+      });
+
+      await addUserToEventGroupThread(tx, {
+        workspaceId,
+        eventId: newEvent.id,
+        userId,
       });
 
       return newEvent;

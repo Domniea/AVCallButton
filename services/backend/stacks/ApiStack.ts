@@ -137,6 +137,16 @@ export function ApiStack({ stack }: StackContext) {
       "PATCH /workspaces/{workspaceId}/invites/{inviteId}/revoke":
         "src/functions/invites/revoke.handler",
 
+      // Chat
+      "GET /chat/inbox": "src/functions/chat/inbox.handler",
+      "POST /chat/dms": "src/functions/chat/dms/create.handler",
+      "GET /chat/threads/{threadId}/messages":
+        "src/functions/chat/threads/messages/list.handler",
+      "POST /chat/threads/{threadId}/messages":
+        "src/functions/chat/threads/messages/create.handler",
+      "POST /chat/threads/{threadId}/read":
+        "src/functions/chat/threads/read.handler",
+
       // Public (no auth) — guest QR call flow
       "GET /public/call/{callToken}/meta": {
         function: "src/functions/public/call/getQRMeta.handler",

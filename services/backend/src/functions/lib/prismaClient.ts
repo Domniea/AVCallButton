@@ -12,5 +12,6 @@ export const EventInviteStatus = prismaPackage.EventInviteStatus;
 export const EventStatus = prismaPackage.EventStatus;
 export const DevicePlatform = prismaPackage.DevicePlatform;
 export const MembershipType = prismaPackage.MembershipType;
+export const ChatThreadType = prismaPackage.ChatThreadType;
 
 export type * from "@prisma/client";

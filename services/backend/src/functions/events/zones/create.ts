@@ -3,6 +3,7 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../../lib/prisma";
 import { authorize } from "../../lib/authorization";
 import { badRequest, forbidden, notFound, serverError } from "../../lib/responses";
+import { getOrCreateZoneThread } from "../../lib/chat/threads";
 import {
   parseRoomIds,
   validateRoomIdsForEvent,
@@ -76,6 +77,12 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
           data: { zoneId: created.id },
         });
       }
+
+      await getOrCreateZoneThread(tx, {
+        workspaceId: dbEvent.workspaceId,
+        eventId,
+        zoneId: created.id,
+      });
 
       return tx.eventZone.findUnique({
         where: { id: created.id },

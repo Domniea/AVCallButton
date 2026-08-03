@@ -55,6 +55,12 @@ enum AlertStatus {
   REJECTED
 }
 
+enum ChatThreadType {
+  EVENT_GROUP
+  ZONE
+  DM
+}
+
 model Workspace {
   id        String   @id @default(uuid())
   name      String
@@ -65,6 +71,7 @@ model Workspace {
   events         Event[]
   invites        Invite[]
   workspaceRoles WorkspaceRole[]
+  chatThreads    ChatThread[]
 }
 
 model WorkspaceRole {
@@ -147,12 +154,12 @@ model Event {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   logs             Log[]
-  messages         Message[]
   alerts           Alert[]
   eventAssignments EventAssignment[]
   eventInvites     EventInvite[]
   zones            EventZone[]
   rooms            EventRoom[]
+  chatThreads      ChatThread[]
 
   @@index([workspaceId])
   @@index([status])
@@ -208,9 +215,10 @@ model EventZone {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event    Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  rooms    EventRoom[]
-  coverage EventZoneCoverage[]
+  event      Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  rooms      EventRoom[]
+  coverage   EventZoneCoverage[]
+  chatThread ChatThread?
 
   @@index([eventId])
   @@index([eventId, sortOrder])
@@ -313,15 +321,62 @@ model Log {
   @@index([createdAt])
 }
 
-model Message {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
-  eventId   String
-  userId    String
 
-  event Event @relation(fields: [eventId], references: [id])
+/// Also enforced in DB: unique EVENT_GROUP per eventId (partial index in migrations).
+model ChatThread {
+  id          String         @id @default(uuid())
+  type        ChatThreadType
+  workspaceId String
+  eventId     String?
+  zoneId      String?        @unique
+  dmKey       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
+  workspace Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  event     Event?             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  zone      EventZone?         @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  members   ChatThreadMember[]
+  messages  ChatMessage[]
+
+  @@unique([eventId, dmKey])
+  @@index([workspaceId])
   @@index([eventId])
-  @@index([createdAt])
+  @@index([type])
+  @@index([workspaceId, updatedAt])
+  @@index([eventId, updatedAt])
+}
+
+model ChatThreadMember {
+  id                String           @id @default(uuid())
+  threadId          String
+  userId            String
+  status            MembershipStatus @default(ACTIVE)
+  lastReadMessageId String?
+  mutedUntil        DateTime?
+  joinedAt          DateTime         @default(now())
+
+  thread          ChatThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  lastReadMessage ChatMessage? @relation("MemberLastRead", fields: [lastReadMessageId], references: [id], onDelete: SetNull)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+  @@index([threadId])
+  @@index([threadId, status])
+}
+
+model ChatMessage {
+  id        String    @id @default(uuid())
+  threadId  String
+  senderId  String
+  body      String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+  deletedAt DateTime?
+
+  thread        ChatThread         @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  readByMembers ChatThreadMember[] @relation("MemberLastRead")
+
+  @@index([threadId, createdAt])
+  @@index([senderId])
 }

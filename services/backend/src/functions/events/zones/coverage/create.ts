@@ -2,6 +2,7 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
 import { prisma } from "../../../lib/prisma";
 import { authorize } from "../../../lib/authorization";
+import { addUserToZoneThread } from "../../../lib/chat/threads";
 import { findEventRosterAssignment } from "../../../lib/events/eventRoster";
 import { badRequest, forbidden, notFound, serverError } from "../../../lib/responses";
 
@@ -44,7 +45,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
         id: membershipId,
         workspaceId: zone.event.workspaceId,
       },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
     if (!membership) return badRequest("Membership not found in event workspace");
 
@@ -53,16 +54,25 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       return badRequest("Membership is not assigned to this event");
     }
 
-    const coverage = await prisma.eventZoneCoverage.create({
-      data: {
+    const coverage = await prisma.$transaction(async (tx) => {
+      const created = await tx.eventZoneCoverage.create({
+        data: {
+          zoneId,
+          membershipId,
+          eventRank: rosterEntry.eventRank,
+          assignedBy: userId,
+        },
+        include: {
+          membership: { include: { workspaceRole: true } },
+        },
+      });
+
+      await addUserToZoneThread(tx, {
         zoneId,
-        membershipId,
-        eventRank: rosterEntry.eventRank,
-        assignedBy: userId,
-      },
-      include: {
-        membership: { include: { workspaceRole: true } },
-      },
+        userId: membership.userId,
+      });
+
+      return created;
     });
 
     return { statusCode: 201, body: JSON.stringify({ coverage }) };

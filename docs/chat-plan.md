@@ -129,11 +129,12 @@ Same threads and APIs as mobile.
 - [x] Phase 3 — Ably token + publish
   - [x] POST /chat/ably-token (+ store client)
   - [x] Publish on message create
-  - [x] Mobile subscribe
+  - [x] Mobile subscribe (open thread)
+  - [x] Mobile inbox live updates (subscribe to event thread channels + poll fallback)
 - [x] Phase 4 — Mobile UI
   - [x] Store API clients (`@av/store` chat.api)
   - [x] Chat tab inbox (workspaceId + eventId via lastSession)
   - [x] Thread screen (list / send / mark read / before + after poll)
   - [x] New DM flow (event roster → POST /chat/dms)
 - [ ] Phase 5 — Web UI
-- [ ] Phase 6 — Push / mute / event-end quieting
+- [ ] Phase 6 — Push / mute / event-end quieting / tab badge

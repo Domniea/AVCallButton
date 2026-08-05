@@ -13,6 +13,10 @@ export function ApiProvider({ children }: PropsWithChildren) {
       throw new Error("API_URL is not configured in Expo config");
     }
 
+    if (__DEV__) {
+      console.log("[api] baseURL", baseURL);
+    }
+
     initApiClient(
       axios.create({
         baseURL,

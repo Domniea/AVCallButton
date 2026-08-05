@@ -70,7 +70,6 @@ export async function getOrCreateZoneThread(
   });
 }
 
-
 async function assertShareEventRoster(
   db: DbClient,
   params: {
@@ -99,14 +98,11 @@ async function assertShareEventRoster(
     select: { membership: { select: { userId: true } } },
   });
 
-  const onRoster = new Set(
-    assignments.map((row) => row.membership.userId),
-  );
+  const onRoster = new Set(assignments.map((row) => row.membership.userId));
   if (!onRoster.has(params.userIdA) || !onRoster.has(params.userIdB)) {
     throw new Error("Both users must be on the event roster");
   }
 }
-
 
 /**
  * Get or create a 1:1 DM thread for an event (idempotent).

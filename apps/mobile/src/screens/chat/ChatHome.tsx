@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl } from "react-native";
 import { Text, VStack } from "native-base";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type {
   AppDispatch,
   ChatInboxItem,
+  ChatMessage,
   ChatThreadType,
   RootState,
 } from "@av/store";
@@ -20,6 +21,8 @@ import { ListRow } from "../../../components/ListRow";
 import { LoadingScreen } from "../../../components/LoadingScreen";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { useThemeColors } from "../../../hooks/useThemeColors";
+import { applyInboxRealtimeMessage } from "../../lib/chat/applyInboxRealtimeMessage";
+import { useChatInboxRealtime } from "../../lib/chat/useChatInboxRealtime";
 import { getIdToken } from "../../lib/getIdToken";
 import {
   getLastSession,
@@ -84,6 +87,7 @@ export default function ChatHome() {
   const { muted, primary } = useThemeColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
+  const myUserId = useSelector((state: RootState) => state.auth.user?.id);
   const assignments = useSelector(
     (state: RootState) => state.roster.assignments,
   );
@@ -94,6 +98,7 @@ export default function ChatHome() {
   const [status, setStatus] = useState<LoadStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [inboxFocused, setInboxFocused] = useState(false);
 
   const emailByUserId = useMemo(() => {
     const map = new Map<string, string>();
@@ -141,6 +146,7 @@ export default function ChatHome() {
       );
       setThreads(nextThreads);
       setStatus("succeeded");
+      hasLoadedInboxRef.current = true;
     } catch (err) {
       console.error("Failed to load chat inbox:", err);
       setThreads([]);
@@ -149,12 +155,74 @@ export default function ChatHome() {
     }
   }, [dispatch]);
 
+  const hasLoadedInboxRef = useRef(false);
+
+  // Keep Ably alive across refocus — only full-screen load on first visit.
   useFocusEffect(
     useCallback(() => {
-      if (authStatus !== "authenticated") return;
-      void loadInbox();
+      setInboxFocused(true);
+      if (authStatus !== "authenticated") {
+        return () => setInboxFocused(false);
+      }
+      void loadInbox({ silent: hasLoadedInboxRef.current });
+      return () => setInboxFocused(false);
     }, [authStatus, loadInbox]),
   );
+
+  const onInboxRealtimeMessage = useCallback(
+    (message: ChatMessage) => {
+      setThreads((prev) =>
+        applyInboxRealtimeMessage(prev, message, myUserId),
+      );
+    },
+    [myUserId],
+  );
+
+  useChatInboxRealtime({
+    eventId: session?.eventId ?? null,
+    enabled: inboxFocused && authStatus === "authenticated" && !!session?.eventId,
+    onRealtimeMessage: onInboxRealtimeMessage,
+  });
+
+  // HTTP fallback while inbox is focused (Ably should win; this keeps the list honest).
+  useEffect(() => {
+    if (
+      !inboxFocused ||
+      authStatus !== "authenticated" ||
+      !session?.workspaceId ||
+      !session.eventId
+    ) {
+      return;
+    }
+
+    const workspaceId = session.workspaceId;
+    const eventId = session.eventId;
+
+    const tick = () => {
+      void (async () => {
+        try {
+          const token = await getIdToken();
+          if (!token) return;
+          const { threads: nextThreads } = await fetchChatInbox(
+            token,
+            workspaceId,
+            eventId,
+          );
+          setThreads(nextThreads);
+        } catch {
+          // keep silent — pull-to-refresh still works
+        }
+      })();
+    };
+
+    const timer = setInterval(tick, 10_000);
+    return () => clearInterval(timer);
+  }, [
+    inboxFocused,
+    authStatus,
+    session?.workspaceId,
+    session?.eventId,
+  ]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

@@ -1,8 +1,4 @@
-import {
-  canViewRoster,
-  hasPermissionForRank,
-  roleRank,
-} from "@av/store";
+import { canViewRoster, hasPermissionForRank, roleRank } from "@av/store";
 
 export const LEAD_MIN_RANK = roleRank.lead;
 

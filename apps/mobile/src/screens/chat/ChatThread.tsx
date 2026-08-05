@@ -86,6 +86,14 @@ export default function ChatThreadScreen() {
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  /** Keep pinned to newest unless the user has scrolled up to read history. */
+  const stickToBottomRef = useRef(true);
+
+  const scrollToBottom = useCallback((animated: boolean) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd({ animated });
+    });
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({ title: title || "Chat" });
@@ -115,11 +123,11 @@ export default function ChatThreadScreen() {
         if (!token) return;
         await markLatestRead(token, [message]);
       })();
-      requestAnimationFrame(() => {
-        listRef.current?.scrollToEnd({ animated: true });
-      });
+      if (stickToBottomRef.current) {
+        scrollToBottom(true);
+      }
     },
-    [markLatestRead],
+    [markLatestRead, scrollToBottom],
   );
 
   useChatThreadRealtime({
@@ -149,14 +157,17 @@ export default function ChatThreadScreen() {
       );
       setMessages(page);
       setHasMore(more);
+      stickToBottomRef.current = true;
       await markLatestRead(token, page);
     } catch (err) {
       console.error("Failed to load messages:", err);
       setError("Could not load messages");
     } finally {
       setLoading(false);
+      // After layout settles on first paint.
+      setTimeout(() => scrollToBottom(false), 50);
     }
-  }, [threadId, markLatestRead]);
+  }, [threadId, markLatestRead, scrollToBottom]);
 
   const loadOlder = useCallback(async () => {
     const oldest = messagesRef.current[0];
@@ -194,10 +205,13 @@ export default function ChatThreadScreen() {
         void markLatestRead(token, next);
         return next;
       });
+      if (stickToBottomRef.current) {
+        scrollToBottom(true);
+      }
     } catch (err) {
       console.error("Failed to poll messages:", err);
     }
-  }, [threadId, markLatestRead]);
+  }, [threadId, markLatestRead, scrollToBottom]);
 
   useFocusEffect(
     useCallback(() => {
@@ -228,17 +242,16 @@ export default function ChatThreadScreen() {
       const { message } = await createThreadMessage(token, threadId, body);
       setDraft("");
       setMessages((prev) => mergeById(prev, [message], "append"));
+      stickToBottomRef.current = true;
       await markLatestRead(token, [message]);
-      requestAnimationFrame(() => {
-        listRef.current?.scrollToEnd({ animated: true });
-      });
+      scrollToBottom(true);
     } catch (err) {
       console.error("Failed to send message:", err);
       setError("Could not send message");
     } finally {
       setSending(false);
     }
-  }, [draft, sending, threadId, markLatestRead]);
+  }, [draft, sending, threadId, markLatestRead, scrollToBottom]);
 
   if (authStatus === "idle" || authStatus === "loading") {
     return <LoadingScreen message="Checking session…" />;
@@ -273,6 +286,20 @@ export default function ChatThreadScreen() {
             flexGrow: 1,
             justifyContent: messages.length === 0 ? "center" : "flex-end",
           }}
+          onContentSizeChange={() => {
+            if (stickToBottomRef.current) {
+              listRef.current?.scrollToEnd({ animated: false });
+            }
+          }}
+          onScroll={(event) => {
+            const { layoutMeasurement, contentOffset, contentSize } =
+              event.nativeEvent;
+            const distanceFromBottom =
+              contentSize.height -
+              (contentOffset.y + layoutMeasurement.height);
+            stickToBottomRef.current = distanceFromBottom < 80;
+          }}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl
               refreshing={loadingOlder}

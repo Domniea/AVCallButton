@@ -46,6 +46,7 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     const tokenRequest = await createChatAblyTokenRequest({
       userId,
       channelNames,
+      clientIdSuffix: threadId ? `thread:${threadId}` : "inbox",
     });
 
     return {

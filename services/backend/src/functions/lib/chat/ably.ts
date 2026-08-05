@@ -17,7 +17,11 @@ function getAblyRest(): Rest {
   return new Rest({ key });
 }
 
-
+/**
+ * Channels the client may subscribe to.
+ * - Open thread: that thread only
+ * - Inbox (no threadId): every ACTIVE thread on the event
+ */
 export async function resolveAblySubscribeChannels(params: {
   userId: string;
   eventId: string;
@@ -51,6 +55,9 @@ export async function resolveAblySubscribeChannels(params: {
     },
     select: { threadId: true },
   });
+  if (memberships.length === 0) {
+    throw new Error("NO_CHAT_CHANNELS");
+  }
 
   return memberships.map((m) => chatThreadChannelName(m.threadId));
 }
@@ -59,6 +66,8 @@ export async function resolveAblySubscribeChannels(params: {
 export async function createChatAblyTokenRequest(params: {
   userId: string;
   channelNames: string[];
+  /** Disambiguate concurrent inbox vs thread connections. */
+  clientIdSuffix?: string;
 }) {
   if (params.channelNames.length === 0) {
     throw new Error("NO_CHAT_CHANNELS");
@@ -70,8 +79,12 @@ export async function createChatAblyTokenRequest(params: {
   }
 
   const rest = getAblyRest();
+  const clientId = params.clientIdSuffix
+    ? `${params.userId}:${params.clientIdSuffix}`
+    : params.userId;
+
   return rest.auth.createTokenRequest({
-    clientId: params.userId,
+    clientId,
     capability,
     ttl: TOKEN_TTL_MS,
   });
@@ -87,11 +100,11 @@ export type ChatMessageAblyPayload = {
   deletedAt: string | null;
 };
 
-/** Event name clients should subscribe to on `thread:{id}` channels. */
+/** Event name clients subscribe to on `thread:{id}` channels. */
 export const CHAT_MESSAGE_CREATED_EVENT = "message.created";
 
 /**
- * Fan out a new message on Ably. Never throws — Postgres is already the source of truth.
+ * Publish a new message on `thread:{id}`. Never throws — Postgres is truth.
  */
 export async function publishChatMessageCreated(params: {
   threadId: string;

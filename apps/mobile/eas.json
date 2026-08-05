@@ -18,7 +18,7 @@
       "env": {
         "APP_ENV": "development",
         "EXPO_PUBLIC_APP_ENV": "development",
-        "EXPO_PUBLIC_API_URL": "https://i1ki31avn0.execute-api.us-east-1.amazonaws.com"
+        "EXPO_PUBLIC_API_URL": "https://7esfoz3k0i.execute-api.us-east-1.amazonaws.com"
       }
     },
     "production": {

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Linking, Platform } from "react-native";
+import { Alert, Linking, Platform } from "react-native";
 import { HStack, Text, VStack, useColorMode } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,7 +10,12 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import * as Notifications from "expo-notifications";
 
 import type { AppDispatch, RootState } from "@av/store";
-import { fetchWorkspacesThunk, sendTestPush } from "@av/store";
+import {
+  deleteEventThunk,
+  fetchEventsThunk,
+  fetchWorkspacesThunk,
+  sendTestPush,
+} from "@av/store";
 import { logoutThunk } from "@av/store/src/auth";
 
 import { BaseButton } from "../../../components/BaseButton";
@@ -18,7 +23,12 @@ import { BaseCard } from "../../../components/BaseCard";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { registerForPushNotifications } from "../../push/registerForPushNotifications";
-import { clearLastSession } from "../../lib/lastSession";
+import {
+  clearLastSession,
+  getLastSession,
+  type LastSession,
+} from "../../lib/lastSession";
+import { canDeleteEvent } from "../../lib/viewMode";
 import type {
   MainStackParamList,
   SettingsStackParamList,
@@ -41,12 +51,18 @@ export default function Settings() {
   const workspaces = useSelector(
     (state: RootState) => state.workspace.workspaces,
   );
+  const events = useSelector((state: RootState) => state.events.events);
 
   const [permission, setPermission] = useState<string>("undetermined");
   const [enableStatus, setEnableStatus] = useState<string | null>(null);
   const [testStatus, setTestStatus] = useState<string | null>(null);
   const [isEnabling, setIsEnabling] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [session, setSession] = useState<LastSession | null>(null);
+  const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+  const [deleteEventStatus, setDeleteEventStatus] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     void (async () => {
@@ -61,6 +77,27 @@ export default function Settings() {
     }
   }, [authStatus, workspaces.length, dispatch]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void (async () => {
+        const next = await getLastSession();
+        setSession(next);
+        if (next) {
+          void dispatch(fetchEventsThunk(next.workspaceId));
+        }
+      })();
+    }, [dispatch]),
+  );
+
+  const activeWorkspace = workspaces.find(
+    (w) => w.workspaceId === session?.workspaceId,
+  );
+  const currentEvent = events.find((e) => e.id === session?.eventId);
+  const showDeleteEvent =
+    session != null &&
+    activeWorkspace != null &&
+    canDeleteEvent(activeWorkspace.roleRank);
+
   const onLogout = async () => {
     try {
       await dispatch(logoutThunk()).unwrap();
@@ -72,12 +109,56 @@ export default function Settings() {
     }
   };
 
+  const onDeleteEvent = useCallback(() => {
+    if (!session) return;
+
+    const eventLabel = currentEvent?.name ?? "this event";
+    Alert.alert(
+      "Delete event?",
+      `Delete “${eventLabel}”? This removes zones, rooms, roster, chat, and coverage. This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              setIsDeletingEvent(true);
+              setDeleteEventStatus(null);
+              try {
+                await dispatch(
+                  deleteEventThunk({
+                    workspaceId: session.workspaceId,
+                    eventId: session.eventId,
+                  }),
+                ).unwrap();
+                await clearLastSession();
+                setSession(null);
+                void dispatch(fetchWorkspacesThunk());
+                navigation.navigate("eventSelector", {
+                  workspaceId: session.workspaceId,
+                });
+              } catch (err) {
+                console.error("Delete event failed:", err);
+                setDeleteEventStatus(
+                  typeof err === "string" ? err : "Could not delete event",
+                );
+              } finally {
+                setIsDeletingEvent(false);
+              }
+            })();
+          },
+        },
+      ],
+    );
+  }, [session, currentEvent?.name, dispatch, navigation]);
+
   const onEnableNotifications = useCallback(async () => {
     setIsEnabling(true);
     setEnableStatus(null);
     try {
-      const session = await fetchAuthSession();
-      const authToken = session.tokens?.idToken?.toString();
+      const sessionAuth = await fetchAuthSession();
+      const authToken = sessionAuth.tokens?.idToken?.toString();
       if (!authToken) {
         setEnableStatus("Not signed in.");
         return;
@@ -110,8 +191,8 @@ export default function Settings() {
     setIsTesting(true);
     setTestStatus(null);
     try {
-      const session = await fetchAuthSession();
-      const authToken = session.tokens?.idToken?.toString();
+      const sessionAuth = await fetchAuthSession();
+      const authToken = sessionAuth.tokens?.idToken?.toString();
       if (!authToken) {
         setTestStatus("Not signed in.");
         return;
@@ -253,6 +334,30 @@ export default function Settings() {
           ) : null}
         </VStack>
       </BaseCard>
+
+      {showDeleteEvent ? (
+        <BaseCard title="Current event" titleAlign="start" variant="outline">
+          <VStack space={3} alignItems="stretch">
+            <Text fontSize="sm" color={muted}>
+              {currentEvent?.name
+                ? `Selected: ${currentEvent.name}`
+                : "Delete the event you’re currently working in."}
+            </Text>
+            <BaseButton
+              title={isDeletingEvent ? "Deleting…" : "Delete event"}
+              variety="secondary"
+              btnWidth="100%"
+              isDisabled={isDeletingEvent}
+              onPress={onDeleteEvent}
+            />
+            {deleteEventStatus ? (
+              <Text fontSize="sm" color={text}>
+                {deleteEventStatus}
+              </Text>
+            ) : null}
+          </VStack>
+        </BaseCard>
+      ) : null}
 
       <BaseCard title="Developer" titleAlign="start" variant="outline">
         <Text fontSize="sm" color={muted} mb={4}>

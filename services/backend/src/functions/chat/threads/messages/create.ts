@@ -1,5 +1,6 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
+import { publishChatMessageCreated } from "../../../lib/chat/ably";
 import { assertThreadMember } from "../../../lib/chat/assertThreadMember";
 import {
   createThreadMessage,
@@ -45,9 +46,15 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       }),
     );
 
+    const apiMessage = chatMessageToApi(message);
+    await publishChatMessageCreated({
+      threadId,
+      message: apiMessage,
+    });
+
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: chatMessageToApi(message) }),
+      body: JSON.stringify({ message: apiMessage }),
     };
   } catch (error) {
     if (error instanceof Error) {

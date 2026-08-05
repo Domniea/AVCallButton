@@ -6,7 +6,10 @@ import {
   MembershipType,
 } from "../prismaClient";
 
-import { addUserToEventGroupThread } from "../chat/threads";
+import {
+  addUserToAllZoneThreadsIfLead,
+  addUserToEventGroupThread,
+} from "../chat/threads";
 import { isWorkspaceRoleRank } from "../permissions";
 import { prisma } from "../prisma";
 import { normalizeEmail, sendInviteEmail } from "../email";
@@ -187,6 +190,11 @@ export async function setEventStaffAssignment(
   await addUserToEventGroupThread(prisma, {
     eventId,
     userId: membership.userId,
+  });
+  await addUserToAllZoneThreadsIfLead(prisma, {
+    eventId,
+    userId: membership.userId,
+    eventRank,
   });
 
   return assignment;
@@ -412,6 +420,11 @@ export async function finalizePendingEventInvitesOnAccept(
     await addUserToEventGroupThread(tx, {
       eventId: ev.eventId,
       userId: membership.userId,
+    });
+    await addUserToAllZoneThreadsIfLead(tx, {
+      eventId: ev.eventId,
+      userId: membership.userId,
+      eventRank: ev.eventRank,
     });
 
     assignments.push({

@@ -18,6 +18,8 @@ export type DashStackParamList = {
 
 export type ChatStackParamList = {
   chatHome: undefined;
+  chatThread: { threadId: string; title?: string };
+  newDm: undefined;
 };
 
 export type SettingsStackParamList = {

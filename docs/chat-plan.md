@@ -72,9 +72,9 @@ Replace/evolve stub `Message` into:
 Hooks:
 
 - Event created → create `EVENT_GROUP` thread
-- Zone created → create `ZONE` thread
-- Assign staff → add to event group members (and zone members if covered)
-- DM → `getOrCreate` by sorted user pair + workspace
+- Zone created → create `ZONE` thread; add all roster leads+ (eventRank ≥ 6)
+- Assign staff → add to event group; leads+ also join every zone thread; covered crew join their zone thread
+- DM → `getOrCreate` by sorted user pair + event
 
 ### Phase 2 — REST APIs (no Ably yet)
 
@@ -126,11 +126,14 @@ Same threads and APIs as mobile.
   - [x] POST read receipts
   - [x] GET inbox
   - [x] POST open DM
-- [ ] Phase 3 — Ably token + publish
-- [ ] Phase 4 — Mobile UI
+- [x] Phase 3 — Ably token + publish
+  - [x] POST /chat/ably-token (+ store client)
+  - [x] Publish on message create
+  - [x] Mobile subscribe
+- [x] Phase 4 — Mobile UI
   - [x] Store API clients (`@av/store` chat.api)
-  - [ ] Chat tab inbox (workspaceId + eventId)
-  - [ ] Thread screen (list / send / mark read / before + after poll)
-  - [ ] New DM flow (event roster → POST /chat/dms)
+  - [x] Chat tab inbox (workspaceId + eventId via lastSession)
+  - [x] Thread screen (list / send / mark read / before + after poll)
+  - [x] New DM flow (event roster → POST /chat/dms)
 - [ ] Phase 5 — Web UI
 - [ ] Phase 6 — Push / mute / event-end quieting

@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { VStack, Text, HStack } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchWorkspacesThunk, setActiveWorkspace } from "@av/store";
@@ -15,8 +16,9 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { useViewMode } from "../../hooks/useViewMode";
 import { resolveViewMode } from "../../lib/viewMode";
-import { clearLastSession } from "../../lib/lastSession";
+import { clearLastSession, getLastSession } from "../../lib/lastSession";
 import { workspaceDisplayName } from "../../lib/workspaceDisplayName";
+import { navigateToEventHome } from "../../navigation/navigateToWorkspaceSelector";
 import type { MainStackParamList } from "../../navigation/types";
 
 type WorkspaceSelectorNav = NativeStackNavigationProp<MainStackParamList>;
@@ -26,6 +28,7 @@ export default function WorkspaceSelector() {
   const navigation = useNavigation<WorkspaceSelectorNav>();
   const { viewMode } = useViewMode();
   const { text, muted, primary } = useThemeColors();
+  const didBootstrap = useRef(false);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const user = useSelector((state: RootState) => state.auth.user);
@@ -41,6 +44,26 @@ export default function WorkspaceSelector() {
   const fetchError = useSelector(
     (state: RootState) => state.workspace.fetchError,
   );
+
+  /** Restore invite / last event only after this screen’s navigator is mounted. */
+  useEffect(() => {
+    if (didBootstrap.current) return;
+    didBootstrap.current = true;
+
+    void (async () => {
+      const inviteToken = await AsyncStorage.getItem("inviteToken");
+      if (inviteToken) {
+        navigation.navigate("invite", { token: inviteToken });
+        return;
+      }
+
+      const session = await getLastSession();
+      if (!session) return;
+
+      dispatch(setActiveWorkspace(session.workspaceId));
+      navigateToEventHome(navigation, session.workspaceId, session.eventId);
+    })();
+  }, [navigation, dispatch]);
 
   useEffect(() => {
     if (authStatus === "authenticated") {

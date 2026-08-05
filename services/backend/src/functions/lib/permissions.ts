@@ -78,7 +78,7 @@ export const actionMinimumRank: Record<Action, number> = {
   "event:delete": 8,
   "event:assignStaff": 6,
   "event:view": 4,
-  "event:viewRoster": 6,
+  "event:viewRoster": 4,
 };
 
 /** Permission check using the member's numeric rank from `WorkspaceRole.rank`. */

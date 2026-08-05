@@ -13,6 +13,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "chat:backfill": "tsx --env-file=.env scripts/backfillChatThreads.ts",
     "remove:local": "sst remove --stage local",
     "remove:dev": "sst remove --stage dev",
     "remove:prod": "sst remove --stage prod"
@@ -23,6 +24,7 @@
     "@aws-sdk/client-ses": "^3.998.0",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "7.4.0",
+    "ably": "^2.26.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.0.1",
     "pg": "^8.18.0",
@@ -33,6 +35,7 @@
     "@types/pg": "^8.16.0",
     "@types/web-push": "^3.6.4",
     "sst": "^2.43.0",
+    "tsx": "^4.23.5",
     "typescript": "~6.0.3"
   }
 }

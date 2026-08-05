@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchEventsThunk, fetchRosterThunk } from "@av/store";
 
+import { canAccessAdminDash } from "../lib/viewMode";
+
 export function useEventScreenData(workspaceId: string, eventId: string) {
   const dispatch = useDispatch<AppDispatch>();
   const rosterAutoRetriedRef = useRef(false);
@@ -16,6 +18,14 @@ export function useEventScreenData(workspaceId: string, eventId: string) {
   const eventsFetchStatus = useSelector(
     (state: RootState) => state.events.fetchStatus,
   );
+  const roleRankValue = useSelector((state: RootState) => {
+    const ws = state.workspace.workspaces.find(
+      (w) => w.workspaceId === workspaceId,
+    );
+    return ws?.roleRank ?? 0;
+  });
+  /** Admin event/zone/room screens only — not the chat DM roster path. */
+  const mayFetchRosterOnDash = canAccessAdminDash(roleRankValue);
   const assignments = useSelector(
     (state: RootState) => state.roster.assignments,
   );
@@ -42,14 +52,16 @@ export function useEventScreenData(workspaceId: string, eventId: string) {
 
   useEffect(() => {
     if (authStatus !== "authenticated" || !authUser || !eventId) return;
+    if (!mayFetchRosterOnDash) return;
     void dispatch(fetchRosterThunk(eventId));
-  }, [authStatus, authUser, eventId, dispatch]);
+  }, [authStatus, authUser, eventId, mayFetchRosterOnDash, dispatch]);
 
   useEffect(() => {
     rosterAutoRetriedRef.current = false;
   }, [eventId]);
 
   useEffect(() => {
+    if (!mayFetchRosterOnDash) return;
     if (
       rosterFetchStatus !== "failed" ||
       rosterEventId !== eventId ||
@@ -62,7 +74,7 @@ export function useEventScreenData(workspaceId: string, eventId: string) {
       void dispatch(fetchRosterThunk(eventId));
     }, 1500);
     return () => clearTimeout(timer);
-  }, [rosterFetchStatus, rosterEventId, eventId, dispatch]);
+  }, [mayFetchRosterOnDash, rosterFetchStatus, rosterEventId, eventId, dispatch]);
 
   return {
     authStatus,

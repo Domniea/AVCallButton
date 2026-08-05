@@ -39,6 +39,7 @@ export function ApiStack({ stack }: StackContext) {
           VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY ?? "",
           VAPID_SUBJECT:
             process.env.VAPID_SUBJECT ?? "mailto:domniea@gmail.com",
+          ABLY_API_KEY: process.env.ABLY_API_KEY ?? "",
           SES_FROM_EMAIL: "domniea@gmail.com",
           APP_URL,
         },
@@ -140,6 +141,7 @@ export function ApiStack({ stack }: StackContext) {
       // Chat
       "GET /chat/inbox": "src/functions/chat/inbox.handler",
       "POST /chat/dms": "src/functions/chat/dms/create.handler",
+      "POST /chat/ably-token": "src/functions/chat/ably-token.handler",
       "GET /chat/threads/{threadId}/messages":
         "src/functions/chat/threads/messages/list.handler",
       "POST /chat/threads/{threadId}/messages":

@@ -67,3 +67,14 @@ export async function createEvent(
     },
   };
 }
+
+export async function deleteEvent(
+  token: string,
+  eventId: string,
+): Promise<{ success: boolean }> {
+  const api = getApiClient();
+  const res = await api.delete<{ success: boolean }>(`/events/${eventId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+}

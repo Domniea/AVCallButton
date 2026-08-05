@@ -5,9 +5,13 @@ import {
   MembershipStatus,
   Prisma as PrismaNS,
 } from "../prismaClient";
+import { roleRank } from "../permissions";
 import { prisma } from "../prisma";
 
 type DbClient = Prisma.TransactionClient | typeof prisma;
+
+/** Leads and above (eventRank ≥ 6) are members of every zone thread on the event. */
+export const LEAD_MIN_EVENT_RANK = roleRank.lead;
 
 export function buildDmKey(userIdA: string, userIdB: string): string {
   return [userIdA, userIdB].sort().join(":");
@@ -209,4 +213,44 @@ export async function addUserToZoneThread(
     zoneId: zone.id,
   });
   return addThreadMember(db, { threadId: thread.id, userId: params.userId });
+}
+
+export async function addLeadsToZoneThread(
+  db: DbClient,
+  params: { eventId: string; zoneId: string },
+) {
+  const leads = await db.eventAssignment.findMany({
+    where: {
+      eventId: params.eventId,
+      eventRank: { gte: LEAD_MIN_EVENT_RANK },
+      membership: { status: MembershipStatus.ACTIVE },
+    },
+    select: { membership: { select: { userId: true } } },
+  });
+
+  for (const row of leads) {
+    await addUserToZoneThread(db, {
+      zoneId: params.zoneId,
+      userId: row.membership.userId,
+    });
+  }
+}
+
+export async function addUserToAllZoneThreadsIfLead(
+  db: DbClient,
+  params: { eventId: string; userId: string; eventRank: number },
+) {
+  if (params.eventRank < LEAD_MIN_EVENT_RANK) return;
+
+  const zones = await db.eventZone.findMany({
+    where: { eventId: params.eventId },
+    select: { id: true },
+  });
+
+  for (const zone of zones) {
+    await addUserToZoneThread(db, {
+      zoneId: zone.id,
+      userId: params.userId,
+    });
+  }
 }

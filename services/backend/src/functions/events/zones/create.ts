@@ -3,7 +3,10 @@ import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 import { prisma } from "../../lib/prisma";
 import { authorize } from "../../lib/authorization";
 import { badRequest, forbidden, notFound, serverError } from "../../lib/responses";
-import { getOrCreateZoneThread } from "../../lib/chat/threads";
+import {
+  addLeadsToZoneThread,
+  getOrCreateZoneThread,
+} from "../../lib/chat/threads";
 import {
   parseRoomIds,
   validateRoomIdsForEvent,
@@ -80,6 +83,10 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
 
       await getOrCreateZoneThread(tx, {
         workspaceId: dbEvent.workspaceId,
+        eventId,
+        zoneId: created.id,
+      });
+      await addLeadsToZoneThread(tx, {
         eventId,
         zoneId: created.id,
       });

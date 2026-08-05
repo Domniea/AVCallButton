@@ -1,7 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { logoutThunk } from "../auth/auth.thunks";
-import { fetchEventsThunk, createEventThunk } from "./events.thunks";
+import {
+  createEventThunk,
+  deleteEventThunk,
+  fetchEventsThunk,
+} from "./events.thunks";
 import type { EventSummary } from "../api/events.api";
 
 export type EventsFetchStatus = "idle" | "loading" | "succeeded" | "failed";
@@ -56,6 +60,12 @@ const eventsSlice = createSlice({
           state.events = [event, ...state.events];
           state.fetchStatus = "succeeded";
           state.fetchError = null;
+        }
+      })
+      .addCase(deleteEventThunk.fulfilled, (state, action) => {
+        const { workspaceId, eventId } = action.payload;
+        if (state.workspaceId === workspaceId) {
+          state.events = state.events.filter((event) => event.id !== eventId);
         }
       })
       .addCase(logoutThunk.fulfilled, () => initialState);

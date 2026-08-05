@@ -3,6 +3,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
 
 import {
   createEvent,
+  deleteEvent,
   fetchEvents,
   type CreateEventInput,
   type EventsListResponse,
@@ -16,6 +17,11 @@ export type FetchEventsResult = EventsListResponse & {
 export type CreateEventArgs = {
   workspaceId: string;
   data: CreateEventInput;
+};
+
+export type DeleteEventArgs = {
+  workspaceId: string;
+  eventId: string;
 };
 
 async function getIdToken(): Promise<string | null> {
@@ -63,6 +69,33 @@ export const createEventThunk = createAsyncThunk<
     } catch (err) {
       console.error("createEventThunk failed:", err);
       return rejectWithValue("Could not create show");
+    }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { auth } = getState();
+      return auth.status === "authenticated" && auth.user != null;
+    },
+  },
+);
+
+export const deleteEventThunk = createAsyncThunk<
+  DeleteEventArgs,
+  DeleteEventArgs,
+  { rejectValue: string; state: RootState }
+>(
+  "events/deleteEvent",
+  async ({ workspaceId, eventId }, { rejectWithValue }) => {
+    try {
+      const token = await getIdToken();
+      if (!token) {
+        return rejectWithValue("No session token");
+      }
+      await deleteEvent(token, eventId);
+      return { workspaceId, eventId };
+    } catch (err) {
+      console.error("deleteEventThunk failed:", err);
+      return rejectWithValue("Could not delete event");
     }
   },
   {

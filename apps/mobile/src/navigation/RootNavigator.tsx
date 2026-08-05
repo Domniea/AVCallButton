@@ -42,6 +42,8 @@ const linking = {
           chat: {
             screens: {
               chatHome: "event/chat",
+              chatThread: "event/chat/thread/:threadId",
+              newDm: "event/chat/new",
             },
           },
           settings: {

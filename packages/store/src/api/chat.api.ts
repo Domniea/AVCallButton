@@ -138,3 +138,37 @@ export async function openDmThread(
   });
   return res.data;
 }
+
+export type AblyTokenRequest = {
+  keyName: string;
+  ttl?: number;
+  capability: string;
+  clientId?: string;
+  timestamp: number;
+  nonce: string;
+  mac: string;
+};
+
+export type FetchAblyTokenInput = {
+  eventId: string;
+  /** If set, token is limited to this thread (must be an ACTIVE member). */
+  threadId?: string;
+};
+
+export type FetchAblyTokenResponse = {
+  tokenRequest: AblyTokenRequest;
+  channels: string[];
+};
+
+export async function fetchAblyToken(
+  token: string,
+  data: FetchAblyTokenInput,
+): Promise<FetchAblyTokenResponse> {
+  const api = getApiClient();
+  const res = await api.post<FetchAblyTokenResponse>(
+    "/chat/ably-token",
+    data,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+}

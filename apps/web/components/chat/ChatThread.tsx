@@ -1,22 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+"use client";
+
 import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  RefreshControl,
-} from "react-native";
-import { Box, HStack, Text } from "native-base";
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-  type RouteProp,
-} from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type UIEvent,
+} from "react";
+import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
+import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 
 import { getIdToken } from "@av/auth-client";
-import { useChatThreadRealtime, mergeMessagesById } from "@av/chat";
+import { mergeMessagesById, useChatThreadRealtime } from "@av/chat";
 import type { ChatMessage, RootState } from "@av/store";
 import {
   createThreadMessage,
@@ -24,17 +22,12 @@ import {
   markThreadRead,
 } from "@av/store";
 
-import { BaseButton } from "../../../components/BaseButton";
-import { BaseInput } from "../../../components/BaseInput";
-import { LoadingScreen } from "../../../components/LoadingScreen";
-import { useThemeColors } from "../../../hooks/useThemeColors";
-import { getLastSession } from "../../lib/lastSession";
-import type { ChatStackParamList } from "../../navigation/types";
-
-type ThreadNav = NativeStackNavigationProp<ChatStackParamList, "chatThread">;
-type ThreadRoute = RouteProp<ChatStackParamList, "chatThread">;
+import { BaseButton } from "@/components/reusable/BaseButton";
+import { BaseInput } from "@/components/reusable/BaseInput";
+import { ChatPaneHeader } from "@/components/chat/ChatShell";
 
 const POLL_MS = 10_000;
+const NEAR_BOTTOM_PX = 80;
 
 function formatTime(iso: string): string {
   const date = new Date(iso);
@@ -45,18 +38,24 @@ function formatTime(iso: string): string {
   });
 }
 
-/** Messenger for one thread — Ably realtime + poll fallback while focused. */
-export default function ChatThreadScreen() {
-  const navigation = useNavigation<ThreadNav>();
-  const route = useRoute<ThreadRoute>();
-  const { threadId, title } = route.params;
-  const { bg, surface, text, muted, primary, border } = useThemeColors();
+type ChatThreadProps = {
+  threadId: string;
+  eventId: string;
+  title?: string | null;
+  chatBasePath: string;
+};
 
+/** Right-pane thread view for split chat layout. */
+export function ChatThread({
+  threadId,
+  eventId,
+  title,
+  chatBasePath,
+}: ChatThreadProps) {
+  const router = useRouter();
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const myUserId = useSelector((state: RootState) => state.auth.user?.id);
 
-  const [eventId, setEventId] = useState<string | null>(null);
-  const [threadFocused, setThreadFocused] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -65,21 +64,16 @@ export default function ChatThreadScreen() {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const listRef = useRef<FlatList<ChatMessage>>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
-  /** Keep pinned to newest unless the user has scrolled up to read history. */
   const stickToBottomRef = useRef(true);
 
-  const scrollToBottom = useCallback((animated: boolean) => {
-    requestAnimationFrame(() => {
-      listRef.current?.scrollToEnd({ animated });
-    });
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
   }, []);
-
-  useEffect(() => {
-    navigation.setOptions({ title: title || "Chat" });
-  }, [navigation, title]);
 
   const markLatestRead = useCallback(
     async (token: string, list: ChatMessage[]) => {
@@ -106,7 +100,7 @@ export default function ChatThreadScreen() {
         await markLatestRead(token, [message]);
       })();
       if (stickToBottomRef.current) {
-        scrollToBottom(true);
+        requestAnimationFrame(() => scrollToBottom("smooth"));
       }
     },
     [markLatestRead, scrollToBottom],
@@ -115,8 +109,7 @@ export default function ChatThreadScreen() {
   useChatThreadRealtime({
     threadId,
     eventId,
-    enabled:
-      threadFocused && authStatus === "authenticated" && eventId != null,
+    enabled: authStatus === "authenticated",
     getIdToken,
     onRealtimeMessage: appendRealtimeMessage,
   });
@@ -125,9 +118,6 @@ export default function ChatThreadScreen() {
     setLoading(true);
     setError(null);
     try {
-      const session = await getLastSession();
-      setEventId(session?.eventId ?? null);
-
       const token = await getIdToken();
       if (!token) {
         setError("No session token");
@@ -147,8 +137,7 @@ export default function ChatThreadScreen() {
       setError("Could not load messages");
     } finally {
       setLoading(false);
-      // After layout settles on first paint.
-      setTimeout(() => scrollToBottom(false), 50);
+      requestAnimationFrame(() => scrollToBottom("auto"));
     }
   }, [threadId, markLatestRead, scrollToBottom]);
 
@@ -156,6 +145,8 @@ export default function ChatThreadScreen() {
     const oldest = messagesRef.current[0];
     if (!oldest || !hasMore || loadingOlder) return;
     setLoadingOlder(true);
+    const el = listRef.current;
+    const prevHeight = el?.scrollHeight ?? 0;
     try {
       const token = await getIdToken();
       if (!token) return;
@@ -166,6 +157,10 @@ export default function ChatThreadScreen() {
       );
       setMessages((prev) => mergeMessagesById(prev, page, "prepend"));
       setHasMore(more);
+      requestAnimationFrame(() => {
+        if (!el) return;
+        el.scrollTop = el.scrollHeight - prevHeight;
+      });
     } catch (err) {
       console.error("Failed to load older messages:", err);
     } finally {
@@ -189,26 +184,38 @@ export default function ChatThreadScreen() {
         return next;
       });
       if (stickToBottomRef.current) {
-        scrollToBottom(true);
+        requestAnimationFrame(() => scrollToBottom("smooth"));
       }
     } catch (err) {
       console.error("Failed to poll messages:", err);
     }
   }, [threadId, markLatestRead, scrollToBottom]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (authStatus !== "authenticated") return;
-      setThreadFocused(true);
-      void loadInitial();
-      const timer = setInterval(() => {
-        void pollNewer();
-      }, POLL_MS);
-      return () => {
-        setThreadFocused(false);
-        clearInterval(timer);
-      };
-    }, [authStatus, loadInitial, pollNewer]),
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    void loadInitial();
+  }, [authStatus, loadInitial]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    const timer = setInterval(() => {
+      void pollNewer();
+    }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [authStatus, pollNewer]);
+
+  const onScroll = useCallback(
+    (event: UIEvent<HTMLDivElement>) => {
+      const el = event.currentTarget;
+      const distanceFromBottom =
+        el.scrollHeight - (el.scrollTop + el.clientHeight);
+      stickToBottomRef.current = distanceFromBottom < NEAR_BOTTOM_PX;
+
+      if (el.scrollTop < 40 && hasMore && !loadingOlder) {
+        void loadOlder();
+      }
+    },
+    [hasMore, loadingOlder, loadOlder],
   );
 
   const onSend = useCallback(async () => {
@@ -227,7 +234,7 @@ export default function ChatThreadScreen() {
       setMessages((prev) => mergeMessagesById(prev, [message], "append"));
       stickToBottomRef.current = true;
       await markLatestRead(token, [message]);
-      scrollToBottom(true);
+      requestAnimationFrame(() => scrollToBottom("smooth"));
     } catch (err) {
       console.error("Failed to send message:", err);
       setError("Could not send message");
@@ -236,88 +243,102 @@ export default function ChatThreadScreen() {
     }
   }, [draft, sending, threadId, markLatestRead, scrollToBottom]);
 
-  if (authStatus === "idle" || authStatus === "loading") {
-    return <LoadingScreen message="Checking session…" />;
-  }
+  const onComposerKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        void onSend();
+      }
+    },
+    [onSend],
+  );
 
-  if (loading && messages.length === 0) {
-    return <LoadingScreen message="Loading messages…" />;
-  }
+  const onSubmit = useCallback(
+    (event: FormEvent) => {
+      event.preventDefault();
+      void onSend();
+    },
+    [onSend],
+  );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
-    >
-      <Box flex={1} bg={bg}>
-        {error ? (
-          <Box px={4} py={2}>
-            <Text fontSize="sm" color={muted}>
-              {error}
-            </Text>
-          </Box>
+    <VStack align="stretch" gap={0} h="100%" minH={0}>
+      <ChatPaneHeader
+        title={title?.trim() ? title : "Chat"}
+        subtitle="Conversation"
+        headerRight={
+          <BaseButton
+            title="Back"
+            variety="tertiary"
+            btnWidth="auto"
+            onClick={() => router.push(chatBasePath)}
+          />
+        }
+      />
+
+      <Box
+        ref={listRef}
+        flex={1}
+        minH={0}
+        overflowY="auto"
+        px={{ base: 4, md: 5 }}
+        py={4}
+        bg="bg"
+        onScroll={onScroll}
+        backgroundImage="radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--chakra-colors-cardBorder) 55%, transparent) 1px, transparent 0)"
+        backgroundSize="18px 18px"
+      >
+        {loading && messages.length === 0 ? (
+          <Text color="gray.500" textAlign="center" py={10}>
+            Loading messages…
+          </Text>
         ) : null}
 
-        <FlatList
-          ref={listRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            flexGrow: 1,
-            justifyContent: messages.length === 0 ? "center" : "flex-end",
-          }}
-          onContentSizeChange={() => {
-            if (stickToBottomRef.current) {
-              listRef.current?.scrollToEnd({ animated: false });
-            }
-          }}
-          onScroll={(event) => {
-            const { layoutMeasurement, contentOffset, contentSize } =
-              event.nativeEvent;
-            const distanceFromBottom =
-              contentSize.height -
-              (contentOffset.y + layoutMeasurement.height);
-            stickToBottomRef.current = distanceFromBottom < 80;
-          }}
-          scrollEventThrottle={16}
-          refreshControl={
-            <RefreshControl
-              refreshing={loadingOlder}
-              onRefresh={() => void loadOlder()}
-            />
-          }
-          ListEmptyComponent={
-            <Text fontSize="sm" color={muted} textAlign="center">
-              No messages yet. Say hello.
+        {loadingOlder ? (
+          <Text fontSize="xs" color="gray.500" textAlign="center" mb={3}>
+            Loading older…
+          </Text>
+        ) : null}
+
+        {!loading && messages.length === 0 ? (
+          <VStack align="center" gap={2} py={16} textAlign="center">
+            <Text fontSize="md" fontWeight="medium" color="text">
+              No messages yet
             </Text>
-          }
-          renderItem={({ item }) => {
+            <Text fontSize="sm" color="gray.500">
+              Say hello to start the thread.
+            </Text>
+          </VStack>
+        ) : null}
+
+        <VStack align="stretch" gap={3} justify="flex-end" minH="100%">
+          {messages.map((item) => {
             const mine = item.senderId === myUserId;
             return (
               <HStack
-                justifyContent={mine ? "flex-end" : "flex-start"}
-                mb={2}
+                key={item.id}
+                justify={mine ? "flex-end" : "flex-start"}
               >
                 <Box
-                  maxW="80%"
-                  bg={mine ? primary : surface}
+                  maxW={{ base: "88%", md: "72%" }}
+                  bg={mine ? "buttonPrimaryBg" : "surfaceElevated"}
+                  color={mine ? "buttonPrimaryFg" : "text"}
                   borderWidth={mine ? 0 : 1}
-                  borderColor={border}
-                  borderRadius="lg"
-                  px={3}
-                  py={2}
+                  borderColor="cardBorder"
+                  borderRadius="xl"
+                  borderBottomRightRadius={mine ? "sm" : "xl"}
+                  borderBottomLeftRadius={mine ? "xl" : "sm"}
+                  px={4}
+                  py={2.5}
+                  shadow={mine ? undefined : "sm"}
                 >
-                  <Text fontSize="md" color={mine ? "white" : text}>
+                  <Text fontSize="md" whiteSpace="pre-wrap" lineHeight="1.5">
                     {item.body}
                   </Text>
                   <Text
-                    fontSize="2xs"
-                    color={mine ? "white" : muted}
-                    opacity={0.8}
-                    mt={1}
+                    fontSize="xs"
+                    opacity={0.75}
+                    mt={1.5}
                     textAlign="right"
                   >
                     {formatTime(item.createdAt)}
@@ -325,37 +346,44 @@ export default function ChatThreadScreen() {
                 </Box>
               </HStack>
             );
-          }}
-        />
+          })}
+        </VStack>
+      </Box>
 
-        <HStack
-          px={3}
-          py={3}
-          space={2}
-          alignItems="flex-end"
-          borderTopWidth={1}
-          borderTopColor={border}
-          bg={surface}
-        >
+      <Box
+        as="form"
+        onSubmit={onSubmit}
+        flexShrink={0}
+        borderTopWidth={1}
+        borderTopColor="cardBorder"
+        bg="surface"
+        px={{ base: 3, md: 4 }}
+        py={3}
+      >
+        {error ? (
+          <Text fontSize="xs" color="red.500" mb={2}>
+            {error}
+          </Text>
+        ) : null}
+        <HStack gap={2} align="flex-end">
           <Box flex={1}>
             <BaseInput
               value={draft}
-              onChangeText={setDraft}
-              placeholder="Message"
-              returnKeyType="send"
-              onSubmitEditing={() => void onSend()}
-              blurOnSubmit={false}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={onComposerKeyDown}
+              placeholder="Write a message…"
+              autoComplete="off"
             />
           </Box>
           <BaseButton
             title={sending ? "…" : "Send"}
             variety="primary"
             btnWidth="auto"
-            isDisabled={sending || !draft.trim()}
-            onPress={() => void onSend()}
+            type="submit"
+            disabled={sending || !draft.trim()}
           />
         </HStack>
       </Box>
-    </KeyboardAvoidingView>
+    </VStack>
   );
 }

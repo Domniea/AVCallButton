@@ -17,6 +17,8 @@
     "eas:dev:ios": "eas build --profile development --platform ios"
   },
   "dependencies": {
+    "@av/auth-client": "1.0.0",
+    "@av/chat": "1.0.0",
     "@av/forms": "1.0.0",
     "@av/store": "1.0.0",
     "@av/ui": "1.0.0",

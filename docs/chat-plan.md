@@ -136,5 +136,9 @@ Same threads and APIs as mobile.
   - [x] Chat tab inbox (workspaceId + eventId via lastSession)
   - [x] Thread screen (list / send / mark read / before + after poll)
   - [x] New DM flow (event roster → POST /chat/dms)
-- [ ] Phase 5 — Web UI
+- [x] Phase 5 — Web UI
+  - [x] Ably helpers + inbox (admin + crew routes, event page entry)
+  - [x] Shared `@av/chat` (Ably helpers/hooks + inbox labels; HTTP stays in `@av/store`)
+  - [x] Thread message view
+  - [x] New DM flow
 - [ ] Phase 6 — Push / mute / event-end quieting / tab badge

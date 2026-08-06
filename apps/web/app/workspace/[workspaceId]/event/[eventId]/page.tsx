@@ -702,16 +702,33 @@ export default function EventPage() {
         />
 
         <BaseCard title={event.name} titleAlign="start" variant="elevated">
-          <HStack flexWrap="wrap" gap={2}>
-            <Badge textTransform="capitalize">{event.status}</Badge>
-            {rosterMatchesEvent && (
-              <Badge variant="outline" colorPalette="gray">
-                {assignments.length} on roster
-                {pendingInvites.length > 0
-                  ? ` · ${pendingInvites.length} pending`
-                  : ""}
-              </Badge>
-            )}
+          <HStack
+            justify="space-between"
+            align="center"
+            flexWrap="wrap"
+            gap={3}
+          >
+            <HStack flexWrap="wrap" gap={2}>
+              <Badge textTransform="capitalize">{event.status}</Badge>
+              {rosterMatchesEvent && (
+                <Badge variant="outline" colorPalette="gray">
+                  {assignments.length} on roster
+                  {pendingInvites.length > 0
+                    ? ` · ${pendingInvites.length} pending`
+                    : ""}
+                </Badge>
+              )}
+            </HStack>
+            <BaseButton
+              title="Chat"
+              variety="secondary"
+              btnWidth="auto"
+              onClick={() =>
+                router.push(
+                  `/workspace/${workspaceId}/event/${eventId}/chat`,
+                )
+              }
+            />
           </HStack>
         </BaseCard>
 

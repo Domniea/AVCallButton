@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchAuthSession } from "aws-amplify/auth";
+import { getIdToken } from "@av/auth-client";
 
 import {
   createEvent,
@@ -23,16 +23,6 @@ export type DeleteEventArgs = {
   workspaceId: string;
   eventId: string;
 };
-
-async function getIdToken(): Promise<string | null> {
-  let session = await fetchAuthSession();
-  let token = session.tokens?.idToken?.toString();
-  if (token) return token;
-
-  session = await fetchAuthSession({ forceRefresh: true });
-  token = session.tokens?.idToken?.toString();
-  return token ?? null;
-}
 
 export const fetchEventsThunk = createAsyncThunk<
   FetchEventsResult,

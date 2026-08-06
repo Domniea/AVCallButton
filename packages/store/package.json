@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
+    "@av/auth-client": "1.0.0",
     "@reduxjs/toolkit": "^2.11.2",
     "react-redux": "^9.2.0"
   }

@@ -108,12 +108,30 @@ export default function CrewEventPage() {
         {detailMatchesRoute && detail && (
           <>
             <BaseCard title={detail.event.name} titleAlign="start" variant="elevated">
-              <HStack flexWrap="wrap" gap={2} mb={4}>
-                <Badge textTransform="capitalize">{detail.event.status}</Badge>
-                <Badge colorPalette="blue">{detail.assignment.roleName}</Badge>
-                <Badge variant="outline">
-                  Event rank {detail.assignment.eventRank}
-                </Badge>
+              <HStack
+                justify="space-between"
+                align="center"
+                flexWrap="wrap"
+                gap={3}
+                mb={4}
+              >
+                <HStack flexWrap="wrap" gap={2}>
+                  <Badge textTransform="capitalize">{detail.event.status}</Badge>
+                  <Badge colorPalette="blue">{detail.assignment.roleName}</Badge>
+                  <Badge variant="outline">
+                    Event rank {detail.assignment.eventRank}
+                  </Badge>
+                </HStack>
+                <BaseButton
+                  title="Chat"
+                  variety="secondary"
+                  btnWidth="auto"
+                  onClick={() =>
+                    router.push(
+                      `/crew/workspace/${workspaceId}/event/${eventId}/chat`,
+                    )
+                  }
+                />
               </HStack>
 
               <VStack align="stretch" gap={3}>

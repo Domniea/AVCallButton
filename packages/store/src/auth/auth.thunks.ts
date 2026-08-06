@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  getIdToken,
   login as amplifyLogin,
   logout as amplifyLogout,
   normalizeAuthState,
@@ -30,9 +31,7 @@ export const fetchMeThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/fetchMe", async (_, { rejectWithValue }) => {
   try {
-    const session = await fetchAuthSession();
-
-    const token = session.tokens?.idToken?.toString();
+    const token = await getIdToken();
 
     if (!token) {
       return rejectWithValue("No access token");

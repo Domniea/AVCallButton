@@ -7,6 +7,7 @@ import {
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDispatch, useSelector } from "react-redux";
 
+import { getIdToken } from "@av/auth-client";
 import type { AppDispatch, RootState } from "@av/store";
 import { fetchRosterThunk, openDmThread } from "@av/store";
 
@@ -15,7 +16,6 @@ import { ListRow } from "../../../components/ListRow";
 import { LoadingScreen } from "../../../components/LoadingScreen";
 import { ScreenLayout } from "../../../components/ScreenLayout";
 import { useThemeColors } from "../../../hooks/useThemeColors";
-import { getIdToken } from "../../lib/getIdToken";
 import {
   getLastSession,
   type LastSession,

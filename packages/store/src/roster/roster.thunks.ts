@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchAuthSession } from "aws-amplify/auth";
+import { getIdToken } from "@av/auth-client";
 
 import {
   assignStaff,
@@ -23,16 +23,6 @@ function workspaceRoleRank(state: RootState): number | null {
     (w) => w.workspaceId === workspaceId,
   );
   return row?.roleRank ?? null;
-}
-
-async function getIdToken(): Promise<string | null> {
-  let session = await fetchAuthSession();
-  let token = session.tokens?.idToken?.toString();
-  if (token) return token;
-
-  session = await fetchAuthSession({ forceRefresh: true });
-  token = session.tokens?.idToken?.toString();
-  return token ?? null;
 }
 
 export const fetchRosterThunk = createAsyncThunk<
@@ -95,8 +85,7 @@ export const assignStaffThunk = createAsyncThunk<
   { rejectValue: string }
 >("roster/assignStaff", async ({ eventId, data }, { rejectWithValue }) => {
   try {
-    const session = await fetchAuthSession();
-    const token = session.tokens?.idToken?.toString();
+    const token = await getIdToken();
     if (!token) {
       return rejectWithValue("No session token");
     }

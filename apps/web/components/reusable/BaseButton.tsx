@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button as ChakraButton, Flex } from "@chakra-ui/react";
-import { useColorMode } from "../ui/color-mode";
+import { useColorModeValue } from "../ui/color-mode";
 
 type ButtonVariant = "primary" | "secondary" | "tertiary";
 
@@ -60,10 +60,8 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const { colorMode } = useColorMode();
   const v = variants[variety];
-
-  const shadow = colorMode === "dark" ? v.shadow.dark : v.shadow.light;
+  const shadow = useColorModeValue(v.shadow.light, v.shadow.dark);
 
   return (
     <Flex

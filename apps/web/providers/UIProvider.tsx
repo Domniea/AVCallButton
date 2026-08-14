@@ -6,7 +6,7 @@ import {
   type ColorModeProviderProps,
 } from "../components/ui/color-mode";
 
-import { chakraSystem } from "@av/ui";
+import { system as chakraSystem } from "../../../packages/ui/src/theme.chakra";
 
 export function Provider(props: ColorModeProviderProps) {
   return (

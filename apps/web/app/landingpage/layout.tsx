@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, VStack } from "@chakra-ui/react";
+
 import LandingHeader from "./LandingHeader";
 
 export default function LandingPageLayout({
@@ -8,11 +8,30 @@ export default function LandingPageLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box minH="100vh" bg="bg">
-      <VStack gap={{ base: 8, md: 12 }} maxW="7xl" mx="auto" align="stretch">
-        <LandingHeader />
+    <div
+      className="chakra-theme dark"
+      style={{
+        height: "100vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--chakra-colors-primary-900)",
+        color: "var(--chakra-colors-text)",
+      }}
+    >
+      <LandingHeader />
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          width: "100%",
+          maxWidth: "80rem",
+          marginInline: "auto",
+          paddingInline: "clamp(1rem, 4vw, 1.5rem)",
+        }}
+      >
         {children}
-      </VStack>
-    </Box>
+      </div>
+    </div>
   );
 }

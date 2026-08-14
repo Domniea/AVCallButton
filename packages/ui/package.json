@@ -11,6 +11,10 @@
       "import": "./src/index.ts",
       "require": "./src/index.ts",
       "react-native": "./src/index.ts"
+    },
+    "./theme.chakra": {
+      "import": "./src/theme.chakra.ts",
+      "require": "./src/theme.chakra.ts"
     }
   }
 }

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Zone Management">
+  <rect width="960" height="600" fill="#eef2f6"/>
+  <rect width="960" height="48" fill="#ffffff"/>
+  <rect x="0" y="48" width="180" height="552" fill="#1e293b"/>
+  <text x="24" y="32" fill="#334155" font-family="system-ui,sans-serif" font-size="16" font-weight="600">Zone Management</text>
+  <rect x="210" y="72" width="220" height="140" rx="10" fill="#ffffff"/>
+  <rect x="450" y="72" width="220" height="140" rx="10" fill="#ffffff"/>
+  <rect x="690" y="72" width="220" height="140" rx="10" fill="#ffffff"/>
+  <rect x="210" y="230" width="700" height="310" rx="12" fill="#ffffff"/>
+</svg>

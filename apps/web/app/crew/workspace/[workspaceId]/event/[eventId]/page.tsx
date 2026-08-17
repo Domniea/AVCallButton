@@ -12,6 +12,7 @@ import {
 } from "@av/store";
 import { BaseButton } from "@/components/reusable/BaseButton";
 import { BaseCard } from "@/components/reusable/BaseCard";
+import { useChatUnreadTotal } from "@/lib/chat/useChatUnreadTotal";
 
 function DetailRow({
   label,
@@ -48,6 +49,15 @@ export default function CrewEventPage() {
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const detailEventId = useSelector((state: RootState) => state.crewDash.eventId);
   const detail = useSelector((state: RootState) => state.crewDash.eventDetail);
+  const chatUnread = useChatUnreadTotal(
+    workspaceId,
+    eventId,
+    authStatus === "authenticated",
+  );
+  const chatButtonTitle =
+    chatUnread > 0
+      ? `Chat (${chatUnread > 99 ? "99+" : chatUnread})`
+      : "Chat";
   const detailStatus = useSelector(
     (state: RootState) => state.crewDash.detailStatus,
   );
@@ -123,7 +133,7 @@ export default function CrewEventPage() {
                   </Badge>
                 </HStack>
                 <BaseButton
-                  title="Chat"
+                  title={chatButtonTitle}
                   variety="secondary"
                   btnWidth="auto"
                   onClick={() =>

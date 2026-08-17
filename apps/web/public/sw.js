@@ -35,9 +35,16 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
-      .then((windowClients) => {
+      .then(async (windowClients) => {
         for (const client of windowClients) {
           if ("focus" in client) {
+            if ("navigate" in client && typeof client.navigate === "function") {
+              try {
+                await client.navigate(targetUrl);
+              } catch {
+                // fall through to focus existing window
+              }
+            }
             return client.focus();
           }
         }

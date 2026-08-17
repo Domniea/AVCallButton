@@ -28,6 +28,7 @@ import {
 } from "@av/store";
 import { BaseCard } from "@/components/reusable/BaseCard";
 import { BaseButton } from "@/components/reusable/BaseButton";
+import { useChatUnreadTotal } from "@/lib/chat/useChatUnreadTotal";
 
 function DetailRow({
   label,
@@ -419,6 +420,15 @@ export default function EventPage() {
   const rosterMatchesEvent =
     rosterEventId === eventId && rosterFetchStatus === "succeeded";
   const rosterAutoRetriedRef = useRef(false);
+  const chatUnread = useChatUnreadTotal(
+    workspaceId,
+    eventId,
+    authStatus === "authenticated",
+  );
+  const chatButtonTitle =
+    chatUnread > 0
+      ? `Chat (${chatUnread > 99 ? "99+" : chatUnread})`
+      : "Chat";
 
   const openAssignStaffModal = () => {
     setIsAssignStaffModalOpen(true);
@@ -720,7 +730,7 @@ export default function EventPage() {
               )}
             </HStack>
             <BaseButton
-              title="Chat"
+              title={chatButtonTitle}
               variety="secondary"
               btnWidth="auto"
               onClick={() =>

@@ -32,15 +32,17 @@ Yarn workspaces + Turborepo.
                  ▼
         SST API (Lambda)
                  │
-       ┌─────────┼─────────┐
-       ▼         ▼         ▼
-   Postgres   SES email   Push
-   (Prisma)               (Expo + web-push)
+       ┌─────────┼─────────┬─────────┐
+       ▼         ▼         ▼         ▼
+   Postgres     SES      Push        S3
+   (Prisma)    email   (Expo +     private
+                       web-push)   buckets
 ```
 
 - **Auth:** AWS Cognito via Amplify; API JWT authorizer on most routes
 - **DB:** PostgreSQL (Neon in practice) via Prisma
 - **API:** SST stages — `local` (`sst dev`), `dev` (`yarn deploy`), `prod` (`deploy:prod`)
+- **Files:** SST `StorageStack` — private S3 (`Uploads`, `Generated`); access via presigned URLs (not public objects)
 - **Web host:** Vercel (`av-call-button-web.vercel.app` in CORS / app URL)
 - **Mobile:** Expo + EAS builds; physical device required for real push
 
@@ -56,7 +58,7 @@ Workspace
         ├── EventRoom (callToken for guest QR)
         │     └── EventRoomCoverage
         ├── Alert (help requests)
-        └── Message (stub — evolve per chat-plan)
+        └── File (S3 metadata; room docs, later event packs / avatars)
 DeviceToken (IOS | ANDROID | WEB push endpoints)
 ```
 
@@ -93,6 +95,7 @@ OS-level notification settings (e.g. macOS → Chrome) are outside the app’s c
 | Web local → deployed API | `apps/web` `.env` / `.env.local` `NEXT_PUBLIC_API_URL` |
 | Guest call links | `apps/web/lib/callLinks.ts` + `NEXT_PUBLIC_APP_URL` |
 | Prisma | run from `services/backend` (`prisma:migrate`, `prisma:generate`) |
+| S3 | created by `StorageStack` on `sst dev` / `sst deploy`; names in SST outputs |
 
 ## Planned chat (summary)
 

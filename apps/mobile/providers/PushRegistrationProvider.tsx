@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { fetchAuthSession } from "aws-amplify/auth";
 import type { RootState } from "@av/store";
+import { subscribeChatNotificationResponses } from "../src/push/chatNotificationRouting";
 import { registerForPushNotifications } from "../src/push/registerForPushNotifications";
 
 export function PushRegistrationProvider({ children }: { children: ReactNode }) {
@@ -29,6 +30,11 @@ export function PushRegistrationProvider({ children }: { children: ReactNode }) 
       cancelled = true;
     };
   }, [status, userId]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    return subscribeChatNotificationResponses();
+  }, [status]);
 
   return <>{children}</>;
 }

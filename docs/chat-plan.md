@@ -141,4 +141,9 @@ Same threads and APIs as mobile.
   - [x] Shared `@av/chat` (Ably helpers/hooks + inbox labels; HTTP stays in `@av/store`)
   - [x] Thread message view
   - [x] New DM flow
-- [ ] Phase 6 — Push / mute / event-end quieting / tab badge
+- [ ] Phase 6 — Polish
+  - [x] Offline push for new messages (notifyUsers + mobile tap routing + web SW url)
+  - [ ] Mute / snooze
+  - [ ] Quiet after event end
+  - [x] Unread badges (mobile chat tab + web event Chat button)
+

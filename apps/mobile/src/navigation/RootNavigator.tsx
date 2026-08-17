@@ -10,6 +10,7 @@ import type { RootState } from "@av/store";
 import { LoadingScreen } from "../../components/LoadingScreen";
 import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
+import { navigationRef } from "./navigationRef";
 
 // Auth and Main trees swap via ternary; linking covers both route maps.
 const linking = {
@@ -86,7 +87,11 @@ export default function RootNavigator() {
       };
 
   return (
-    <NavigationContainer linking={linking as any} theme={navTheme}>
+    <NavigationContainer
+      ref={navigationRef}
+      linking={linking as any}
+      theme={navTheme}
+    >
       {authStatus === "idle" || authStatus === "loading" ? (
         <LoadingScreen message="Checking session…" />
       ) : authStatus === "authenticated" ? (

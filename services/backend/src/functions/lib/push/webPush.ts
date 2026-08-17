@@ -60,6 +60,15 @@ function buildPayload(notification: PushNotification): string {
   if (notification.data?.roomId) {
     data.roomId = notification.data.roomId;
   }
+  if (notification.data?.type) {
+    data.type = notification.data.type;
+  }
+  if (notification.data?.threadId) {
+    data.threadId = notification.data.threadId;
+  }
+  if (notification.data?.workspaceId) {
+    data.workspaceId = notification.data.workspaceId;
+  }
 
   const payload: WebPushPayload = {
     title: notification.title,

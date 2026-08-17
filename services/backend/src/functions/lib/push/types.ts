@@ -6,5 +6,9 @@ export type PushNotification = {
     eventId?: string;
     roomId?: string;
     url?: string;
+    /** Discriminator for clients (`chat` | omit for alerts). */
+    type?: string;
+    threadId?: string;
+    workspaceId?: string;
   };
 };

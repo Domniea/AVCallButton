@@ -6,6 +6,7 @@ import {
   createThreadMessage,
   parseMessageBody,
 } from "../../../lib/chat/messages";
+import { notifyChatMessageCreated } from "../../../lib/chat/notify";
 import { chatMessageToApi } from "../../../lib/mappers/chat";
 import { prisma } from "../../../lib/prisma";
 import { badRequest, forbidden, serverError } from "../../../lib/responses";
@@ -50,6 +51,13 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     await publishChatMessageCreated({
       threadId,
       message: apiMessage,
+    });
+
+    // Fire-and-forget offline interrupt (Ably covers connected clients).
+    void notifyChatMessageCreated({
+      threadId,
+      senderId: userId,
+      body,
     });
 
     return {

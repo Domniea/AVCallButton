@@ -7,11 +7,12 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "postinstall": "node ./scripts/ensurePrismaWorkspaceLink.mjs",
     "dev": "sst dev --stage local",
     "deploy": "sst deploy --stage dev",
     "deploy:prod": "sst deploy --stage prod",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "node ./scripts/ensurePrismaWorkspaceLink.mjs && prisma generate",
+    "prisma:migrate": "node ./scripts/ensurePrismaWorkspaceLink.mjs && prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "chat:backfill": "tsx --env-file=.env scripts/backfillChatThreads.ts",
     "remove:local": "sst remove --stage local",

@@ -61,6 +61,16 @@ enum ChatThreadType {
   DM
 }
 
+enum FileBucket {
+  UPLOADS
+  GENERATED
+}
+
+enum FileStatus {
+  PENDING
+  READY
+}
+
 model Workspace {
   id        String   @id @default(uuid())
   name      String
@@ -72,6 +82,7 @@ model Workspace {
   invites        Invite[]
   workspaceRoles WorkspaceRole[]
   chatThreads    ChatThread[]
+  files          File[]
 }
 
 model WorkspaceRole {
@@ -160,6 +171,7 @@ model Event {
   zones            EventZone[]
   rooms            EventRoom[]
   chatThreads      ChatThread[]
+  files            File[]
 
   @@index([workspaceId])
   @@index([status])
@@ -238,6 +250,7 @@ model EventRoom {
   zone     EventZone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
   coverage EventRoomCoverage[]
   alerts   Alert[]
+  files    File[]
 
   @@index([eventId])
   @@index([zoneId])
@@ -379,4 +392,32 @@ model ChatMessage {
 
   @@index([threadId, createdAt])
   @@index([senderId])
+}
+
+/// Metadata for an S3 object. Bytes live in S3; this row is what the app lists/authz against.
+/// Room docs set workspaceId + eventId + roomId; event packs omit roomId; avatars can omit both.
+model File {
+  id           String     @id @default(uuid())
+  workspaceId  String
+  eventId      String?
+  roomId       String?
+  bucket       FileBucket
+  key          String
+  originalName String
+  contentType  String
+  sizeBytes    Int?
+  status       FileStatus @default(PENDING)
+  uploadedBy   String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  event     Event?     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  room      EventRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([bucket, key])
+  @@index([workspaceId])
+  @@index([eventId, createdAt])
+  @@index([roomId, createdAt])
+  @@index([uploadedBy])
 }

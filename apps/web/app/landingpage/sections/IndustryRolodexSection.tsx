@@ -68,8 +68,8 @@ function IndustryCard({
       >
         <Box
           position="relative"
-          h="100%"
-          w="auto"
+          h="99%"
+          w="100%"
           maxW="100%"
           aspectRatio="1"
           borderRadius="lg"
@@ -243,11 +243,7 @@ export default function IndustryRolodexSection() {
         </IconButton>
 
         {!mounted && activeSlide ? (
-          <Box
-            position="absolute"
-            w={{ base: "46%", md: "42%" }}
-            h="100%"
-          >
+          <Box position="absolute" w={{ base: "46%", md: "42%" }} h="100%">
             <IndustryCard slide={activeSlide} isActive />
           </Box>
         ) : (

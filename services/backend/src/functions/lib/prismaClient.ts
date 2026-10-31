@@ -13,5 +13,7 @@ export const EventStatus = prismaPackage.EventStatus;
 export const DevicePlatform = prismaPackage.DevicePlatform;
 export const MembershipType = prismaPackage.MembershipType;
 export const ChatThreadType = prismaPackage.ChatThreadType;
+export const FileBucket = prismaPackage.FileBucket;
+export const FileStatus = prismaPackage.FileStatus;
 
 export type * from "@prisma/client";

@@ -8,12 +8,17 @@ import { Badge, Box, Grid, HStack, Text, VStack } from "@chakra-ui/react";
 import { fetchAuthSession } from "aws-amplify/auth";
 
 import type { AppDispatch, RootState } from "@av/store";
-import type { RosterAssignment } from "@av/store";
+import type { RosterAssignment, StoredFile } from "@av/store";
 import {
   fetchEventsThunk,
   fetchRosterThunk,
   fetchRoomCoverage,
+  fetchWorkspacesThunk,
+  getRoomFileDownloadUrl,
+  hasPermissionForRank,
+  listRoomFiles,
   removeRoomCoverage,
+  uploadRoomDocument,
   type RoomCoverage,
 } from "@av/store";
 
@@ -66,7 +71,17 @@ function apiErrorMessage(err: unknown): string {
   ) {
     return err.response.data.error;
   }
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
   return "Could not update coverage. Try again.";
+}
+
+function formatFileSize(bytes: number | null): string {
+  if (bytes == null) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export default function RoomDetailPage() {
@@ -88,8 +103,20 @@ export default function RoomDetailPage() {
   const [coverageActionError, setCoverageActionError] = useState<string | null>(
     null,
   );
+  const [files, setFiles] = useState<StoredFile[]>([]);
+  const [filesLoading, setFilesLoading] = useState(true);
+  const [filesError, setFilesError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [openingFileId, setOpeningFileId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces,
+  );
+  const workspaceFetchStatus = useSelector(
+    (state: RootState) => state.workspace.fetchStatus,
+  );
 
   const event = useSelector((state: RootState) =>
     state.events.events.find((entry) => entry.id === eventId),
@@ -114,6 +141,11 @@ export default function RoomDetailPage() {
     ? event?.zones.find((entry) => entry.id === room.zoneId)
     : null;
 
+  const workspace = workspaces.find((entry) => entry.workspaceId === workspaceId);
+  const canUploadFiles = workspace
+    ? hasPermissionForRank(workspace.roleRank, "event:update")
+    : false;
+
   const loadCoverage = useCallback(async () => {
     setCoverageLoading(true);
     try {
@@ -128,6 +160,30 @@ export default function RoomDetailPage() {
       setCoverageLoading(false);
     }
   }, [eventId, roomId]);
+
+  const loadFiles = useCallback(async () => {
+    setFilesLoading(true);
+    setFilesError(null);
+    try {
+      const session = await fetchAuthSession();
+      const token = session.tokens?.idToken?.toString();
+      if (!token) return;
+      const { files: nextFiles } = await listRoomFiles(token, eventId, roomId);
+      setFiles(nextFiles);
+    } catch (err) {
+      console.error("Failed to load room files:", err);
+      setFilesError(apiErrorMessage(err));
+    } finally {
+      setFilesLoading(false);
+    }
+  }, [eventId, roomId]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated") return;
+    if (workspaces.length === 0 && workspaceFetchStatus === "idle") {
+      void dispatch(fetchWorkspacesThunk());
+    }
+  }, [authStatus, dispatch, workspaceFetchStatus, workspaces.length]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
@@ -152,7 +208,65 @@ export default function RoomDetailPage() {
   useEffect(() => {
     if (!room) return;
     void loadCoverage();
-  }, [loadCoverage, room]);
+    void loadFiles();
+  }, [loadCoverage, loadFiles, room]);
+
+  const handleFileSelected = useCallback(
+    async (selected: File | undefined) => {
+      if (!selected) return;
+      setFilesError(null);
+      setUploading(true);
+      try {
+        const session = await fetchAuthSession();
+        const token = session.tokens?.idToken?.toString();
+        if (!token) return;
+        await uploadRoomDocument(
+          token,
+          eventId,
+          roomId,
+          {
+            originalName: selected.name,
+            contentType: selected.type || "application/octet-stream",
+            sizeBytes: selected.size,
+          },
+          selected,
+        );
+        await loadFiles();
+      } catch (err) {
+        setFilesError(apiErrorMessage(err));
+      } finally {
+        setUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    },
+    [eventId, loadFiles, roomId],
+  );
+
+  const handleOpenFile = useCallback(
+    async (fileId: string) => {
+      setFilesError(null);
+      setOpeningFileId(fileId);
+      try {
+        const session = await fetchAuthSession();
+        const token = session.tokens?.idToken?.toString();
+        if (!token) return;
+        const { downloadUrl } = await getRoomFileDownloadUrl(
+          token,
+          eventId,
+          roomId,
+          fileId,
+        );
+        window.open(downloadUrl, "_blank", "noopener,noreferrer");
+      } catch (err) {
+        setFilesError(apiErrorMessage(err));
+      } finally {
+        setOpeningFileId(null);
+      }
+    },
+    [eventId, roomId],
+  );
 
   const handleRemoveCoverage = useCallback(
     async (membershipId: string) => {
@@ -276,6 +390,12 @@ export default function RoomDetailPage() {
           </Text>
         ) : null}
 
+        {filesError ? (
+          <Text fontSize="sm" color="red.500">
+            {filesError}
+          </Text>
+        ) : null}
+
         <Grid
           w="100%"
           gap={6}
@@ -381,10 +501,83 @@ export default function RoomDetailPage() {
             titleAlign="start"
             variant="elevated"
           >
-            <Text fontSize="sm" color="gray.500">
-              Upload floor plans, rack diagrams, and other reference files for
-              this room. File storage is coming soon.
-            </Text>
+            <VStack align="stretch" gap={3}>
+              <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
+                <Text fontSize="sm" color="gray.500">
+                  Floor plans, rack diagrams, and other reference files for this
+                  room.
+                </Text>
+                {canUploadFiles ? (
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.txt,.zip,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                      style={{ display: "none" }}
+                      onChange={(e) => void handleFileSelected(e.target.files?.[0])}
+                    />
+                    <BaseButton
+                      variety="tertiary"
+                      title={uploading ? "Uploading…" : "Upload file"}
+                      btnWidth="auto"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    />
+                  </>
+                ) : null}
+              </HStack>
+              {filesLoading ? (
+                <Text fontSize="sm" color="gray.500">
+                  Loading documents…
+                </Text>
+              ) : files.length === 0 ? (
+                <Text fontSize="sm" color="gray.500">
+                  No documents yet.
+                  {canUploadFiles ? " Upload a file to get started." : ""}
+                </Text>
+              ) : (
+                <VStack align="stretch" gap={2}>
+                  {files.map((file) => {
+                    const isOpening = openingFileId === file.id;
+                    const meta = [formatFileSize(file.sizeBytes), file.contentType]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <HStack
+                        key={file.id}
+                        justify="space-between"
+                        align="center"
+                        gap={2}
+                        py={2}
+                        px={3}
+                        borderWidth={1}
+                        borderColor="cardBorder"
+                        borderRadius="md"
+                        bg="surface"
+                      >
+                        <Box flex={1} minW={0}>
+                          <Text fontSize="sm" color="text" truncate>
+                            {file.originalName}
+                          </Text>
+                          {meta ? (
+                            <Text fontSize="xs" color="gray.500" truncate>
+                              {meta}
+                            </Text>
+                          ) : null}
+                        </Box>
+                        <BaseButton
+                          variety="tertiary"
+                          title={isOpening ? "Opening…" : "Open"}
+                          btnWidth="auto"
+                          disabled={isOpening}
+                          onClick={() => void handleOpenFile(file.id)}
+                        />
+                      </HStack>
+                    );
+                  })}
+                </VStack>
+              )}
+            </VStack>
           </BaseCard>
 
           <BaseCard

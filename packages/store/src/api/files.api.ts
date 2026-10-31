@@ -95,13 +95,16 @@ export async function completeRoomFileUpload(
   return res.data;
 }
 
+/** Body for the S3 PUT — web uses `Blob`/`File`; React Native can pass `Blob` or `ArrayBuffer`. */
+export type RoomUploadBody = Blob | ArrayBuffer;
+
 /** Create → PUT bytes to S3 → complete. */
 export async function uploadRoomDocument(
   token: string,
   eventId: string,
   roomId: string,
   meta: RequestRoomFileUploadInput,
-  body: Blob,
+  body: RoomUploadBody,
 ): Promise<StoredFile> {
   const { file: pending, uploadUrl, headers } = await requestRoomFileUpload(
     token,

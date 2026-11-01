@@ -11,10 +11,9 @@
     "composite": true,
     "skipLibCheck": true,
 
-    "baseUrl": ".",
     "paths": {
-      "@av/ui": ["packages/ui"],
-      "@av/ui/*": ["packages/ui/src/*"]
+      "@av/ui": ["./packages/ui"],
+      "@av/ui/*": ["./packages/ui/src/*"]
     }
   }
 }

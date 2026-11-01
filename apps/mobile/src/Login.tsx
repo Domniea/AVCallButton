@@ -25,9 +25,7 @@ import {
 
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import type { AppDispatch, RootState } from "@av/store";
-import { fetchMeThunk, logoutThunk } from "@av/store/src/auth";
-import { logout } from "packages/auth-client/src";
-import { loginThunk } from "@av/store/src/auth";
+import { fetchMeThunk, logoutThunk, loginThunk } from "@av/store/src/auth";
 
 type LoginNav = NativeStackNavigationProp<
   ParamListBase & { invite: undefined; home: undefined },

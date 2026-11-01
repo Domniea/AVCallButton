@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HStack, Text, VStack } from "native-base";
-import { useRoute } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -52,6 +52,8 @@ export default function RoomDetailScreen() {
   const [uploading, setUploading] = useState(false);
   const [openingFileId, setOpeningFileId] = useState<string | null>(null);
   const [sharingFileId, setSharingFileId] = useState<string | null>(null);
+  const filesLoadGenerationRef = useRef(0);
+  const filesRoomIdRef = useRef(roomId);
 
   const {
     authStatus,
@@ -69,35 +71,63 @@ export default function RoomDetailScreen() {
   });
   const canUploadFiles = hasPermissionForRank(roleRank, "event:update");
 
+  const coverageScope = useMemo(
+    () => ({ zoneIds: [] as string[], roomIds: [roomId] }),
+    [roomId],
+  );
+
   const {
     roomCoverage,
     coverageActionError,
+    coverageLoadError,
+    coverageLoading,
+    loadCoverage,
     removingCoverage,
     handleCoverageAssigned,
     handleRemoveCoverage,
-  } = useEventCoverage(eventId, event);
+  } = useEventCoverage(eventId, event, coverageScope);
+
+  useEffect(() => {
+    if (filesRoomIdRef.current === roomId) return;
+    filesRoomIdRef.current = roomId;
+    filesLoadGenerationRef.current += 1;
+    setFiles([]);
+    setFilesError(null);
+    setFilesLoading(true);
+  }, [roomId]);
 
   const loadFiles = useCallback(async () => {
+    const generation = ++filesLoadGenerationRef.current;
     setFilesLoading(true);
     setFilesError(null);
     try {
       const session = await fetchAuthSession();
       const token = session.tokens?.idToken?.toString();
-      if (!token) return;
+      if (!token) {
+        if (generation !== filesLoadGenerationRef.current) return;
+        setFilesError("Not signed in.");
+        return;
+      }
       const { files: nextFiles } = await listRoomFiles(token, eventId, roomId);
+      if (generation !== filesLoadGenerationRef.current) return;
       setFiles(nextFiles);
     } catch (err) {
       console.error("Failed to load room files:", err);
+      if (generation !== filesLoadGenerationRef.current) return;
       setFilesError(documentsErrorMessage(err));
     } finally {
-      setFilesLoading(false);
+      if (generation === filesLoadGenerationRef.current) {
+        setFilesLoading(false);
+      }
     }
   }, [eventId, roomId]);
 
-  useEffect(() => {
-    if (authStatus !== "authenticated") return;
-    void loadFiles();
-  }, [authStatus, loadFiles]);
+  useFocusEffect(
+    useCallback(() => {
+      if (authStatus !== "authenticated") return;
+      void loadFiles();
+    }, [authStatus, loadFiles]),
+  );
 
   const handleUpload = useCallback(
     async (source: RoomDocumentSource) => {
@@ -210,6 +240,20 @@ export default function RoomDetailScreen() {
           </Text>
         ) : null}
 
+        {coverageLoadError ? (
+          <VStack space={2}>
+            <Text fontSize="sm" color="red.500">
+              {coverageLoadError}
+            </Text>
+            <BaseButton
+              title="Retry coverage"
+              variety="tertiary"
+              btnWidth="auto"
+              onPress={() => void loadCoverage()}
+            />
+          </VStack>
+        ) : null}
+
         <BaseCard title="Room details" titleAlign="start" variant="outline">
           <VStack space={3}>
             <DetailRow label="Room name" value={room.name} />
@@ -248,21 +292,29 @@ export default function RoomDetailScreen() {
             ) : null}
 
             {filesError ? (
-              <Text fontSize="sm" color="red.500">
-                {filesError}
-              </Text>
+              <VStack space={2}>
+                <Text fontSize="sm" color="red.500">
+                  {filesError}
+                </Text>
+                <BaseButton
+                  title="Retry"
+                  variety="tertiary"
+                  btnWidth="auto"
+                  onPress={() => void loadFiles()}
+                />
+              </VStack>
             ) : null}
 
-            {filesLoading ? (
+            {filesLoading && files.length === 0 ? (
               <Text fontSize="sm" color={muted}>
                 Loading documents…
               </Text>
-            ) : files.length === 0 ? (
+            ) : files.length === 0 && !filesError ? (
               <Text fontSize="sm" color={muted}>
                 No documents yet.
                 {canUploadFiles ? " Upload a file to get started." : ""}
               </Text>
-            ) : (
+            ) : files.length === 0 ? null : (
               <VStack space={2}>
                 {files.map((file) => {
                   const meta = [formatFileSize(file.sizeBytes), file.contentType]
@@ -315,20 +367,31 @@ export default function RoomDetailScreen() {
         </BaseCard>
 
         <BaseCard variant="outline">
-          <CoverageList
-            rows={roomCoverage[room.id] ?? []}
-            roster={roster}
-            label="Room coverage"
-            onAdd={() => setAssignCoverageModalOpen(true)}
-            onRemove={(membershipId) =>
-              void handleRemoveCoverage(roomTarget, membershipId)
-            }
-            removingMembershipId={removingMembershipIdFor(
-              removingCoverage,
-              "room",
-              room.id,
-            )}
-          />
+          {coverageLoading && (roomCoverage[room.id] ?? []).length === 0 ? (
+            <VStack space={2}>
+              <Text fontSize="sm" fontWeight="semibold" color={text}>
+                Room coverage
+              </Text>
+              <Text fontSize="sm" color={muted}>
+                Loading coverage…
+              </Text>
+            </VStack>
+          ) : (
+            <CoverageList
+              rows={roomCoverage[room.id] ?? []}
+              roster={roster}
+              label="Room coverage"
+              onAdd={() => setAssignCoverageModalOpen(true)}
+              onRemove={(membershipId) =>
+                void handleRemoveCoverage(roomTarget, membershipId)
+              }
+              removingMembershipId={removingMembershipIdFor(
+                removingCoverage,
+                "room",
+                room.id,
+              )}
+            />
+          )}
         </BaseCard>
       </ScreenLayout>
 

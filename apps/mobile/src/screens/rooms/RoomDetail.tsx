@@ -8,6 +8,7 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import type { RootState, StoredFile } from "@av/store";
 import { hasPermissionForRank, listRoomFiles } from "@av/store";
 
+import { BaseBottomSheet } from "../../../components/BaseBottomSheet";
 import { BaseButton } from "../../../components/BaseButton";
 import { BaseCard } from "../../../components/BaseCard";
 import { LoadingScreen } from "../../../components/LoadingScreen";
@@ -24,6 +25,7 @@ import {
   pickAndUploadRoomDocument,
   previewRoomDocument,
   shareRoomDocument,
+  type RoomDocumentSource,
 } from "../../lib/roomDocuments";
 import type { DashStackParamList } from "../../navigation/types";
 
@@ -43,6 +45,7 @@ export default function RoomDetailScreen() {
   const { workspaceId, eventId, roomId } = route.params;
   const { muted, text, border } = useThemeColors();
   const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
+  const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   const [files, setFiles] = useState<StoredFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
   const [filesError, setFilesError] = useState<string | null>(null);
@@ -96,21 +99,32 @@ export default function RoomDetailScreen() {
     void loadFiles();
   }, [authStatus, loadFiles]);
 
-  const handleUpload = useCallback(async () => {
-    setFilesError(null);
-    setUploading(true);
-    try {
-      const session = await fetchAuthSession();
-      const token = session.tokens?.idToken?.toString();
-      if (!token) return;
-      const uploaded = await pickAndUploadRoomDocument(token, eventId, roomId);
-      if (uploaded) await loadFiles();
-    } catch (err) {
-      setFilesError(documentsErrorMessage(err));
-    } finally {
-      setUploading(false);
-    }
-  }, [eventId, loadFiles, roomId]);
+  const handleUpload = useCallback(
+    async (source: RoomDocumentSource) => {
+      setUploadSheetOpen(false);
+      setFilesError(null);
+      // Let the action sheet finish dismissing before presenting a system picker.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setUploading(true);
+      try {
+        const session = await fetchAuthSession();
+        const token = session.tokens?.idToken?.toString();
+        if (!token) return;
+        const uploaded = await pickAndUploadRoomDocument(
+          token,
+          eventId,
+          roomId,
+          source,
+        );
+        if (uploaded) await loadFiles();
+      } catch (err) {
+        setFilesError(documentsErrorMessage(err));
+      } finally {
+        setUploading(false);
+      }
+    },
+    [eventId, loadFiles, roomId],
+  );
 
   const handlePreview = useCallback(
     async (fileId: string) => {
@@ -229,7 +243,7 @@ export default function RoomDetailScreen() {
                 variety="tertiary"
                 btnWidth="auto"
                 isDisabled={uploading}
-                onPress={() => void handleUpload()}
+                onPress={() => setUploadSheetOpen(true)}
               />
             ) : null}
 
@@ -324,6 +338,38 @@ export default function RoomDetailScreen() {
         target={roomTarget}
         onClose={() => setAssignCoverageModalOpen(false)}
         onAssigned={handleCoverageAssigned}
+      />
+
+      <BaseBottomSheet
+        isOpen={uploadSheetOpen}
+        onClose={() => setUploadSheetOpen(false)}
+        title="Add document"
+        items={[
+          {
+            key: "camera",
+            label: "Take photo",
+            isDisabled: uploading,
+            onPress: () => {
+              void handleUpload("camera");
+            },
+          },
+          {
+            key: "library",
+            label: "Photo library",
+            isDisabled: uploading,
+            onPress: () => {
+              void handleUpload("library");
+            },
+          },
+          {
+            key: "files",
+            label: "Browse files",
+            isDisabled: uploading,
+            onPress: () => {
+              void handleUpload("files");
+            },
+          },
+        ]}
       />
     </>
   );

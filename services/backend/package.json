@@ -15,6 +15,7 @@
     "prisma:migrate": "node ./scripts/ensurePrismaWorkspaceLink.mjs && prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "chat:backfill": "tsx --env-file=.env scripts/backfillChatThreads.ts",
+    "db:nuke": "tsx --env-file=.env scripts/nuke.ts",
     "remove:local": "sst remove --stage local",
     "remove:dev": "sst remove --stage dev",
     "remove:prod": "sst remove --stage prod"
@@ -22,7 +23,9 @@
   "dependencies": {
     "@av/auth-core": "*",
     "@aws-sdk/client-cognito-identity-provider": "^3.1001.0",
+    "@aws-sdk/client-s3": "^3.1121.0",
     "@aws-sdk/client-ses": "^3.998.0",
+    "@aws-sdk/s3-request-presigner": "^3.1121.0",
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "7.4.0",
     "ably": "^2.26.0",

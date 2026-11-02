@@ -4,7 +4,7 @@ Short map of the system for humans and agents. Keep this lean; put feature-speci
 
 ## What the product is
 
-Ops tool for live events: workspaces of staff, events with zones/rooms, guest QR help calls, and push alerts to covered crew/leads. Chat (event / zone / DM) is planned next — see [`chat-plan.md`](./chat-plan.md).
+Ops tool for live events: workspaces of staff, events with zones/rooms, guest QR help calls, and push alerts to covered crew/leads. Product direction: [`vision.md`](./vision.md). Active room-alert / crew-dash build: [`room-alert-dashboard.md`](./room-alert-dashboard.md). Chat: [`chat-plan.md`](./chat-plan.md).
 
 ## Monorepo layout
 
@@ -66,6 +66,8 @@ Guest flow: public `GET/POST /public/call/{callToken}/…` (no auth) → create 
 
 Calls are gated by event status / end time (`isEventAcceptingCalls`).
 
+**Room status direction:** Alert remains the permanent record; `EventRoom` will hold a transactional current-state projection (`currentPriority`, etc.) for the crew dash. Details: [`room-alert-dashboard.md`](./room-alert-dashboard.md).
+
 ## Notifications (today)
 
 1. Client registers token → `POST /me/device-tokens`
@@ -97,10 +99,13 @@ OS-level notification settings (e.g. macOS → Chrome) are outside the app’s c
 | Prisma | run from `services/backend` (`prisma:migrate`, `prisma:generate`) |
 | S3 | created by `StorageStack` on `sst dev` / `sst deploy`; names in SST outputs |
 
-## Planned chat (summary)
+## Planned / in progress features
 
-Postgres threads/messages as truth; Ably for live fanout; existing push as offline fallback. Types: event group, zone, DM. Details and phases: **[`docs/chat-plan.md`](./chat-plan.md)**.
+| Feature | Doc |
+| --- | --- |
+| Room alert crew dashboard | [`room-alert-dashboard.md`](./room-alert-dashboard.md) |
+| Chat (event / zone / DM) | [`chat-plan.md`](./chat-plan.md) |
 
 ## How to use this in a new chat
 
-> Read `docs/architecture.md` for system context. For chat work, follow `docs/chat-plan.md`.
+> Read `docs/architecture.md` for system context. For product direction, `docs/vision.md`. For room alerts / crew dash, follow `docs/room-alert-dashboard.md`. For chat, follow `docs/chat-plan.md`. See also [`docs/README.md`](./README.md).

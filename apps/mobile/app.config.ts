@@ -25,6 +25,15 @@ export default function ({ config }: ConfigContext): ExpoConfig {
           color: "#ffffff",
         },
       ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission:
+            "Allow AV Call Button to access your photos for room documents.",
+          cameraPermission:
+            "Allow AV Call Button to use the camera for room documents.",
+        },
+      ],
     ],
 
     splash: {
@@ -38,6 +47,12 @@ export default function ({ config }: ConfigContext): ExpoConfig {
       supportsTablet: true,
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
+        NSPhotoLibraryUsageDescription:
+          "Allow AV Call Button to access your photos for room documents.",
+        NSCameraUsageDescription:
+          "Allow AV Call Button to use the camera for room documents.",
+        NSMicrophoneUsageDescription:
+          "Allow AV Call Button to use the microphone when recording video.",
       },
     },
 

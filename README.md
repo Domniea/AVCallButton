@@ -1,136 +1,230 @@
-# Turborepo starter
+# AV Call Button
 
-This Turborepo starter is maintained by the Turborepo core team.
+Ops tool for live events: workspaces, events, rooms/zones, guest QR help calls, and push alerts to covered crew.
 
-## Using this example
+This README is the “I stepped away for a few months” guide. For deeper system maps, see [`docs/architecture.md`](./docs/architecture.md).
 
-Run the following command:
+---
+
+## What lives where
+
+| Folder | What it is |
+| --- | --- |
+| `apps/web` | Next.js website (admin + guest call pages) |
+| `apps/mobile` | Expo / React Native iOS & Android app |
+| `services/backend` | API (SST + Lambda), database (Prisma), email/push |
+| `packages/*` | Shared code (auth, Redux store, forms, UI) |
+
+**Rule of thumb:** run everyday commands from the **repo root**. The real scripts live in each app; root just `cd`s into the right folder and runs them.
+
+---
+
+## One-time / returning setup
+
+You need:
+
+- Node 20+
+- Yarn 1 (`yarn@1.22.22`)
+- Xcode + iOS Simulator (for mobile)
+- AWS credentials that can talk to Cognito / deploy SST
+- Local env files (not in git):
+  - `services/backend/.env` — at least `DATABASE_URL`
+  - `apps/web/.env` — at least `NEXT_PUBLIC_API_URL`
+  - `apps/mobile/.env` — at least `EXPO_PUBLIC_API_URL`
+
+Then from the repo root:
 
 ```sh
-npx create-turbo@latest
+yarn setup
 ```
 
-## What's inside?
+That installs dependencies, generates the Prisma client, and **optionally** offers a database nuke.
 
-This Turborepo includes the following packages/apps:
+Force the nuke prompt path:
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```sh
+yarn setup:nuke
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### What “nuke” does (and does not)
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+| Nuke **does** | Nuke **does not** |
+| --- | --- |
+| Wipe Postgres data and recreate empty tables | Delete Cognito login users |
+| Clear non-prod upload/generated files (if those stacks exist) | Remove your AWS Cognito pool |
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+**Important:** Cognito users are left alone on purpose. If you nuke the DB but keep signing in with the same Cognito account, the API will recreate a **personal workspace** (plus membership + default roles) the next time that user hits `GET /workspaces`.
 
-### Develop
+For a truly empty slate (feel like brand-new users again):
 
-To develop all apps and packages, run the following command:
+1. Run `yarn db:nuke` (or say yes during `yarn setup`)
+2. Delete users in the **AWS Cognito user pool** console  
+   Pool id is hard-coded in `services/backend/stacks/ApiStack.ts`
+3. Sign up again in the app
 
-```
-cd my-turborepo
+You can also run nuke alone anytime:
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```sh
+yarn db:nuke
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+## How to run things day to day
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+Open **separate terminals**. Most flows need the API plus one client.
 
-### Remote Caching
+### 1. Backend API (required for real data)
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```sh
+yarn backend:dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+This runs `sst dev --stage local` inside `services/backend`. Leave it running. SST prints an **API Gateway URL** — that is your local API.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Point the clients at it:
 
+- Web: `NEXT_PUBLIC_API_URL` in `apps/web/.env`
+- Mobile: `EXPO_PUBLIC_API_URL` in `apps/mobile/.env`
+
+If you would rather talk to the **already deployed** API (shared `dev` stage), skip `backend:dev` and set those URLs to the deployed API instead.
+
+### 2. Web app
+
+```sh
+yarn web
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+Opens Next.js (usually http://localhost:3000).
+
+Other web helpers:
+
+```sh
+yarn web:build      # production build
+yarn web:start      # serve that build
+yarn web:dev:env    # next dev with apps/web/.env explicitly loaded
 ```
 
-## Useful Links
+### 3. iOS app
 
-Learn more about the power of Turborepo:
+Two different commands — easy to mix up:
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
-# AVCallButton
+| Command | When to use |
+| --- | --- |
+| `yarn ios` | **Build / install** native app on the Simulator (first time, or after native/dependency changes) |
+| `yarn ios:start` | **Day to day** — boot Simulator + Metro when the app is already installed |
+
+```sh
+yarn ios          # compile + install + launch
+yarn ios:start    # just run Metro against the installed app
+```
+
+Android mirrors that: `yarn android` / `yarn android:start`.
+
+**Simulator tip:** soft-keyboard haptic warnings (`hapticpatternlibrary.plist`, `CHHapticPattern`, etc.) are Simulator noise, not your app crashing. Toggle **I/O → Keyboard → Connect Hardware Keyboard** (`Cmd+Shift+K`) to quiet them.
+
+---
+
+## Auth, personal workspace, and org workspace
+
+- Sign up / login go through **AWS Cognito** (Amplify in the apps).
+- There is **no User table** for “accounts” in Postgres. Cognito owns logins.
+- On first workspace list after login, the API ensures a **personal** workspace for that Cognito user (`type: "personal"`), with default roles (GUEST → OWNER) and an owner membership.
+
+### Corporate / org workspace
+
+Backend is ready: `POST /workspaces/org` with `{ "name": "Acme AV" }` and a Cognito ID token.
+
+**UI is not built yet** (web dashboard and mobile workspace list only show workspaces; they don’t create orgs). Until there is a button, create one with curl (or any HTTP client) while signed in:
+
+```sh
+curl -X POST "$API_URL/workspaces/org" \
+  -H "Authorization: Bearer $ID_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Acme AV"}'
+```
+
+Reload the dashboard / workspace list afterward. You will be the org **owner**.
+
+---
+
+## Deploying the API
+
+Stages (SST):
+
+| Stage | Command (from root) | Typical use |
+| --- | --- | --- |
+| `local` | `yarn backend:dev` | Laptop live-reload API |
+| `dev` | `yarn backend:deploy` | Shared deployed API for clients |
+| `prod` | `yarn backend:deploy:prod` | Production — be careful |
+
+Same thing from the backend folder:
+
+```sh
+cd services/backend
+yarn dev              # local
+yarn deploy           # stage: dev
+yarn deploy:prod      # stage: prod
+```
+
+After deploy, update client env URLs if the API URL changed, then restart web / rebuild or reload mobile.
+
+**Web hosting** is separate (Vercel for the Next app). Deploying the API does not deploy the website, and vice versa.
+
+**Database migrations** when schema changes:
+
+```sh
+yarn prisma:migrate     # local / interactive migrate
+yarn prisma:generate    # regenerate client after schema changes
+```
+
+On deployed environments you usually apply with Prisma migrate deploy from `services/backend` (see `prisma:migrate:deploy` there).
+
+---
+
+## Root command cheat sheet
+
+```sh
+yarn setup                 # install + prisma generate + optional nuke
+yarn setup:nuke            # same, and offer / run nuke
+
+yarn backend:dev           # local SST API
+yarn backend:deploy        # deploy API to stage "dev"
+yarn backend:deploy:prod   # deploy API to stage "prod"
+
+yarn web                   # Next.js dev
+yarn ios                   # native iOS build + install
+yarn ios:start             # iOS Metro only
+yarn android
+yarn android:start
+
+yarn db:nuke               # wipe DB (not Cognito)
+yarn prisma:migrate
+yarn prisma:generate
+```
+
+You can still `cd apps/web`, `cd apps/mobile`, or `cd services/backend` and run the same script names there if you prefer.
+
+---
+
+## Mental model for “empty slate”
+
+```text
+yarn db:nuke
+        │
+        ├─► Postgres empty          ✅
+        └─► Cognito users remain    ⚠️
+
+Still signed in with old Cognito user?
+        │
+        └─► App loads workspaces → API recreates personal workspace
+```
+
+Want new users from scratch → nuke **and** delete Cognito users, then sign up again.
+
+---
+
+## More detail
+
+- System map: [`docs/architecture.md`](./docs/architecture.md)
+- Chat plan: [`docs/chat-plan.md`](./docs/chat-plan.md)

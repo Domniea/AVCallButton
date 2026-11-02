@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { fetchAuthSession } from "aws-amplify/auth";
 
@@ -21,9 +21,17 @@ type EventShape = {
   rooms: Array<{ id: string; name: string; zoneId: string | null }>;
 };
 
+export type EventCoverageScope = {
+  /** When set, only these zones are fetched. Omit to fetch all event zones. */
+  zoneIds?: string[];
+  /** When set, only these rooms are fetched. Omit to fetch all event rooms. */
+  roomIds?: string[];
+};
+
 export function useEventCoverage(
   eventId: string,
   event: EventShape | undefined,
+  scope?: EventCoverageScope,
 ) {
   const [roomCoverage, setRoomCoverage] = useState<
     Record<string, RoomCoverage[]>
@@ -36,25 +44,59 @@ export function useEventCoverage(
   const [coverageActionError, setCoverageActionError] = useState<string | null>(
     null,
   );
+  const [coverageLoadError, setCoverageLoadError] = useState<string | null>(
+    null,
+  );
   const [coverageLoading, setCoverageLoading] = useState(false);
+  const loadGenerationRef = useRef(0);
+  const scopeRef = useRef(scope);
+  scopeRef.current = scope;
+
+  // "*" = no scope (fetch all). Otherwise a stable sorted id list.
+  const zoneIdsKey =
+    scope?.zoneIds == null ? "*" : scope.zoneIds.slice().sort().join(",");
+  const roomIdsKey =
+    scope?.roomIds == null ? "*" : scope.roomIds.slice().sort().join(",");
 
   const loadCoverage = useCallback(async () => {
     if (!event) return;
-    if (event.zones.length === 0 && event.rooms.length === 0) {
-      setZoneCoverage({});
-      setRoomCoverage({});
+
+    const currentScope = scopeRef.current;
+    const zonesToFetch =
+      currentScope?.zoneIds != null
+        ? event.zones.filter((zone) =>
+            currentScope.zoneIds!.includes(zone.id),
+          )
+        : event.zones;
+    const roomsToFetch =
+      currentScope?.roomIds != null
+        ? event.rooms.filter((room) =>
+            currentScope.roomIds!.includes(room.id),
+          )
+        : event.rooms;
+
+    if (zonesToFetch.length === 0 && roomsToFetch.length === 0) {
+      setCoverageLoadError(null);
+      setCoverageLoading(false);
       return;
     }
 
+    const generation = ++loadGenerationRef.current;
     setCoverageLoading(true);
+    setCoverageLoadError(null);
+
     try {
       const session = await fetchAuthSession();
       const token = session.tokens?.idToken?.toString();
-      if (!token) return;
+      if (!token) {
+        if (generation !== loadGenerationRef.current) return;
+        setCoverageLoadError("Not signed in.");
+        return;
+      }
 
       const [zoneSettled, roomSettled] = await Promise.all([
         Promise.allSettled(
-          event.zones.map(async (zone) => {
+          zonesToFetch.map(async (zone) => {
             const { coverage } = await fetchZoneCoverage(
               token,
               eventId,
@@ -64,7 +106,7 @@ export function useEventCoverage(
           }),
         ),
         Promise.allSettled(
-          event.rooms.map(async (room) => {
+          roomsToFetch.map(async (room) => {
             const { coverage } = await fetchRoomCoverage(
               token,
               eventId,
@@ -75,30 +117,54 @@ export function useEventCoverage(
         ),
       ]);
 
+      if (generation !== loadGenerationRef.current) return;
+
       const zones: Record<string, ZoneCoverage[]> = {};
+      let zoneFailures = 0;
       for (const result of zoneSettled) {
         if (result.status === "fulfilled") {
           const [id, coverage] = result.value;
           zones[id] = coverage;
+        } else {
+          zoneFailures += 1;
         }
       }
 
       const rooms: Record<string, RoomCoverage[]> = {};
+      let roomFailures = 0;
       for (const result of roomSettled) {
         if (result.status === "fulfilled") {
           const [id, coverage] = result.value;
           rooms[id] = coverage;
+        } else {
+          roomFailures += 1;
         }
       }
 
-      setZoneCoverage(zones);
-      setRoomCoverage(rooms);
+      setZoneCoverage((prev) => ({ ...prev, ...zones }));
+      setRoomCoverage((prev) => ({ ...prev, ...rooms }));
+
+      const total = zoneSettled.length + roomSettled.length;
+      const failures = zoneFailures + roomFailures;
+      if (failures > 0) {
+        setCoverageLoadError(
+          failures === total
+            ? "Could not load coverage. Try again."
+            : "Some coverage failed to load. Try again.",
+        );
+      } else {
+        setCoverageLoadError(null);
+      }
     } catch (err) {
       console.error("Failed to load coverage:", err);
+      if (generation !== loadGenerationRef.current) return;
+      setCoverageLoadError(apiErrorMessage(err));
     } finally {
-      setCoverageLoading(false);
+      if (generation === loadGenerationRef.current) {
+        setCoverageLoading(false);
+      }
     }
-  }, [event, eventId]);
+  }, [event, eventId, roomIdsKey, zoneIdsKey]);
 
   const refreshCoverageForTarget = useCallback(
     async (target: CoverageTarget) => {
@@ -207,6 +273,7 @@ export function useEventCoverage(
     zoneCoverage,
     removingCoverage,
     coverageActionError,
+    coverageLoadError,
     coverageLoading,
     loadCoverage,
     handleCoverageAssigned,

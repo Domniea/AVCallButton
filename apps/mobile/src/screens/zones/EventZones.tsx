@@ -38,10 +38,13 @@ export default function EventZonesScreen() {
     eventId,
   );
 
-  const { zoneCoverage, roomCoverage, coverageLoading } = useEventCoverage(
-    eventId,
-    event,
-  );
+  const {
+    zoneCoverage,
+    roomCoverage,
+    coverageLoading,
+    coverageLoadError,
+    loadCoverage,
+  } = useEventCoverage(eventId, event);
 
   if (authStatus === "idle" || authStatus === "loading") {
     return <LoadingScreen message="Checking session…" />;
@@ -75,11 +78,25 @@ export default function EventZonesScreen() {
           />
         </HStack>
 
-        {coverageLoading && (
+        {coverageLoading ? (
           <Text fontSize="sm" color={muted}>
             Loading coverage…
           </Text>
-        )}
+        ) : null}
+
+        {coverageLoadError ? (
+          <HStack space={2} alignItems="center" flexWrap="wrap">
+            <Text fontSize="sm" color="red.500">
+              {coverageLoadError}
+            </Text>
+            <BaseButton
+              title="Retry"
+              variety="tertiary"
+              btnWidth="auto"
+              onPress={() => void loadCoverage()}
+            />
+          </HStack>
+        ) : null}
 
         {event.zones.length === 0 && event.rooms.length === 0 ? (
           <BaseCard variant="outline">

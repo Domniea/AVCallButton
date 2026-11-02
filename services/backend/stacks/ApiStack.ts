@@ -126,6 +126,16 @@ export function ApiStack({ stack }: StackContext) {
       "DELETE /events/{eventId}/rooms/{roomId}":
         "src/functions/events/rooms/delete.handler",
 
+      // Room files
+      "GET /events/{eventId}/rooms/{roomId}/files":
+        "src/functions/events/rooms/files/list.handler",
+      "POST /events/{eventId}/rooms/{roomId}/files":
+        "src/functions/events/rooms/files/create.handler",
+      "GET /events/{eventId}/rooms/{roomId}/files/{fileId}/download":
+        "src/functions/events/rooms/files/download.handler",
+      "POST /events/{eventId}/rooms/{roomId}/files/{fileId}/complete":
+        "src/functions/events/rooms/files/complete.handler",
+
       // Room coverage
       "GET /events/{eventId}/rooms/{roomId}/coverage":
         "src/functions/events/rooms/coverage/list.handler",

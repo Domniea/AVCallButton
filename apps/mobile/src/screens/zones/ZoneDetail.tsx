@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { VStack, Text } from "native-base";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 
+import { BaseButton } from "../../../components/BaseButton";
 import { BaseCard } from "../../../components/BaseCard";
 import { ListRow } from "../../../components/ListRow";
 import { LoadingScreen } from "../../../components/LoadingScreen";
@@ -27,7 +28,7 @@ export default function ZoneDetailScreen() {
   const navigation = useNavigation<ZoneDetailNav>();
   const route = useRoute<ZoneDetailRoute>();
   const { workspaceId, eventId, zoneId } = route.params;
-  const { muted } = useThemeColors();
+  const { muted, text } = useThemeColors();
   const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
 
   const {
@@ -38,14 +39,25 @@ export default function ZoneDetailScreen() {
     rosterMatchesEvent,
   } = useEventScreenData(workspaceId, eventId);
 
+  const coverageScope = useMemo(() => {
+    if (!event) return { zoneIds: [zoneId], roomIds: [] as string[] };
+    return {
+      zoneIds: [zoneId],
+      roomIds: roomsForZone(event.rooms, zoneId).map((room) => room.id),
+    };
+  }, [event, zoneId]);
+
   const {
     zoneCoverage,
     roomCoverage,
     coverageActionError,
+    coverageLoadError,
+    coverageLoading,
+    loadCoverage,
     removingCoverage,
     handleCoverageAssigned,
     handleRemoveCoverage,
-  } = useEventCoverage(eventId, event);
+  } = useEventCoverage(eventId, event, coverageScope);
 
   if (authStatus === "idle" || authStatus === "loading") {
     return <LoadingScreen message="Checking session…" />;
@@ -73,6 +85,7 @@ export default function ZoneDetailScreen() {
   const zoneRooms = roomsForZone(event.rooms, zone.id);
   const roster = rosterMatchesEvent ? assignments : [];
   const zoneTarget = { kind: "zone" as const, id: zone.id, name: zone.name };
+  const zoneRows = zoneCoverage[zone.id] ?? [];
 
   return (
     <>
@@ -83,21 +96,46 @@ export default function ZoneDetailScreen() {
           </Text>
         ) : null}
 
+        {coverageLoadError ? (
+          <VStack space={2}>
+            <Text fontSize="sm" color="red.500">
+              {coverageLoadError}
+            </Text>
+            <BaseButton
+              title="Retry"
+              variety="tertiary"
+              btnWidth="auto"
+              onPress={() => void loadCoverage()}
+            />
+          </VStack>
+        ) : null}
+
         <BaseCard variant="outline">
-          <CoverageList
-            rows={zoneCoverage[zone.id] ?? []}
-            roster={roster}
-            label="Zone coverage"
-            onAdd={() => setAssignCoverageModalOpen(true)}
-            onRemove={(membershipId) =>
-              void handleRemoveCoverage(zoneTarget, membershipId)
-            }
-            removingMembershipId={removingMembershipIdFor(
-              removingCoverage,
-              "zone",
-              zone.id,
-            )}
-          />
+          {coverageLoading && zoneRows.length === 0 ? (
+            <VStack space={2}>
+              <Text fontSize="sm" fontWeight="semibold" color={text}>
+                Zone coverage
+              </Text>
+              <Text fontSize="sm" color={muted}>
+                Loading coverage…
+              </Text>
+            </VStack>
+          ) : (
+            <CoverageList
+              rows={zoneRows}
+              roster={roster}
+              label="Zone coverage"
+              onAdd={() => setAssignCoverageModalOpen(true)}
+              onRemove={(membershipId) =>
+                void handleRemoveCoverage(zoneTarget, membershipId)
+              }
+              removingMembershipId={removingMembershipIdFor(
+                removingCoverage,
+                "zone",
+                zone.id,
+              )}
+            />
+          )}
         </BaseCard>
 
         <VStack space={3}>
@@ -114,8 +152,9 @@ export default function ZoneDetailScreen() {
           ) : (
             zoneRooms.map((room) => {
               const coverageCount = (roomCoverage[room.id] ?? []).length;
-              const subtitle =
-                coverageCount > 0
+              const subtitle = coverageLoading
+                ? "Loading coverage…"
+                : coverageCount > 0
                   ? `${coverageCount} staff assigned`
                   : "No coverage yet";
 

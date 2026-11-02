@@ -16,7 +16,7 @@ const UPLOAD_CORS = [
 ];
 
 /**
- * Private S3 buckets. Objects are not public — APIs will issue presigned URLs.
+ * S3 buckets for private storage.
  *
  * - Uploads: user files (room docs/schematics, later avatars)
  * - Generated: app-created files (QR packs, device configs, exports)

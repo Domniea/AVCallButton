@@ -14,15 +14,28 @@
     ]
   },
   "scripts": {
+    "postinstall": "node scripts/patch-native-base-backhandler.js",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "check-types": "turbo run check-types",
-    "android": "yarn --cwd apps/mobile android",
     "ios": "yarn --cwd apps/mobile ios",
-    "prisma:migrate": "yarn workspace @av/backend prisma:migrate",
-    "prisma:generate": "yarn workspace @av/backend prisma:generate"
+    "ios:start": "yarn --cwd apps/mobile ios:start",
+    "android": "yarn --cwd apps/mobile android",
+    "android:start": "yarn --cwd apps/mobile android:start",
+    "web": "yarn --cwd apps/web dev",
+    "web:build": "yarn --cwd apps/web build",
+    "web:start": "yarn --cwd apps/web start",
+    "web:dev:env": "yarn --cwd apps/web dev:env",
+    "backend:dev": "yarn --cwd services/backend dev",
+    "backend:deploy": "yarn --cwd services/backend deploy",
+    "backend:deploy:prod": "yarn --cwd services/backend deploy:prod",
+    "setup": "bash scripts/setup.sh",
+    "setup:nuke": "bash scripts/setup.sh --nuke",
+    "prisma:migrate": "yarn --cwd services/backend prisma:migrate",
+    "prisma:generate": "yarn --cwd services/backend prisma:generate",
+    "db:nuke": "yarn --cwd services/backend db:nuke"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.4.2",
@@ -46,6 +59,7 @@
   },
   "devDependencies": {
     "babel-plugin-module-resolver": "^5.0.2",
+    "patch-package": "^8.0.1",
     "prettier": "^3.1.1",
     "sucrase": "^3.35.1",
     "turbo": "^2.6.0",

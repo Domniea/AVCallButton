@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useColorModeValue } from "native-base";
 import { useSelector } from "react-redux";
 
 import type { RootState } from "@av/store";
 
+import { useNavColors } from "../../hooks/useNavColors";
 import { useChatUnreadTotal } from "../lib/chat/useChatUnreadTotal";
 import ChatStackNavigator from "./ChatStackNavigator";
 import DashStackNavigator from "./DashStackNavigator";
@@ -14,10 +14,7 @@ import type { MainTabParamList } from "./types";
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
-  const tabBarBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const active = useColorModeValue("#01796F", "#45FFD4");
-  const inactive = useColorModeValue("#4E5D6E", "#C4D2E3");
-  const border = useColorModeValue("#C4D2E3", "#4E5D6E");
+  const { tabBarBg, tabActive, tabInactive, tabBorder } = useNavColors();
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const unreadTotal = useChatUnreadTotal(authStatus === "authenticated");
@@ -28,12 +25,12 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: active,
-        tabBarInactiveTintColor: inactive,
+        tabBarActiveTintColor: tabActive,
+        tabBarInactiveTintColor: tabInactive,
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: tabBarBg,
-          borderTopColor: border,
+          borderTopColor: tabBorder,
         },
       }}
     >

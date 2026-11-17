@@ -2,14 +2,14 @@ import { PropsWithChildren } from "react";
 
 import { AmplifyProvider } from "./AmplifyProvider.native";
 import { ReduxProvider } from "./ReduxProvider.native";
-import { NativeBaseProviderWrapper } from "./NativeBaseProvider.native";
+import { GluestackProviderWrapper } from "./GluestackProvider.native";
 import { AuthBootstrapProvider } from "./AuthBootstrapProvider";
 import { PushRegistrationProvider } from "./PushRegistrationProvider";
 import { ApiProvider } from "./ApiProvider";
 
 export function ClientProviders({ children }: PropsWithChildren) {
   return (
-    <NativeBaseProviderWrapper>
+    <GluestackProviderWrapper>
       <AmplifyProvider>
         <ApiProvider>
           <ReduxProvider>
@@ -19,6 +19,6 @@ export function ClientProviders({ children }: PropsWithChildren) {
           </ReduxProvider>
         </ApiProvider>
       </AmplifyProvider>
-    </NativeBaseProviderWrapper>
+    </GluestackProviderWrapper>
   );
 }

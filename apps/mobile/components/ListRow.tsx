@@ -1,7 +1,13 @@
 import React, { type ReactNode } from "react";
-import { Box, HStack, Text, Pressable, Icon } from "native-base";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "../hooks/useThemeColors";
+import { nativeTheme } from "@av/ui";
 
 interface ListRowProps {
   title: string;
@@ -23,49 +29,58 @@ export function ListRow({
   children,
 }: ListRowProps) {
   const { surface, text, muted, border } = useThemeColors();
+  const subtle = nativeTheme.shadows.subtle;
 
   const content = (
-    <Box
-      bg={surface}
-      borderWidth={1}
-      borderColor={border}
-      borderRadius="lg"
-      overflow="hidden"
-      shadow="subtle"
+    <View
+      style={[
+        styles.row,
+        subtle,
+        {
+          backgroundColor: surface,
+          borderColor: border,
+        },
+      ]}
     >
       {accentColor ? (
-        <Box position="absolute" left={0} top={0} bottom={0} w={1} bg={accentColor} />
+        <View style={[styles.accent, { backgroundColor: accentColor }]} />
       ) : null}
 
-      <HStack alignItems="center" px={4} py={3} pl={accentColor ? 5 : 4} space={3}>
-        <Box flex={1}>
-          <Text fontSize="md" fontWeight="semibold" color={text} numberOfLines={2}>
+      <View
+        style={[
+          styles.inner,
+          { paddingLeft: accentColor ? 20 : 16 },
+        ]}
+      >
+        <View style={styles.body}>
+          <Text style={[styles.title, { color: text }]} numberOfLines={2}>
             {title}
           </Text>
           {subtitle ? (
-            <Text fontSize="xs" color={muted} mt={0.5} numberOfLines={2}>
+            <Text style={[styles.subtitle, { color: muted }]} numberOfLines={2}>
               {subtitle}
             </Text>
           ) : null}
           {meta ? (
-            <Text fontSize="xs" color={muted} mt={1}>
-              {meta}
-            </Text>
+            <Text style={[styles.meta, { color: muted }]}>{meta}</Text>
           ) : null}
           {children}
-        </Box>
+        </View>
 
         {rightElement ??
           (onPress ? (
-            <Icon as={Ionicons} name="chevron-forward" size="sm" color={muted} />
+            <Ionicons name="chevron-forward" size={16} color={muted} />
           ) : null)}
-      </HStack>
-    </Box>
+      </View>
+    </View>
   );
 
   if (onPress) {
     return (
-      <Pressable onPress={onPress} _pressed={{ opacity: 0.85 }}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+      >
         {content}
       </Pressable>
     );
@@ -73,3 +88,40 @@ export function ListRow({
 
   return content;
 }
+
+const styles = StyleSheet.create({
+  row: {
+    borderWidth: 1,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  accent: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+  },
+  inner: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingRight: 16,
+    gap: 12,
+  },
+  body: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  subtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  meta: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+});

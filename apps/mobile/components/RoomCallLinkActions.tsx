@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
-import { Box, HStack, Text, VStack } from "native-base";
+import { View, Text, StyleSheet, Share } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { Share } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import { BaseButton } from "./BaseButton";
@@ -72,54 +71,88 @@ export function RoomCallLinkActions({
   }, [callToken, eventName, roomName, zoneName]);
 
   return (
-    <VStack space={4} alignItems="stretch">
-      <Text fontSize="sm" color={muted}>
+    <View style={styles.stack}>
+      <Text style={[styles.help, { color: muted }]}>
         Share, print, or post this link so guests can request AV help from this
         room.
       </Text>
 
-      <Box alignItems="center" py={2}>
+      <View style={styles.qrWrap}>
         <QRCode value={callUrl} size={200} backgroundColor="white" />
-      </Box>
+      </View>
 
-      <Text fontSize="xs" color={muted} textAlign="center">
-        {callUrl}
-      </Text>
+      <Text style={[styles.url, { color: muted }]}>{callUrl}</Text>
 
-      <VStack space={2}>
-        <HStack space={2} flexWrap="wrap">
-          <Box flex={1} minW="140px">
+      <View style={styles.actions}>
+        <View style={styles.row}>
+          <View style={styles.half}>
             <BaseButton
               variety="secondary"
               title={copyLabel}
               onPress={() => void handleCopyLink()}
             />
-          </Box>
-          <Box flex={1} minW="140px">
+          </View>
+          <View style={styles.half}>
             <BaseButton
               variety="tertiary"
               title="Share link"
               onPress={() => void handleShareLink()}
             />
-          </Box>
-        </HStack>
+          </View>
+        </View>
         <BaseButton
           variety="tertiary"
           title={isSharingPdf ? "Preparing…" : "Share PDF sign"}
           isDisabled={isSharingPdf}
           onPress={() => void handleSharePdf()}
         />
-      </VStack>
+      </View>
 
       {actionError ? (
-        <Text fontSize="sm" color="red.500">
-          {actionError}
-        </Text>
+        <Text style={styles.error}>{actionError}</Text>
       ) : null}
 
-      <Text fontSize="xs" color={text} opacity={0.7}>
+      <Text style={[styles.tip, { color: text }]}>
         Tip: use Share PDF sign to AirDrop or print a door poster.
       </Text>
-    </VStack>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  stack: {
+    gap: 16,
+    alignItems: "stretch",
+  },
+  help: {
+    fontSize: 14,
+  },
+  qrWrap: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  url: {
+    fontSize: 12,
+    textAlign: "center",
+  },
+  actions: {
+    gap: 8,
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  half: {
+    flex: 1,
+    minWidth: 140,
+  },
+  error: {
+    fontSize: 14,
+    color: "#EF4444",
+  },
+  tip: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+});

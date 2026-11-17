@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Text, VStack, useColorModeValue } from "native-base";
+import { Box, Text, VStack, useColorModeValue } from "../../../components/ui/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { fetchAuthSession } from "aws-amplify/auth";

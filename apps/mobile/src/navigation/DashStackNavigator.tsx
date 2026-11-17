@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useColorModeValue } from "native-base";
+import { useNavColors } from "../../hooks/useNavColors";
 
 import EventHome from "../screens/app/EventHome";
 import EventZonesScreen from "../screens/zones/EventZones";
@@ -11,13 +11,12 @@ const Stack = createNativeStackNavigator<DashStackParamList>();
 
 /** Event dashboard + zones/rooms drill-down (keeps bottom tabs visible). */
 export default function DashStackNavigator() {
-  const headerBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
-  const contentBg = useColorModeValue("#F2F2F2", "#002624");
+  const { headerBg, headerTint, contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
+        headerTransparent: false,
         headerStyle: { backgroundColor: headerBg },
         headerTintColor: headerTint,
         headerTitleStyle: { fontWeight: "600", fontSize: 17 },

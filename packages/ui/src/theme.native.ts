@@ -1,5 +1,3 @@
-import { extendTheme } from "native-base";
-
 import { mobileTokens } from "./tokens/mobile";
 import {
   nativeFontConfig,
@@ -7,7 +5,11 @@ import {
   nativeFontWeights,
 } from "./tokens/mobile/typography";
 
-export const nativeTheme = extendTheme({
+/**
+ * Legacy mobile theme shape (pre-Gluestack). Kept as a plain object for
+ * any residual references; runtime theming now uses theme.gluestack.ts.
+ */
+export const nativeTheme = {
   components: {
     Input: {
       defaultProps: {
@@ -23,12 +25,10 @@ export const nativeTheme = extendTheme({
   shadows: mobileTokens.shadows,
   fontSizes: mobileTokens.fontSizes,
   fontConfig: nativeFontConfig,
-
   fontWeights: nativeFontWeights,
-
   fonts: {
     heading: nativeFontFamilies.heading,
     body: nativeFontFamilies.body,
     mono: nativeFontFamilies.mono,
   },
-});
+};

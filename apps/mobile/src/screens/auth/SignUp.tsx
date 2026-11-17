@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack } from "native-base";
+import { VStack } from "../../../components/ui/layout";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { VStack, Text, HStack } from "native-base";
+import { VStack, Text, HStack } from "../../../components/ui/layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";

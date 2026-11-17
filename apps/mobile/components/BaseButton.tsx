@@ -1,5 +1,6 @@
-import React from "react";
-import { Pressable, Box, Text, useColorModeValue } from "native-base";
+import React, { useState } from "react";
+import { View, StyleSheet, type ViewStyle } from "react-native";
+import { Button, useTokenColor } from "./ui/gluestack";
 
 type ButtonVariant = "primary" | "secondary" | "tertiary";
 
@@ -16,36 +17,18 @@ interface BaseButtonProps {
   isDisabled?: boolean;
 }
 
-
-const variantTokens = {
-  primary: {
-    bg: ["buttonPrimaryBg", "buttonPrimaryBgDark"],
-    fg: ["buttonPrimaryFg", "buttonPrimaryFgDark"],
-    pressed: ["buttonPrimaryHoverBg", "buttonPrimaryHoverBgDark"],
-    border: ["transparent", "transparent"],
-    borderWidth: 0,
-    shadow: ["buttonPrimary", "buttonPrimaryDark"],
-  },
-
-  secondary: {
-    bg: ["buttonSecondaryBg", "buttonSecondaryBgDark"],
-    fg: ["buttonSecondaryFg", "buttonSecondaryFgDark"],
-    pressed: ["buttonSecondaryHoverBg", "buttonSecondaryHoverBgDark"],
-    border: ["buttonSecondaryBorder", "buttonSecondaryBorderDark"],
-    borderWidth: 1,
-    shadow: ["buttonSecondary", "buttonSecondaryDark"],
-  },
-
-  tertiary: {
-    bg: ["transparent", "transparent"],
-    fg: ["buttonTertiaryFg", "buttonTertiaryFgDark"],
-    pressed: ["buttonTertiaryHoverBg", "buttonTertiaryHoverBgDark"],
-    border: ["transparent", "transparent"],
-    borderWidth: 0,
-    shadow: ["buttonTertiary", "buttonTertiaryDark"],
-  },
-};
-
+/**
+ * Primary is pinned to brand solids so token path issues can't wash out CTAs.
+ * Matches packages/ui semanticTokens buttonPrimary*:
+ *   bg #01796F (primary.500), fg #F2F2F2 (tertiary.50), pressed #01685F
+ */
+const PRIMARY = {
+  bg: "#01796F",
+  fg: "#F2F2F2",
+  pressed: "#01685F",
+  border: "transparent",
+  borderWidth: 0,
+} as const;
 
 export const BaseButton: React.FC<BaseButtonProps> = ({
   title,
@@ -57,52 +40,116 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
   rightIcon,
   children,
   onPress,
-  ...rest
+  isDisabled,
 }) => {
-  const v = variantTokens[variety];
+  const [pressed, setPressed] = useState(false);
 
-  const bg = useColorModeValue(v.bg[0], v.bg[1]);
-  const fg = useColorModeValue(v.fg[0], v.fg[1]);
-  const pressed = useColorModeValue(v.pressed[0], v.pressed[1]);
-  const border = useColorModeValue(v.border[0], v.border[1]);
-  const shadow = useColorModeValue(v.shadow[0], v.shadow[1]);
+  const secondaryBg = useTokenColor("buttonSecondaryBg", "buttonSecondaryBgDark");
+  const secondaryFg = useTokenColor("buttonSecondaryFg", "buttonSecondaryFgDark");
+  const secondaryPressed = useTokenColor(
+    "buttonSecondaryHoverBg",
+    "buttonSecondaryHoverBgDark",
+  );
+  const secondaryBorder = useTokenColor(
+    "buttonSecondaryBorder",
+    "buttonSecondaryBorderDark",
+  );
+  const tertiaryFg = useTokenColor("buttonTertiaryFg", "buttonTertiaryFgDark");
+  const tertiaryPressed = useTokenColor(
+    "buttonTertiaryHoverBg",
+    "buttonTertiaryHoverBgDark",
+  );
+
+  let bg: string;
+  let fg: string;
+  let pressedBg: string;
+  let border: string;
+  let borderWidth: number;
+
+  if (variety === "primary") {
+    bg = PRIMARY.bg;
+    fg = PRIMARY.fg;
+    pressedBg = PRIMARY.pressed;
+    border = PRIMARY.border;
+    borderWidth = PRIMARY.borderWidth;
+  } else if (variety === "secondary") {
+    bg = secondaryBg;
+    fg = secondaryFg;
+    pressedBg = secondaryPressed;
+    border = secondaryBorder;
+    borderWidth = 1;
+  } else {
+    bg = "transparent";
+    fg = tertiaryFg;
+    pressedBg = tertiaryPressed;
+    border = "transparent";
+    borderWidth = 0;
+  }
+
+  const widthStyle: ViewStyle =
+    btnWidth === "100%" || btnWidth === "full"
+      ? { alignSelf: "stretch", width: "100%" }
+      : {
+          width: btnWidth as ViewStyle["width"],
+          alignSelf: center ? "center" : undefined,
+        };
 
   return (
-    <Box
-      w={btnWidth}
-      alignSelf={center ? "center" : undefined}
-      shadow={shadow}
-      overflow="visible"
-      borderRadius="xl"
-    >
-      <Pressable
+    <View style={[styles.wrap, widthStyle, center ? styles.center : null]}>
+      <Button
+        accessibilityRole="button"
+        isDisabled={isDisabled}
         onPress={onPress}
-        bg={bg}
-        borderColor={border}
-        borderWidth={v.borderWidth}
-        borderRadius="xl"
-        py={4}
-        px={6}
-        height={btnHeight}
-        flexDir="row"
-        alignItems="center"
-        justifyContent="center"
-        _pressed={{ bg: pressed }}
-        {...rest}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        style={[
+          styles.button,
+          {
+            backgroundColor: pressed ? pressedBg : bg,
+            borderColor: border,
+            borderWidth,
+            height: typeof btnHeight === "number" ? btnHeight : undefined,
+            opacity: isDisabled ? 0.5 : 1,
+          },
+        ]}
       >
         {leftIcon}
-
-        <Text
-          color={fg}
-          fontFamily="heading"
-          fontSize="lg"
-          mx={leftIcon || rightIcon ? 2 : 0}
+        <Button.Text
+          style={[
+            styles.label,
+            {
+              color: fg,
+              marginHorizontal: leftIcon || rightIcon ? 8 : 0,
+            },
+          ]}
         >
           {children ?? title}
-        </Text>
-
+        </Button.Text>
         {rightIcon}
-      </Pressable>
-    </Box>
+      </Button>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  wrap: {
+    borderRadius: 24,
+    overflow: "visible",
+  },
+  center: {
+    alignSelf: "center",
+  },
+  button: {
+    minHeight: 48,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+});

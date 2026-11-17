@@ -1,12 +1,19 @@
 import React, { type ReactElement, type ReactNode } from "react";
-import { Box, VStack, Text, ScrollView } from "native-base";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  type DimensionValue,
+  type RefreshControlProps,
+} from "react-native";
 import { useThemeColors } from "../hooks/useThemeColors";
 
 interface ScreenLayoutProps {
   title?: string;
   subtitle?: string;
   maxW?: string | number;
-  refreshControl?: ReactElement;
+  refreshControl?: ReactElement<RefreshControlProps>;
   children: ReactNode;
 }
 
@@ -18,32 +25,62 @@ export function ScreenLayout({
   children,
 }: ScreenLayoutProps) {
   const { bg, text, muted } = useThemeColors();
+  const maxWidth: DimensionValue =
+    typeof maxW === "number"
+      ? maxW
+      : maxW.endsWith("%")
+        ? (maxW as DimensionValue)
+        : Number(maxW) || 960;
 
   return (
-    <Box flex={1} bg={bg}>
+    <View style={[styles.root, { backgroundColor: bg }]}>
       <ScrollView
-        px={6}
-        py={6}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.content}
         refreshControl={refreshControl}
+        keyboardShouldPersistTaps="handled"
       >
-        <VStack space={6} maxW={maxW} alignSelf="center" w="100%">
+        <View style={[styles.inner, { maxWidth }]}>
           {title ? (
-            <VStack space={1}>
-              <Text fontSize="2xl" fontWeight="bold" fontFamily="heading" color={text}>
-                {title}
-              </Text>
+            <View style={styles.header}>
+              <Text style={[styles.title, { color: text }]}>{title}</Text>
               {subtitle ? (
-                <Text fontSize="sm" color={muted}>
+                <Text style={[styles.subtitle, { color: muted }]}>
                   {subtitle}
                 </Text>
               ) : null}
-            </VStack>
+            </View>
           ) : null}
 
           {children}
-        </VStack>
+        </View>
       </ScrollView>
-    </Box>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 32,
+  },
+  inner: {
+    width: "100%",
+    alignSelf: "center",
+    gap: 24,
+  },
+  header: {
+    gap: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 14,
+  },
+});

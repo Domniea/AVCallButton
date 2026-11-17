@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useColorModeValue } from "native-base";
+import { useNavColors } from "../../hooks/useNavColors";
 
 import Login from "../screens/auth/Login";
 import SignUp from "../screens/auth/SignUp";
@@ -10,14 +10,13 @@ import type { AuthStackParamList } from "./types";
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator() {
-  const headerBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
-  const contentBg = useColorModeValue("#F2F2F2", "#002624");
+  const { headerBg, headerTint, contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       initialRouteName="login"
       screenOptions={{
+        headerTransparent: false,
         headerStyle: { backgroundColor: headerBg },
         headerTintColor: headerTint,
         headerTitleStyle: { fontWeight: "600", fontSize: 17 },

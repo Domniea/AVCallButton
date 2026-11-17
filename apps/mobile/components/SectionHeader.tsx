@@ -1,5 +1,5 @@
 import React from "react";
-import { Text } from "native-base";
+import { Text, StyleSheet } from "react-native";
 import { useThemeColors } from "../hooks/useThemeColors";
 
 interface SectionHeaderProps {
@@ -9,15 +9,13 @@ interface SectionHeaderProps {
 export function SectionHeader({ children }: SectionHeaderProps) {
   const { text } = useThemeColors();
 
-  return (
-    <Text
-      fontSize="sm"
-      fontWeight="semibold"
-      fontFamily="heading"
-      color={text}
-      mb={2}
-    >
-      {children}
-    </Text>
-  );
+  return <Text style={[styles.header, { color: text }]}>{children}</Text>;
 }
+
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+});

@@ -16,6 +16,5 @@ config.resolver.nodeModulesPaths = [
   path.join(projectRoot, "node_modules"),
   path.join(workspaceRoot, "node_modules"),
 ];
-config.resolver.unstable_enableSymlinks = true;
 
 module.exports = config;

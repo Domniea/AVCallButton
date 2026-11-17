@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Box, Text, VStack, useColorModeValue } from "native-base";
+import { Box, Text, VStack, useColorModeValue } from "../../../components/ui/layout";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";

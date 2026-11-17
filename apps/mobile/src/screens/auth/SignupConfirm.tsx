@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack } from "native-base";
+import { VStack } from "../../../components/ui/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   useNavigation,

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Box, VStack, Text, HStack, Pressable, useColorModeValue } from "native-base";
+import { Box, VStack, Text, HStack, Pressable, useColorModeValue } from "../../../components/ui/layout";
 import { useDispatch } from "react-redux";
 import { fetchAuthSession } from "aws-amplify/auth";
 import { Controller } from "react-hook-form";
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
 });

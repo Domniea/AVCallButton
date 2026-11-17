@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { HStack, Text, VStack } from "native-base";
+import { HStack, Text, VStack } from "../../../components/ui/layout";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import { useSelector } from "react-redux";

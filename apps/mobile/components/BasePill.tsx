@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Text, useColorModeValue } from "native-base";
+import { View, Text, StyleSheet } from "react-native";
+import { useTokenColor } from "./ui/gluestack";
 
 type BasePillVariant =
   | "default"
@@ -34,45 +35,54 @@ const pillVariants: Record<
     bg: ["primary.100", "primary.900"],
     fg: ["primary.700", "primary.200"],
   },
+  // Status hues aren't in brand tokens — pin readable solids.
   success: {
-    bg: ["green.100", "green.900"],
-    fg: ["green.700", "green.200"],
+    bg: ["#DCFCE7", "#14532D"],
+    fg: ["#15803D", "#BBF7D0"],
   },
   warning: {
-    bg: ["orange.100", "orange.900"],
-    fg: ["orange.700", "orange.200"],
+    bg: ["#FFEDD5", "#7C2D12"],
+    fg: ["#C2410C", "#FED7AA"],
   },
   danger: {
-    bg: ["red.100", "red.900"],
-    fg: ["red.700", "red.200"],
+    bg: ["#FEE2E2", "#7F1D1D"],
+    fg: ["#DC2626", "#FCA5A5"],
   },
 };
 
 export function BasePill({ label, variant = "default" }: BasePillProps) {
   const resolvedVariant = variant === "blue" ? "primary" : variant;
   const tokens = pillVariants[resolvedVariant];
-  const outlineBorder = useColorModeValue("cardBorder", "cardBorderDark");
-
-  const bg = useColorModeValue(tokens.bg[0], tokens.bg[1]);
-  const fg = useColorModeValue(tokens.fg[0], tokens.fg[1]);
+  const outlineBorder = useTokenColor("cardBorder", "cardBorderDark");
+  const bg = useTokenColor(tokens.bg[0], tokens.bg[1]);
+  const fg = useTokenColor(tokens.fg[0], tokens.fg[1]);
 
   return (
-    <Box
-      bg={bg}
-      borderWidth={tokens.border ? 1 : 0}
-      borderColor={outlineBorder}
-      borderRadius="full"
-      px={2.5}
-      py={0.5}
+    <View
+      style={[
+        styles.pill,
+        {
+          backgroundColor: bg,
+          borderWidth: tokens.border ? 1 : 0,
+          borderColor: outlineBorder,
+        },
+      ]}
     >
-      <Text
-        fontSize="2xs"
-        fontWeight="semibold"
-        color={fg}
-        textTransform="capitalize"
-      >
-        {label}
-      </Text>
-    </Box>
+      <Text style={[styles.label, { color: fg }]}>{label}</Text>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  pill: {
+    borderRadius: 9999,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    alignSelf: "flex-start",
+  },
+  label: {
+    fontSize: 10,
+    fontWeight: "600",
+    textTransform: "capitalize",
+  },
+});

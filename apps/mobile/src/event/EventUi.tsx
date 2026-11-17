@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, VStack, Text, HStack, useColorModeValue } from "native-base";
+import { Box, VStack, Text, HStack, useColorModeValue } from "../../components/ui/layout";
 
 import type { RosterAssignment } from "@av/store";
 import { BasePill } from "../../components/BasePill";

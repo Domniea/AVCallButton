@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useColorModeValue } from "native-base";
+import { useNavColors } from "../../hooks/useNavColors";
 
 import Settings from "../screens/settings/Settings";
 import DevMenu from "../screens/dev/DevMenu";
@@ -9,13 +9,12 @@ const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 /** Settings tab stack (developer tools nested under Settings). */
 export default function SettingsStackNavigator() {
-  const headerBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
-  const contentBg = useColorModeValue("#F2F2F2", "#002624");
+  const { headerBg, headerTint, contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
+        headerTransparent: false,
         headerStyle: { backgroundColor: headerBg },
         headerTintColor: headerTint,
         headerTitleStyle: { fontWeight: "600", fontSize: 17 },

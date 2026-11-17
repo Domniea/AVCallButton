@@ -1,17 +1,10 @@
-import { useColorModeValue } from "native-base";
+import { useColorMode } from "../providers/ColorModeProvider";
 
+/**
+ * App-facing semantic colors as resolved hex values.
+ * Keys preserved from the NativeBase era for screen compatibility.
+ */
 export function useThemeColors() {
-  const textMuted = useColorModeValue("textMuted", "textMutedDark");
-
-  return {
-    bg: useColorModeValue("bg", "bgDark"),
-    surface: useColorModeValue("surface", "surfaceDark"),
-    text: useColorModeValue("text", "textDark"),
-    /** Secondary / caption text — use this instead of raw "muted" color tokens */
-    muted: textMuted,
-    textMuted,
-    border: useColorModeValue("cardBorder", "cardBorderDark"),
-    primary: useColorModeValue("primary.500", "accent.600"),
-    primarySoft: useColorModeValue("primary.100", "primary.900"),
-  };
+  const { palette } = useColorMode();
+  return palette;
 }

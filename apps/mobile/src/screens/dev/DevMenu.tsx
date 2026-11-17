@@ -1,5 +1,5 @@
 import React from "react";
-import { Text } from "native-base";
+import { Text } from "../../../components/ui/layout";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";

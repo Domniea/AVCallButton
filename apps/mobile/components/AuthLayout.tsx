@@ -1,5 +1,12 @@
 import React, { type ReactNode } from "react";
-import { Box, VStack, Text } from "native-base";
+import {
+  View,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+} from "react-native";
 import { BaseCard } from "./BaseCard";
 import { useThemeColors } from "../hooks/useThemeColors";
 
@@ -10,29 +17,81 @@ interface AuthLayoutProps {
   footer?: ReactNode;
 }
 
-export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+  footer,
+}: AuthLayoutProps) {
   const { bg, text, muted } = useThemeColors();
 
   return (
-    <Box flex={1} bg={bg} px={6} py={6} justifyContent="center">
-      <BaseCard variant="elevated" p={8} maxW="480" alignSelf="center" w="100%">
-        <VStack space={6}>
-          <VStack space={1}>
-            <Text fontSize="2xl" fontWeight="bold" fontFamily="heading" color={text}>
-              {title}
-            </Text>
-            {subtitle ? (
-              <Text fontSize="sm" color={muted}>
-                {subtitle}
-              </Text>
-            ) : null}
-          </VStack>
+    <View style={[styles.root, { backgroundColor: bg }]}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={styles.flex}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.content}
+        >
+          <BaseCard
+            variant="elevated"
+            style={styles.card}
+          >
+            <View style={styles.stack}>
+              <View style={styles.header}>
+                <Text style={[styles.title, { color: text }]}>{title}</Text>
+                {subtitle ? (
+                  <Text style={[styles.subtitle, { color: muted }]}>
+                    {subtitle}
+                  </Text>
+                ) : null}
+              </View>
 
-          {children}
+              {children}
 
-          {footer}
-        </VStack>
-      </BaseCard>
-    </Box>
+              {footer}
+            </View>
+          </BaseCard>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    paddingBottom: 32,
+  },
+  card: {
+    padding: 32,
+    maxWidth: 480,
+    alignSelf: "center",
+    width: "100%",
+  },
+  stack: {
+    gap: 24,
+  },
+  header: {
+    gap: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 14,
+  },
+});

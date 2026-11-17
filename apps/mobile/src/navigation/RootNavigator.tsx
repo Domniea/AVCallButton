@@ -3,11 +3,12 @@ import {
   DefaultTheme,
   DarkTheme,
 } from "@react-navigation/native";
-import { useColorModeValue } from "native-base";
 import { useSelector } from "react-redux";
 
 import type { RootState } from "@av/store";
 import { LoadingScreen } from "../../components/LoadingScreen";
+import { useColorMode } from "../../providers/ColorModeProvider";
+import { useNavColors } from "../../hooks/useNavColors";
 import AuthNavigator from "./AuthNavigator";
 import MainNavigator from "./MainNavigator";
 import { navigationRef } from "./navigationRef";
@@ -61,30 +62,16 @@ const linking = {
 
 export default function RootNavigator() {
   const authStatus = useSelector((state: RootState) => state.auth.status);
-  const isDark = useColorModeValue(false, true);
-  const navTheme = isDark
-    ? {
-        ...DarkTheme,
-        colors: {
-          ...DarkTheme.colors,
-          background: "#002624",
-          card: "#2A2A2A",
-          text: "#F2F2F2",
-          border: "#4E5D6E",
-          primary: "#45FFD4",
-        },
-      }
-    : {
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          background: "#F2F2F2",
-          card: "#FFFFFF",
-          text: "#002624",
-          border: "#C4D2E3",
-          primary: "#01796F",
-        },
-      };
+  const { colorMode } = useColorMode();
+  const { navThemeColors } = useNavColors();
+  const isDark = colorMode === "dark";
+  const navTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      ...navThemeColors,
+    },
+  };
 
   return (
     <NavigationContainer

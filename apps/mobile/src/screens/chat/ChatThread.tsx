@@ -5,7 +5,7 @@ import {
   Platform,
   RefreshControl,
 } from "react-native";
-import { Box, HStack, Text } from "native-base";
+import { Box, HStack, Text } from "../../../components/ui/layout";
 import {
   useFocusEffect,
   useNavigation,

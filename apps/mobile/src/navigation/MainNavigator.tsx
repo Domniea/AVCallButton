@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useColorModeValue } from "native-base";
+import { useNavColors } from "../../hooks/useNavColors";
 
 import WorkspaceSelector from "../screens/select/WorkspaceSelector";
 import EventSelector from "../screens/select/EventSelector";
@@ -13,14 +13,13 @@ import type { MainStackParamList } from "./types";
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function MainNavigator() {
-  const headerBg = useColorModeValue("#FFFFFF", "#2A2A2A");
-  const headerTint = useColorModeValue("#002624", "#F2F2F2");
-  const contentBg = useColorModeValue("#F2F2F2", "#002624");
+  const { headerBg, headerTint, contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       initialRouteName="workspaceSelector"
       screenOptions={{
+        headerTransparent: false,
         headerStyle: { backgroundColor: headerBg },
         headerTintColor: headerTint,
         headerTitleStyle: { fontWeight: "600", fontSize: 17 },

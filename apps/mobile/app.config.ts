@@ -19,6 +19,7 @@ export default function ({ config }: ConfigContext): ExpoConfig {
     newArchEnabled: true,
 
     plugins: [
+      "expo-font",
       [
         "expo-notifications",
         {
@@ -34,6 +35,7 @@ export default function ({ config }: ConfigContext): ExpoConfig {
             "Allow AV Call Button to use the camera for room documents.",
         },
       ],
+      "./plugins/withXcode27PodDeploymentTarget",
     ],
 
     splash: {

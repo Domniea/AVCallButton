@@ -6,7 +6,7 @@ import {
   HStack,
   ScrollView,
   useColorModeValue,
-} from "native-base";
+} from "../../../components/ui/layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";

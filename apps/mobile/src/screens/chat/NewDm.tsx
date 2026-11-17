@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Text, VStack } from "native-base";
+import { Text, VStack } from "../../../components/ui/layout";
 import {
   useFocusEffect,
   useNavigation,

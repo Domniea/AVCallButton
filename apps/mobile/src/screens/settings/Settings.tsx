@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Platform } from "react-native";
-import { HStack, Text, VStack, useColorMode } from "native-base";
+import { HStack, Text, VStack, useColorMode } from "../../../components/ui/layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { CompositeNavigationProp } from "@react-navigation/native";

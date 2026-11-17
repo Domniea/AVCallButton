@@ -1,20 +1,40 @@
 import React from "react";
-import { HStack, Text, Switch, useColorMode } from "native-base";
+import { View, Text, Switch, StyleSheet } from "react-native";
 import { BaseCard } from "./BaseCard";
 import { useThemeColors } from "../hooks/useThemeColors";
+import { useColorMode } from "../providers/ColorModeProvider";
 
 export function ThemeToggle() {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { text } = useThemeColors();
+  const { text, border, primary } = useThemeColors();
 
   return (
-    <HStack alignItems="center" justifyContent="space-between" pt={4}>
-      <Text fontSize="sm" color={text}>
+    <View style={styles.row}>
+      <Text style={[styles.label, { color: text }]}>
         {colorMode === "light" ? "Light mode" : "Dark mode"}
       </Text>
-      <BaseCard variant="elevated" p={3}>
-        <Switch isChecked={colorMode === "dark"} onToggle={toggleColorMode} />
+      <BaseCard variant="elevated" style={styles.cardPad}>
+        <Switch
+          value={colorMode === "dark"}
+          onValueChange={toggleColorMode}
+          trackColor={{ false: border, true: primary }}
+        />
       </BaseCard>
-    </HStack>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 16,
+  },
+  label: {
+    fontSize: 14,
+  },
+  cardPad: {
+    padding: 12,
+  },
+});

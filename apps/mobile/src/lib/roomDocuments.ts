@@ -1,6 +1,7 @@
-import { Linking } from "react-native";
+import { Platform } from "react-native";
 import * as Device from "expo-device";
 import * as DocumentPicker from "expo-document-picker";
+import { Directory, File, Paths } from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import * as Sharing from "expo-sharing";
@@ -89,6 +90,13 @@ type PickedLocalFile = {
   originalName: string;
   contentType: string;
   sizeBytes: number | null;
+};
+
+type CachedRoomDoc = {
+  fileId: string;
+  originalName: string;
+  contentType: string;
+  local: File;
 };
 
 async function resolveSizeBytes(
@@ -214,24 +222,143 @@ export async function pickAndUploadRoomDocument(
   return uploadLocalFile(token, eventId, roomId, picked);
 }
 
-/** Open the signed download URL in the system browser / Quick Look. */
+function roomDocsCacheDir(): Directory {
+  const dir = new Directory(Paths.cache, "room-docs");
+  dir.create({ intermediates: true, idempotent: true });
+  return dir;
+}
+
+function packetCandidates(
+  selectedFileId: string,
+  packet: StoredFile[],
+): StoredFile[] {
+  const ready = packet.filter((file) => file.status === "READY");
+  if (ready.some((file) => file.id === selectedFileId)) return ready;
+  const selected = packet.find((file) => file.id === selectedFileId);
+  return selected ? [selected, ...ready] : ready;
+}
+
+async function downloadCachedRoomDoc(
+  token: string,
+  eventId: string,
+  roomId: string,
+  file: StoredFile,
+): Promise<CachedRoomDoc> {
+  const downloaded = await getRoomFileDownloadUrl(
+    token,
+    eventId,
+    roomId,
+    file.id,
+  );
+  const originalName = downloaded.originalName || file.originalName;
+  const contentType = resolveContentType(
+    originalName,
+    downloaded.contentType || file.contentType,
+  );
+  const dest = new File(
+    roomDocsCacheDir(),
+    `${file.id}-${safeCacheName(originalName)}`,
+  );
+  const local = await File.downloadFileAsync(downloaded.downloadUrl, dest, {
+    idempotent: true,
+  });
+  return { fileId: file.id, originalName, contentType, local };
+}
+
+async function previewSingle(doc: CachedRoomDoc): Promise<void> {
+  const canPreview = await doc.local.canPreview({ mimeType: doc.contentType });
+  if (!canPreview) {
+    throw new Error("This file can’t be previewed on this device");
+  }
+  await doc.local.preview({
+    title: doc.originalName,
+    mimeType: doc.contentType,
+  });
+}
+
+/**
+ * Download room docs to cache and open the native in-app preview.
+ * On iOS, opens the full packet in Quick Look starting at the selected file.
+ * On Android, opens the selected file only (platform limit).
+ */
 export async function previewRoomDocument(
   token: string,
   eventId: string,
   roomId: string,
-  fileId: string,
+  selectedFileId: string,
+  packet: StoredFile[] = [],
 ): Promise<void> {
-  const { downloadUrl } = await getRoomFileDownloadUrl(
+  const candidates = packetCandidates(selectedFileId, packet);
+  if (candidates.length === 0) {
+    throw new Error("No documents available to preview");
+  }
+
+  const selected =
+    candidates.find((file) => file.id === selectedFileId) ?? candidates[0];
+  if (!selected) {
+    throw new Error("Selected document was not found");
+  }
+
+  // Prefer opening the selected file quickly, then pull the rest for the packet.
+  const selectedCached = await downloadCachedRoomDoc(
     token,
     eventId,
     roomId,
-    fileId,
+    selected,
   );
-  const canOpen = await Linking.canOpenURL(downloadUrl);
-  if (!canOpen) {
-    throw new Error("Cannot open this file on this device");
+
+  const others = candidates.filter((file) => file.id !== selected.id);
+  const otherResults = await Promise.allSettled(
+    others.map((file) => downloadCachedRoomDoc(token, eventId, roomId, file)),
+  );
+  const otherById = new Map<string, CachedRoomDoc>();
+  others.forEach((file, index) => {
+    const result = otherResults[index];
+    if (result?.status === "fulfilled") otherById.set(file.id, result.value);
+  });
+
+  const packetDocs: CachedRoomDoc[] = [];
+  for (const file of candidates) {
+    if (file.id === selected.id) {
+      packetDocs.push(selectedCached);
+      continue;
+    }
+    const cached = otherById.get(file.id);
+    if (cached) packetDocs.push(cached);
   }
-  await Linking.openURL(downloadUrl);
+
+  const previewable: CachedRoomDoc[] = [];
+  for (const doc of packetDocs) {
+    try {
+      if (await doc.local.canPreview({ mimeType: doc.contentType })) {
+        previewable.push(doc);
+      }
+    } catch {
+      // Skip files the platform cannot inspect.
+    }
+  }
+
+  const initialIndex = previewable.findIndex(
+    (doc) => doc.fileId === selected.id,
+  );
+  if (initialIndex < 0) {
+    throw new Error("This file can’t be previewed on this device");
+  }
+
+  const canUsePacket =
+    Platform.OS === "ios" &&
+    previewable.length > 1 &&
+    (await File.canPreview(previewable.map((doc) => doc.local)));
+
+  if (canUsePacket) {
+    await File.preview(
+      previewable.map((doc) => doc.local),
+      { initialIndex },
+    );
+    return;
+  }
+
+  await previewSingle(previewable[initialIndex]!);
 }
 
 /** Download to cache and open the share sheet (Save to Files / AirDrop / etc.). */

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ScrollView } from "react-native";
 import { HStack, Text, VStack } from "../../../components/ui/layout";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
@@ -46,6 +47,7 @@ export default function RoomDetailScreen() {
   const { muted, text, border } = useThemeColors();
   const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const [docsSheetOpen, setDocsSheetOpen] = useState(false);
   const [files, setFiles] = useState<StoredFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
   const [filesError, setFilesError] = useState<string | null>(null);
@@ -158,20 +160,23 @@ export default function RoomDetailScreen() {
 
   const handlePreview = useCallback(
     async (fileId: string) => {
+      setDocsSheetOpen(false);
       setFilesError(null);
+      // Let the sheet dismiss before presenting Quick Look / the system viewer.
+      await new Promise((resolve) => setTimeout(resolve, 300));
       setOpeningFileId(fileId);
       try {
         const session = await fetchAuthSession();
         const token = session.tokens?.idToken?.toString();
         if (!token) return;
-        await previewRoomDocument(token, eventId, roomId, fileId);
+        await previewRoomDocument(token, eventId, roomId, fileId, files);
       } catch (err) {
         setFilesError(documentsErrorMessage(err));
       } finally {
         setOpeningFileId(null);
       }
     },
-    [eventId, roomId],
+    [eventId, files, roomId],
   );
 
   const handleShare = useCallback(
@@ -198,6 +203,12 @@ export default function RoomDetailScreen() {
     },
     [eventId, roomId],
   );
+
+  const documentsSummary = useMemo(() => {
+    if (filesLoading && files.length === 0) return "Loading documents…";
+    if (files.length === 0) return "No documents yet.";
+    return `${files.length} file${files.length === 1 ? "" : "s"} in this room packet.`;
+  }, [files.length, filesLoading]);
 
   if (authStatus === "idle" || authStatus === "loading") {
     return <LoadingScreen message="Checking session…" />;
@@ -278,18 +289,15 @@ export default function RoomDetailScreen() {
           <VStack space={3}>
             <Text fontSize="sm" color={muted}>
               Floor plans, rack diagrams, and other reference files for this
-              room.
+              room. Open the packet to browse or preview files in-app.
             </Text>
 
-            {canUploadFiles ? (
-              <BaseButton
-                title={uploading ? "Uploading…" : "Upload file"}
-                variety="tertiary"
-                btnWidth="auto"
-                isDisabled={uploading}
-                onPress={() => setUploadSheetOpen(true)}
-              />
-            ) : null}
+            <Text fontSize="sm" color={text}>
+              {documentsSummary}
+              {files.length === 0 && canUploadFiles && !filesLoading
+                ? " Upload a file to get started."
+                : ""}
+            </Text>
 
             {filesError ? (
               <VStack space={2}>
@@ -305,64 +313,30 @@ export default function RoomDetailScreen() {
               </VStack>
             ) : null}
 
-            {filesLoading && files.length === 0 ? (
-              <Text fontSize="sm" color={muted}>
-                Loading documents…
-              </Text>
-            ) : files.length === 0 && !filesError ? (
-              <Text fontSize="sm" color={muted}>
-                No documents yet.
-                {canUploadFiles ? " Upload a file to get started." : ""}
-              </Text>
-            ) : files.length === 0 ? null : (
-              <VStack space={2}>
-                {files.map((file) => {
-                  const meta = [formatFileSize(file.sizeBytes), file.contentType]
-                    .filter(Boolean)
-                    .join(" · ");
-                  const isOpening = openingFileId === file.id;
-                  const isSharing = sharingFileId === file.id;
-                  return (
-                    <VStack
-                      key={file.id}
-                      space={2}
-                      py={2}
-                      px={3}
-                      borderWidth={1}
-                      borderColor={border}
-                      borderRadius="md"
-                    >
-                      <VStack space={0.5}>
-                        <Text fontSize="sm" color={text} numberOfLines={2}>
-                          {file.originalName}
-                        </Text>
-                        {meta ? (
-                          <Text fontSize="xs" color={muted} numberOfLines={1}>
-                            {meta}
-                          </Text>
-                        ) : null}
-                      </VStack>
-                      <HStack space={2} flexWrap="wrap">
-                        <BaseButton
-                          title={isOpening ? "Opening…" : "Preview"}
-                          variety="tertiary"
-                          btnWidth="auto"
-                          isDisabled={isOpening || isSharing}
-                          onPress={() => void handlePreview(file.id)}
-                        />
-                        <BaseButton
-                          title={isSharing ? "Saving…" : "Save / Share"}
-                          variety="tertiary"
-                          btnWidth="auto"
-                          isDisabled={isOpening || isSharing}
-                          onPress={() => void handleShare(file)}
-                        />
-                      </HStack>
-                    </VStack>
-                  );
-                })}
-              </VStack>
-            )}
+            <HStack space={2} flexWrap="wrap">
+              {files.length > 0 ? (
+                <BaseButton
+                  title={
+                    openingFileId
+                      ? "Opening…"
+                      : `View packet (${files.length})`
+                  }
+                  variety="tertiary"
+                  btnWidth="auto"
+                  isDisabled={Boolean(openingFileId) || uploading}
+                  onPress={() => setDocsSheetOpen(true)}
+                />
+              ) : null}
+              {canUploadFiles ? (
+                <BaseButton
+                  title={uploading ? "Uploading…" : "Upload"}
+                  variety="tertiary"
+                  btnWidth="auto"
+                  isDisabled={uploading || Boolean(openingFileId)}
+                  onPress={() => setUploadSheetOpen(true)}
+                />
+              ) : null}
+            </HStack>
           </VStack>
         </BaseCard>
 
@@ -434,6 +408,72 @@ export default function RoomDetailScreen() {
           },
         ]}
       />
+
+      <BaseBottomSheet
+        isOpen={docsSheetOpen}
+        onClose={() => setDocsSheetOpen(false)}
+        title={`Room packet · ${files.length}`}
+        showCancel
+        cancelLabel="Close"
+      >
+        <ScrollView
+          style={{ width: "100%", maxHeight: 420 }}
+          contentContainerStyle={{ paddingBottom: 8 }}
+        >
+          <VStack space={2} px={4} pb={2}>
+            <Text fontSize="xs" color={muted} textAlign="center">
+              Tap View to open in-app. On iPhone you can swipe between files in
+              the packet.
+            </Text>
+            {files.map((file) => {
+              const meta = [formatFileSize(file.sizeBytes), file.contentType]
+                .filter(Boolean)
+                .join(" · ");
+              const isOpening = openingFileId === file.id;
+              const isSharing = sharingFileId === file.id;
+              const busy = Boolean(openingFileId) || Boolean(sharingFileId);
+              return (
+                <VStack
+                  key={file.id}
+                  space={2}
+                  py={2}
+                  px={3}
+                  borderWidth={1}
+                  borderColor={border}
+                  borderRadius="md"
+                >
+                  <VStack space={0.5}>
+                    <Text fontSize="sm" color={text} numberOfLines={2}>
+                      {file.originalName}
+                    </Text>
+                    {meta ? (
+                      <Text fontSize="xs" color={muted} numberOfLines={1}>
+                        {meta}
+                      </Text>
+                    ) : null}
+                  </VStack>
+                  <HStack space={2} flexWrap="wrap">
+                    <BaseButton
+                      title={isOpening ? "Opening…" : "View"}
+                      variety="tertiary"
+                      btnWidth="auto"
+                      isDisabled={busy}
+                      onPress={() => void handlePreview(file.id)}
+                    />
+                    <BaseButton
+                      title={isSharing ? "Saving…" : "Share"}
+                      variety="tertiary"
+                      btnWidth="auto"
+                      isDisabled={busy}
+                      onPress={() => void handleShare(file)}
+                    />
+                  </HStack>
+                </VStack>
+              );
+            })}
+          </VStack>
+        </ScrollView>
+      </BaseBottomSheet>
     </>
   );
 }

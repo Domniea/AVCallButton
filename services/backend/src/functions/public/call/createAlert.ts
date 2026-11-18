@@ -1,6 +1,7 @@
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import type { AlertPriority as AlertPriorityType } from "@prisma/client";
 
+import { publishAlertBoardInvalidated } from "../../lib/alerts/ably";
 import { createRoomAlert } from "../../lib/alerts/createRoomAlert";
 import { isEventAcceptingCalls } from "../../lib/events/eventCallStatus";
 import { prisma } from "../../lib/prisma";
@@ -96,6 +97,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       roomId: room.id,
       priority,
       message,
+    });
+
+    await publishAlertBoardInvalidated({
+      eventId: room.eventId,
+      roomId: room.id,
+      alertId: alert.id,
+      action: "created",
+      updatedAt: new Date().toISOString(),
     });
 
     const recipients = await resolveAlertRecipients({

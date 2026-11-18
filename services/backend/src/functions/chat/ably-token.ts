@@ -1,5 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
+import { eventAlertBoardChannelName } from "../lib/alerts/ably";
+import { assertRosterEntry } from "../lib/assertRosterEntry";
 import {
   createChatAblyTokenRequest,
   resolveAblySubscribeChannels,
@@ -34,8 +36,27 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       typeof body.eventId === "string" ? body.eventId.trim() : "";
     const threadId =
       typeof body.threadId === "string" ? body.threadId.trim() : "";
+    const purpose =
+      typeof body.purpose === "string" ? body.purpose.trim() : "chat";
 
     if (!eventId) return badRequest("eventId is required");
+
+    if (purpose === "alert-board") {
+      await assertRosterEntry(userId, eventId);
+      const channelNames = [eventAlertBoardChannelName(eventId)];
+      const tokenRequest = await createChatAblyTokenRequest({
+        userId,
+        channelNames,
+        clientIdSuffix: "alert-board",
+      });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          tokenRequest,
+          channels: channelNames,
+        }),
+      };
+    }
 
     const channelNames = await resolveAblySubscribeChannels({
       userId,
@@ -58,6 +79,9 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
     };
   } catch (error) {
     if (error instanceof Error) {
+      if (error.message === "NOT_ON_ROSTER") {
+        return forbidden("Not on event roster");
+      }
       if (error.message === "NOT_THREAD_MEMBER") {
         return forbidden("Not a member of this thread");
       }

@@ -17,6 +17,7 @@ import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
 import { BaseButton } from "../../../components/BaseButton";
 import { BaseCard } from "../../../components/BaseCard";
 import { BasePill } from "../../../components/BasePill";
+import { EventAlertBoard } from "../../event/EventAlertBoard";
 import type {
   DashStackParamList,
   MainStackParamList,
@@ -108,7 +109,7 @@ export default function CrewEventDashboard() {
   return (
     <Box flex={1} bg={bg}>
       <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
-       <VStack space={4} maxW="720" alignSelf="center" w="100%">
+        <VStack space={4} maxW="720" alignSelf="center" w="100%">
           {detailStatus === "loading" && (
             <Text color={muted}>Loading your event coverage…</Text>
           )}
@@ -125,6 +126,12 @@ export default function CrewEventDashboard() {
             </BaseCard>
           )}
 
+          <EventAlertBoard
+            workspaceId={workspaceId}
+            eventId={eventId}
+            enabled={authStatus === "authenticated"}
+          />
+
           {detailMatchesRoute && detail && (
             <>
               <BaseCard
@@ -134,7 +141,10 @@ export default function CrewEventDashboard() {
               >
                 <HStack space={2} flexWrap="wrap" mb={4}>
                   <BasePill label={detail.event.status} />
-                  <BasePill label={detail.assignment.roleName} variant="blue" />
+                  <BasePill
+                    label={detail.assignment.roleName}
+                    variant="primary"
+                  />
                   <BasePill
                     label={`Event rank ${detail.assignment.eventRank}`}
                     variant="outline"
@@ -191,24 +201,10 @@ export default function CrewEventDashboard() {
                           >
                             {zone.name}
                           </Text>
-                          <HStack space={2} flexWrap="wrap">
-                            <BasePill
-                              label={`Rank ${zone.eventRank}`}
-                              variant="outline"
-                            />
-                            {zone.alertSummary.active > 0 ? (
-                              <BasePill
-                                label={`${zone.alertSummary.active} active alert${zone.alertSummary.active === 1 ? "" : "s"}`}
-                                variant="blue"
-                              />
-                            ) : null}
-                            {zone.alertSummary.pending > 0 ? (
-                              <BasePill
-                                label={`${zone.alertSummary.pending} pending`}
-                                variant="outline"
-                              />
-                            ) : null}
-                          </HStack>
+                          <BasePill
+                            label={`Rank ${zone.eventRank}`}
+                            variant="outline"
+                          />
                         </HStack>
                         {zone.rooms.length > 0 ? (
                           <VStack space={1} mt={2}>
@@ -275,7 +271,7 @@ export default function CrewEventDashboard() {
               navigation.navigate("crewEventSelector", { workspaceId })
             }
           />
-        </VStack> 
+        </VStack>
       </ScrollView>
     </Box>
   );

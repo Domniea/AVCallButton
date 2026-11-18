@@ -2,13 +2,15 @@ import { MembershipStatus } from "../prismaClient";
 import { prisma } from "../prisma";
 import { notifyUsers } from "../push/notifyUsers";
 
-function previewBody(body: string): string {
+/** Truncate chat body for push preview (exported for unit tests). */
+export function previewChatPushBody(body: string): string {
   const trimmed = body.trim();
   if (trimmed.length <= 120) return trimmed;
   return `${trimmed.slice(0, 117)}…`;
 }
 
-function threadPushTitle(params: {
+/** Title line for chat push (exported for unit tests). */
+export function chatThreadPushTitle(params: {
   type: string;
   eventName: string | null;
   zoneName: string | null;
@@ -58,7 +60,7 @@ export async function notifyChatMessageCreated(params: {
 
     if (!thread || thread.members.length === 0) return;
 
-    const title = threadPushTitle({
+    const title = chatThreadPushTitle({
       type: thread.type,
       eventName: thread.event?.name ?? null,
       zoneName: thread.zone?.name ?? null,
@@ -74,7 +76,7 @@ export async function notifyChatMessageCreated(params: {
       userIds: thread.members.map((m) => m.userId),
       notification: {
         title,
-        body: previewBody(params.body),
+        body: previewChatPushBody(params.body),
         data: {
           type: "chat",
           threadId: thread.id,

@@ -1,13 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView } from "react-native";
+import { AppState, ScrollView } from "react-native";
 import { HStack, Text, VStack } from "../../../components/ui/layout";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { fetchAuthSession } from "aws-amplify/auth";
 
-import type { RootState, StoredFile } from "@av/store";
-import { hasPermissionForRank, listRoomFiles } from "@av/store";
+import type { AlertSummary, RootState, StoredFile } from "@av/store";
+import {
+  fetchRoomActiveAlerts,
+  hasPermissionForRank,
+  listRoomFiles,
+  resolveEventAlert,
+} from "@av/store";
 
 import { BaseBottomSheet } from "../../../components/BaseBottomSheet";
 import { BaseButton } from "../../../components/BaseButton";
@@ -22,6 +27,14 @@ import { apiErrorMessage, removingMembershipIdFor } from "../../event/eventHelpe
 import { useEventCoverage } from "../../event/useEventCoverage";
 import { useEventScreenData } from "../../event/useEventScreenData";
 import {
+  formatAlertAge,
+  priorityLabel,
+  severityAccent,
+  severityFromPriority,
+  severityLabel,
+  severityPillVariant,
+} from "../../event/alertBoardUi";
+import {
   formatFileSize,
   pickAndUploadRoomDocument,
   previewRoomDocument,
@@ -29,6 +42,7 @@ import {
   type RoomDocumentSource,
 } from "../../lib/roomDocuments";
 import type { DashStackParamList } from "../../navigation/types";
+import { BasePill } from "../../../components/BasePill";
 
 type RoomDetailRoute = RouteProp<DashStackParamList, "roomDetail">;
 
@@ -56,6 +70,18 @@ export default function RoomDetailScreen() {
   const [sharingFileId, setSharingFileId] = useState<string | null>(null);
   const filesLoadGenerationRef = useRef(0);
   const filesRoomIdRef = useRef(roomId);
+
+  const [activeAlerts, setActiveAlerts] = useState<AlertSummary[]>([]);
+  const [alertsRoom, setAlertsRoom] = useState<{
+    id: string;
+    name: string;
+    zoneName: string | null;
+    currentPriority: "HIGH" | "MEDIUM" | null;
+  } | null>(null);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [alertsError, setAlertsError] = useState<string | null>(null);
+  const [resolvingAlertId, setResolvingAlertId] = useState<string | null>(null);
+  const [alertsFocused, setAlertsFocused] = useState(false);
 
   const {
     authStatus,
@@ -124,12 +150,113 @@ export default function RoomDetailScreen() {
     }
   }, [eventId, roomId]);
 
+  const loadActiveAlerts = useCallback(async (opts?: { quiet?: boolean }) => {
+    if (!opts?.quiet) {
+      setAlertsLoading(true);
+    }
+    setAlertsError(null);
+    try {
+      const session = await fetchAuthSession();
+      const token = session.tokens?.idToken?.toString();
+      if (!token) {
+        setAlertsError("Not signed in.");
+        return;
+      }
+      const data = await fetchRoomActiveAlerts(token, eventId, roomId);
+      setActiveAlerts(data.alerts);
+      setAlertsRoom({
+        id: data.room.id,
+        name: data.room.name,
+        zoneName: data.room.zoneName,
+        currentPriority: data.room.currentPriority,
+      });
+    } catch (err) {
+      console.error("Failed to load room alerts:", err);
+      setAlertsError(apiErrorMessage(err));
+    } finally {
+      setAlertsLoading(false);
+    }
+  }, [eventId, roomId]);
+
+  const handleResolveAlert = useCallback(
+    async (alertId: string) => {
+      setAlertsError(null);
+
+      const previousAlerts = activeAlerts;
+      const previousRoom = alertsRoom;
+      const remaining = activeAlerts.filter((alert) => alert.id !== alertId);
+      const optimisticPriority = remaining.some((a) => a.priority === "HIGH")
+        ? ("HIGH" as const)
+        : remaining.some((a) => a.priority === "MEDIUM")
+          ? ("MEDIUM" as const)
+          : null;
+
+      // Drop immediately; confirm with API in the background.
+      setActiveAlerts(remaining);
+      setAlertsRoom((prev) =>
+        prev ? { ...prev, currentPriority: optimisticPriority } : prev,
+      );
+      setResolvingAlertId(alertId);
+
+      try {
+        const session = await fetchAuthSession();
+        const token = session.tokens?.idToken?.toString();
+        if (!token) {
+          setActiveAlerts(previousAlerts);
+          setAlertsRoom(previousRoom);
+          setAlertsError("Not signed in.");
+          return;
+        }
+        const result = await resolveEventAlert(token, eventId, alertId);
+        setAlertsRoom((prev) =>
+          prev
+            ? { ...prev, currentPriority: result.room.currentPriority }
+            : prev,
+        );
+      } catch (err) {
+        console.error("Failed to resolve alert:", err);
+        setActiveAlerts(previousAlerts);
+        setAlertsRoom(previousRoom);
+        setAlertsError(apiErrorMessage(err));
+      } finally {
+        setResolvingAlertId(null);
+      }
+    },
+    [activeAlerts, alertsRoom, eventId],
+  );
+
   useFocusEffect(
     useCallback(() => {
-      if (authStatus !== "authenticated") return;
+      if (authStatus !== "authenticated") {
+        setAlertsFocused(false);
+        return;
+      }
+      setAlertsFocused(true);
       void loadFiles();
-    }, [authStatus, loadFiles]),
+      void loadActiveAlerts();
+      return () => setAlertsFocused(false);
+    }, [authStatus, loadFiles, loadActiveAlerts]),
   );
+
+  useEffect(() => {
+    if (authStatus !== "authenticated" || !alertsFocused) return;
+
+    const poll = setInterval(() => {
+      void loadActiveAlerts({ quiet: true });
+    }, 5_000);
+
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        void loadActiveAlerts({ quiet: true });
+      }
+    });
+    return () => {
+      clearInterval(poll);
+      if (sub && typeof sub.remove === "function") {
+        sub.remove();
+      }
+    };
+  }, [authStatus, alertsFocused, loadActiveAlerts]);
 
   const handleUpload = useCallback(
     async (source: RoomDocumentSource) => {
@@ -214,16 +341,25 @@ export default function RoomDetailScreen() {
     return <LoadingScreen message="Checking session…" />;
   }
 
-  if (!event && eventsFetchStatus === "succeeded") {
-    return <LoadingScreen message="Event not found" />;
-  }
+  const roomFromEvent = event?.rooms.find((r) => r.id === roomId) ?? null;
+  const zoneFromEvent = roomFromEvent?.zoneId
+    ? event?.zones.find((z) => z.id === roomFromEvent.zoneId)
+    : null;
 
-  if (!event) {
+  const roomName = roomFromEvent?.name ?? alertsRoom?.name ?? null;
+  const zoneName =
+    zoneFromEvent?.name ?? alertsRoom?.zoneName ?? null;
+  const roomPriority = alertsRoom?.currentPriority ?? null;
+
+  if (!event && eventsFetchStatus === "loading") {
     return <LoadingScreen message="Loading event…" />;
   }
 
-  const room = event.rooms.find((r) => r.id === roomId);
-  if (!room) {
+  if (!roomName && alertsLoading) {
+    return <LoadingScreen message="Loading room…" />;
+  }
+
+  if (!roomName) {
     return (
       <ScreenLayout title="Room not found" maxW="720">
         <Text fontSize="sm" color={muted}>
@@ -233,18 +369,22 @@ export default function RoomDetailScreen() {
     );
   }
 
-  const zone = room.zoneId
-    ? event.zones.find((z) => z.id === room.zoneId)
-    : null;
   const roster = rosterMatchesEvent ? assignments : [];
-  const roomTarget = { kind: "room" as const, id: room.id, name: room.name };
-  const subtitle = zone
-    ? `${event.name} · ${zone.name}`
-    : `${event.name} · Unassigned`;
+  const roomTarget = {
+    kind: "room" as const,
+    id: roomId,
+    name: roomName,
+  };
+  const subtitle = [
+    event?.name,
+    zoneName ?? (roomFromEvent ? "Unassigned" : null),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <>
-      <ScreenLayout title={room.name} subtitle={subtitle} maxW="720">
+      <ScreenLayout title={roomName} subtitle={subtitle || undefined} maxW="720">
         {coverageActionError ? (
           <Text fontSize="sm" color="red.500">
             {coverageActionError}
@@ -267,19 +407,111 @@ export default function RoomDetailScreen() {
 
         <BaseCard title="Room details" titleAlign="start" variant="outline">
           <VStack space={3}>
-            <DetailRow label="Room name" value={room.name} />
-            <DetailRow label="Zone" value={zone?.name ?? "Unassigned"} />
+            <DetailRow label="Room name" value={roomName} />
+            <DetailRow label="Zone" value={zoneName ?? "Unassigned"} />
+            <HStack space={2} alignItems="center" flexWrap="wrap">
+              <Text fontSize="xs" color={muted}>
+                Alert status
+              </Text>
+              <BasePill
+                label={severityLabel(severityFromPriority(roomPriority))}
+                variant={severityPillVariant(
+                  severityFromPriority(roomPriority),
+                )}
+              />
+            </HStack>
           </VStack>
         </BaseCard>
 
-        <BaseCard title="Guest help link" titleAlign="start" variant="outline">
-          <RoomCallLinkActions
-            roomName={room.name}
-            callToken={room.callToken}
-            eventName={event.name}
-            zoneName={zone?.name}
-          />
+        <BaseCard title="Active alerts" titleAlign="start" variant="outline">
+          <VStack space={3}>
+            {alertsLoading && activeAlerts.length === 0 ? (
+              <Text fontSize="sm" color={muted}>
+                Loading alerts…
+              </Text>
+            ) : null}
+
+            {alertsError ? (
+              <VStack space={2}>
+                <Text fontSize="sm" color="red.500">
+                  {alertsError}
+                </Text>
+                <BaseButton
+                  title="Retry alerts"
+                  variety="tertiary"
+                  btnWidth="auto"
+                  onPress={() => void loadActiveAlerts()}
+                />
+              </VStack>
+            ) : null}
+
+            {!alertsLoading && !alertsError && activeAlerts.length === 0 ? (
+              <Text fontSize="sm" color={muted}>
+                No active requests. Room is clear.
+              </Text>
+            ) : null}
+
+            {activeAlerts.map((alert) => {
+              const severity = severityFromPriority(alert.priority);
+              const age = formatAlertAge(alert.createdAt);
+              return (
+                <VStack
+                  key={alert.id}
+                  space={2}
+                  borderWidth={1}
+                  borderColor={border}
+                  borderRadius="md"
+                  px={3}
+                  py={3}
+                  style={{
+                    borderLeftWidth: 4,
+                    borderLeftColor: severityAccent(severity),
+                  }}
+                >
+                  <HStack
+                    justifyContent="space-between"
+                    alignItems="center"
+                    flexWrap="wrap"
+                    space={2}
+                  >
+                    <BasePill
+                      label={priorityLabel(alert.priority)}
+                      variant={severityPillVariant(severity)}
+                    />
+                    {age ? (
+                      <Text fontSize="xs" color={muted}>
+                        {age}
+                      </Text>
+                    ) : null}
+                  </HStack>
+                  <Text fontSize="sm" color={text}>
+                    {alert.message?.trim() || "No message provided"}
+                  </Text>
+                  <BaseButton
+                    title={
+                      resolvingAlertId === alert.id ? "Resolving…" : "Resolve"
+                    }
+                    variety="secondary"
+                    btnWidth="auto"
+                    isDisabled={resolvingAlertId !== null}
+                    onPress={() => void handleResolveAlert(alert.id)}
+                  />
+                </VStack>
+              );
+            })}
+          </VStack>
         </BaseCard>
+
+        {roomFromEvent?.callToken ? (
+          <BaseCard title="Guest help link" titleAlign="start" variant="outline">
+            <RoomCallLinkActions
+              roomName={roomName}
+              callToken={roomFromEvent.callToken}
+              eventName={event?.name ?? "Event"}
+              zoneName={zoneName ?? undefined}
+            />
+          </BaseCard>
+        ) : null}
 
         <BaseCard
           title="Documents & schematics"
@@ -341,7 +573,7 @@ export default function RoomDetailScreen() {
         </BaseCard>
 
         <BaseCard variant="outline">
-          {coverageLoading && (roomCoverage[room.id] ?? []).length === 0 ? (
+          {coverageLoading && (roomCoverage[roomId] ?? []).length === 0 ? (
             <VStack space={2}>
               <Text fontSize="sm" fontWeight="semibold" color={text}>
                 Room coverage
@@ -352,7 +584,7 @@ export default function RoomDetailScreen() {
             </VStack>
           ) : (
             <CoverageList
-              rows={roomCoverage[room.id] ?? []}
+              rows={roomCoverage[roomId] ?? []}
               roster={roster}
               label="Room coverage"
               onAdd={() => setAssignCoverageModalOpen(true)}
@@ -362,7 +594,7 @@ export default function RoomDetailScreen() {
               removingMembershipId={removingMembershipIdFor(
                 removingCoverage,
                 "room",
-                room.id,
+                roomId,
               )}
             />
           )}

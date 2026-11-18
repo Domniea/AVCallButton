@@ -14,6 +14,7 @@ import { ScreenLayout } from "../../../components/ScreenLayout";
 import { SectionHeader } from "../../../components/SectionHeader";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import AssignStaffModal from "./AssignStaffModal";
+import { EventAlertBoard } from "../../event/EventAlertBoard";
 import {
   assignmentSubtitle,
   pendingSubtitle,
@@ -93,6 +94,12 @@ export default function EventDashboard() {
             <BasePill label={`${assignments.length} staff`} variant="outline" />
           ) : null}
         </HStack>
+
+        <EventAlertBoard
+          workspaceId={workspaceId}
+          eventId={eventId}
+          enabled={authStatus === "authenticated"}
+        />
 
         <BaseCard variant="outline">
           <SectionHeader>Event details</SectionHeader>

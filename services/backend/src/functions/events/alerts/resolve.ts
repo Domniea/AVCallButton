@@ -1,5 +1,7 @@
 import type { APIGatewayProxyHandlerV2WithJWTAuthorizer } from "aws-lambda";
 
+import { publishAlertBoardInvalidated } from "../../lib/alerts/ably";
+import { formatAlert } from "../../lib/alerts/formatAlert";
 import { resolveRoomAlert } from "../../lib/alerts/resolveRoomAlert";
 import { assertRosterEntry } from "../../lib/assertRosterEntry";
 import { badRequest, forbidden, notFound, serverError } from "../../lib/responses";
@@ -24,31 +26,27 @@ export const handler: APIGatewayProxyHandlerV2WithJWTAuthorizer = async (
       resolvedBy: userId,
     });
 
+    if (!alreadyResolved) {
+      await publishAlertBoardInvalidated({
+        eventId,
+        roomId: alert.roomId,
+        alertId: alert.id,
+        action: "resolved",
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({
         alreadyResolved,
-        alert: {
-          id: alert.id,
-          eventId: alert.eventId,
-          roomId: alert.roomId,
-          kind: alert.kind,
-          message: alert.message,
-          priority: alert.priority,
-          status: alert.status,
-          createdAt: alert.createdAt,
-          updatedAt: alert.updatedAt,
-          acknowledgedAt: alert.acknowledgedAt,
-          acknowledgedBy: alert.acknowledgedBy,
-          resolvedAt: alert.resolvedAt,
-          resolvedBy: alert.resolvedBy,
-        },
+        alert: formatAlert(alert),
         room: {
           id: alert.roomId,
           currentPriority: projection.currentPriority,
           currentAlertId: projection.currentAlertId,
           activeAlertCount: projection.activeAlertCount,
-          statusUpdatedAt: projection.statusUpdatedAt,
+          statusUpdatedAt: projection.statusUpdatedAt?.toISOString() ?? null,
         },
       }),
     };

@@ -16,10 +16,44 @@ export type RoomAlertProjection = {
   statusUpdatedAt: Date | null;
 };
 
+export type ActiveAlertForProjection = {
+  id: string;
+  priority: AlertPriorityType;
+  createdAt: Date;
+};
+
 const priorityRank: Record<AlertPriorityType, number> = {
   [AlertPriority.HIGH]: 0,
   [AlertPriority.MEDIUM]: 1,
 };
+
+export function isActiveAlertStatus(status: string): boolean {
+  return (ACTIVE_ALERT_STATUSES as readonly string[]).includes(status);
+}
+
+/**
+ * Pure projection rules: HIGH outranks MEDIUM; driving = oldest at that priority.
+ * Used by DB recompute and unit tests.
+ */
+export function computeProjectionFromActiveAlerts(
+  active: ActiveAlertForProjection[],
+): Pick<
+  RoomAlertProjection,
+  "currentPriority" | "currentAlertId" | "activeAlertCount"
+> {
+  const sorted = [...active].sort((a, b) => {
+    const byPriority = priorityRank[a.priority] - priorityRank[b.priority];
+    if (byPriority !== 0) return byPriority;
+    return a.createdAt.getTime() - b.createdAt.getTime();
+  });
+
+  const driving = sorted[0] ?? null;
+  return {
+    currentPriority: driving?.priority ?? null,
+    currentAlertId: driving?.id ?? null,
+    activeAlertCount: sorted.length,
+  };
+}
 
 /** Lock the room row for the rest of the transaction (create/resolve/ack share this). */
 export async function lockEventRoom(
@@ -54,29 +88,21 @@ export async function recomputeRoomProjection(
     },
   });
 
-  active.sort((a, b) => {
-    const byPriority = priorityRank[a.priority] - priorityRank[b.priority];
-    if (byPriority !== 0) return byPriority;
-    return a.createdAt.getTime() - b.createdAt.getTime();
-  });
-
-  const driving = active[0] ?? null;
+  const computed = computeProjectionFromActiveAlerts(active);
   const statusUpdatedAt = new Date();
 
   await tx.eventRoom.update({
     where: { id: roomId },
     data: {
-      currentPriority: driving?.priority ?? null,
-      currentAlertId: driving?.id ?? null,
-      activeAlertCount: active.length,
+      currentPriority: computed.currentPriority,
+      currentAlertId: computed.currentAlertId,
+      activeAlertCount: computed.activeAlertCount,
       statusUpdatedAt,
     },
   });
 
   return {
-    currentPriority: driving?.priority ?? null,
-    currentAlertId: driving?.id ?? null,
-    activeAlertCount: active.length,
+    ...computed,
     statusUpdatedAt,
   };
 }

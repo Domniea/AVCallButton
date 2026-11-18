@@ -153,6 +153,8 @@ export type FetchAblyTokenInput = {
   eventId: string;
   /** If set, token is limited to this thread (must be an ACTIVE member). */
   threadId?: string;
+  /** Roster-scoped `event:{eventId}` channel for alert-board invalidation. */
+  purpose?: "chat" | "alert-board";
 };
 
 export type FetchAblyTokenResponse = {

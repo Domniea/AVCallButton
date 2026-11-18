@@ -16,6 +16,8 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "chat:backfill": "tsx --env-file=.env scripts/backfillChatThreads.ts",
     "db:nuke": "tsx --env-file=.env scripts/nuke.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "remove:local": "sst remove --stage local",
     "remove:dev": "sst remove --stage dev",
     "remove:prod": "sst remove --stage prod"
@@ -40,6 +42,7 @@
     "@types/web-push": "^3.6.4",
     "sst": "^2.43.0",
     "tsx": "^4.23.5",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
   }
 }

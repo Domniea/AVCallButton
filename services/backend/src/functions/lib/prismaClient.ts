@@ -15,5 +15,7 @@ export const MembershipType = prismaPackage.MembershipType;
 export const ChatThreadType = prismaPackage.ChatThreadType;
 export const FileBucket = prismaPackage.FileBucket;
 export const FileStatus = prismaPackage.FileStatus;
+export const AlertStatus = prismaPackage.AlertStatus;
+export const AlertPriority = prismaPackage.AlertPriority;
 
 export type * from "@prisma/client";

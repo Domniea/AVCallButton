@@ -7,9 +7,17 @@ export type CallMeta = {
   zone: { name: string } | null;
 };
 
+export type HelpAlertPriority = "HIGH" | "MEDIUM";
+
 export type CreateHelpAlertResult = {
   alertId: string;
+  priority: HelpAlertPriority;
   notifiedCount: number;
+  room: {
+    currentPriority: HelpAlertPriority | null;
+    currentAlertId: string | null;
+    activeAlertCount: number;
+  };
 };
 
 export async function fetchCallMeta(callToken: string): Promise<CallMeta> {
@@ -22,13 +30,16 @@ export async function fetchCallMeta(callToken: string): Promise<CallMeta> {
 
 export async function createHelpAlert(
   callToken: string,
-  input?: { message?: string },
+  input?: { message?: string; priority?: HelpAlertPriority },
 ): Promise<CreateHelpAlertResult> {
   const api = getApiClient();
-  const body =
-    input?.message && input.message.trim().length > 0
-      ? { message: input.message.trim() }
-      : {};
+  const body: { message?: string; priority?: HelpAlertPriority } = {};
+  if (input?.message && input.message.trim().length > 0) {
+    body.message = input.message.trim();
+  }
+  if (input?.priority) {
+    body.priority = input.priority;
+  }
   const res = await api.post<CreateHelpAlertResult>(
     `/public/call/${encodeURIComponent(callToken)}/alerts`,
     body,

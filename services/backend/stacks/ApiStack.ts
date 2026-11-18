@@ -144,6 +144,10 @@ export function ApiStack({ stack }: StackContext) {
       "DELETE /events/{eventId}/rooms/{roomId}/coverage/{membershipId}":
         "src/functions/events/rooms/coverage/delete.handler",
 
+      // Alerts (crew)
+      "POST /events/{eventId}/alerts/{alertId}/resolve":
+        "src/functions/events/alerts/resolve.handler",
+
       // Invites
       "POST /workspaces/{workspaceId}/invites":
         "src/functions/invites/create.handler",

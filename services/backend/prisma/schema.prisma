@@ -55,6 +55,12 @@ enum AlertStatus {
   REJECTED
 }
 
+/// Guest/crew urgency for a room help request. HIGH outranks MEDIUM at read/projection time.
+enum AlertPriority {
+  HIGH
+  MEDIUM
+}
+
 enum ChatThreadType {
   EVENT_GROUP
   ZONE
@@ -246,15 +252,23 @@ model EventRoom {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event    Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  zone     EventZone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
-  coverage EventRoomCoverage[]
-  alerts   Alert[]
-  files    File[]
+  /// Projection cache only — Alert rows remain source of truth. null priority = GREEN.
+  currentPriority  AlertPriority?
+  currentAlertId   String?        @unique
+  statusUpdatedAt  DateTime?
+  activeAlertCount Int            @default(0)
+
+  event        Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  zone         EventZone?          @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  currentAlert Alert?              @relation("RoomDrivingAlert", fields: [currentAlertId], references: [id], onDelete: SetNull)
+  coverage     EventRoomCoverage[]
+  alerts       Alert[]             @relation("RoomAlerts")
+  files        File[]
 
   @@index([eventId])
   @@index([zoneId])
   @@index([eventId, sortOrder])
+  @@index([eventId, currentPriority])
 }
 
 model EventRoomCoverage {
@@ -292,21 +306,35 @@ model EventZoneCoverage {
 }
 
 /// Room help request from a public QR scan (v1: single kind "HELP").
+/// Source of truth for room severity; EventRoom projection is derived from active rows.
 model Alert {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   eventId   String
   roomId    String
-  kind      String   @default("HELP")
+  kind      String        @default("HELP")
   message   String?
-  status    String   @default("OPEN")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  priority  AlertPriority @default(HIGH)
+  status    AlertStatus   @default(OPEN)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  event Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  room  EventRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  acknowledgedAt DateTime?
+  acknowledgedBy String?
+  resolvedAt     DateTime?
+  resolvedBy     String?
+
+  /// Future-ready nullable hooks (unused in MVP).
+  requestTypeId      String?
+  requesterType      String?
+  responsibleGroupId String?
+
+  event          Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  room           EventRoom  @relation("RoomAlerts", fields: [roomId], references: [id], onDelete: Cascade)
+  drivingForRoom EventRoom? @relation("RoomDrivingAlert")
 
   @@index([eventId, status, createdAt])
   @@index([roomId, createdAt])
+  @@index([roomId, status, priority, createdAt])
   @@index([status])
 }
 

@@ -5,12 +5,18 @@ import { useParams } from "next/navigation";
 import { Box, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import axios from "axios";
 
-import { createHelpAlert, fetchCallMeta, type CallMeta } from "@av/store";
+import {
+  createHelpAlert,
+  fetchCallMeta,
+  type CallMeta,
+  type HelpAlertPriority,
+} from "@av/store";
 import { RHFInput } from "@av/forms/src/controllers/RHFInput";
 import { useAppForm } from "@av/forms/src/useAppForm";
 import {
   GUEST_HELP_MESSAGE_MAX_LENGTH,
   guestHelpRequestSchema,
+  type GuestHelpPriority,
   type GuestHelpRequestSchema,
 } from "@av/forms/src/schemas/public/guestHelpRequestSchema";
 
@@ -32,6 +38,22 @@ function parseApiError(error: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
+function confirmCopy(priority: HelpAlertPriority): {
+  title: string;
+  body: string;
+} {
+  if (priority === "HIGH") {
+    return {
+      title: "Help is on the way",
+      body: "Staff were notified that you need help now",
+    };
+  }
+  return {
+    title: "Request sent",
+    body: "Staff were notified to come by when available",
+  };
+}
+
 export default function GuestCallPage() {
   const params = useParams<{ callToken: string }>();
   const callToken = params.callToken?.trim() ?? "";
@@ -40,7 +62,9 @@ export default function GuestCallPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
 
-  const [didSend, setDidSend] = useState(false);
+  const [sentPriority, setSentPriority] = useState<HelpAlertPriority | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!callToken) {
@@ -115,7 +139,7 @@ export default function GuestCallPage() {
               staff directly if you need assistance.
             </Text>
           </NoticePanel>
-        ) : didSend ? (
+        ) : sentPriority ? (
           <VStack align="stretch" gap={5}>
             <NoticePanel tone="success">
               <VStack align="center" gap={4} textAlign="center" py={2}>
@@ -124,10 +148,10 @@ export default function GuestCallPage() {
                 </StatusIcon>
                 <VStack gap={2}>
                   <Text fontWeight="bold" color="text" fontSize="2xl">
-                    Help is on the way
+                    {confirmCopy(sentPriority).title}
                   </Text>
                   <Text fontSize="md" color="gray.500" lineHeight="tall">
-                    AV staff have been notified for{" "}
+                    {confirmCopy(sentPriority).body} for{" "}
                     <Text as="span" fontWeight="semibold" color="text">
                       {meta.room.name}
                     </Text>
@@ -140,14 +164,14 @@ export default function GuestCallPage() {
               variety="secondary"
               btnHeight="52px"
               title="Send another request"
-              onClick={() => setDidSend(false)}
+              onClick={() => setSentPriority(null)}
             />
           </VStack>
         ) : (
           <GuestHelpForm
             key="guest-help-form"
             callToken={callToken}
-            onSent={() => setDidSend(true)}
+            onSent={(priority) => setSentPriority(priority)}
           />
         )}
       </VStack>
@@ -160,9 +184,11 @@ function GuestHelpForm({
   onSent,
 }: {
   callToken: string;
-  onSent: () => void;
+  onSent: (priority: GuestHelpPriority) => void;
 }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submittingPriority, setSubmittingPriority] =
+    useState<GuestHelpPriority | null>(null);
 
   const form = useAppForm(guestHelpRequestSchema, { message: "" });
   const {
@@ -174,24 +200,29 @@ function GuestHelpForm({
 
   const messageLength = watch("message")?.length ?? 0;
 
-  const onSubmit = async (values: GuestHelpRequestSchema) => {
-    setSubmitError(null);
-    try {
-      await createHelpAlert(callToken, {
-        message: values.message.trim() || undefined,
-      });
-      onSent();
-    } catch (error) {
-      setSubmitError(parseApiError(error));
-    }
-  };
+  const submitWithPriority = (priority: GuestHelpPriority) =>
+    handleSubmit(async (values: GuestHelpRequestSchema) => {
+      setSubmitError(null);
+      setSubmittingPriority(priority);
+      try {
+        await createHelpAlert(callToken, {
+          message: values.message.trim() || undefined,
+          priority,
+        });
+        onSent(priority);
+      } catch (error) {
+        setSubmitError(parseApiError(error));
+      } finally {
+        setSubmittingPriority(null);
+      }
+    })();
 
   return (
-    <Box as="form" onSubmit={handleSubmit(onSubmit)} w="full">
+    <Box as="form" w="full" onSubmit={(e) => e.preventDefault()}>
       <VStack align="stretch" gap={4}>
         <Text fontSize="md" color="gray.500" lineHeight="tall">
-          Tap Request help or press send on your keyboard. Leave the message
-          blank if you just need someone to come by.
+          Choose how soon you need help. Add an optional message if it helps
+          staff know what to bring.
         </Text>
 
         <Box>
@@ -210,7 +241,7 @@ function GuestHelpForm({
             componentProps={{
               placeholder: "e.g. No sound from the projector",
               type: "text",
-              enterKeyHint: "send",
+              enterKeyHint: "done",
               autoComplete: "off",
               autoCorrect: "off",
               maxLength: GUEST_HELP_MESSAGE_MAX_LENGTH,
@@ -228,11 +259,42 @@ function GuestHelpForm({
           </NoticePanel>
         ) : null}
 
-        <BaseButton type="submit" btnHeight="60px" disabled={isSubmitting}>
-          <Text fontSize={{ base: "xl", md: "lg" }} fontWeight="bold">
-            {isSubmitting ? "Sending…" : "Request help"}
-          </Text>
-        </BaseButton>
+        <VStack align="stretch" gap={3} pt={1}>
+          <BaseButton
+            type="button"
+            btnHeight="60px"
+            disabled={isSubmitting}
+            onClick={() => void submitWithPriority("HIGH")}
+          >
+            <VStack gap={0}>
+              <Text fontSize={{ base: "xl", md: "lg" }} fontWeight="bold">
+                {submittingPriority === "HIGH" ? "Sending…" : "Need help now"}
+              </Text>
+              <Text fontSize="sm" opacity={0.85}>
+                Urgent — staff notified immediately
+              </Text>
+            </VStack>
+          </BaseButton>
+
+          <BaseButton
+            type="button"
+            variety="secondary"
+            btnHeight="60px"
+            disabled={isSubmitting}
+            onClick={() => void submitWithPriority("MEDIUM")}
+          >
+            <VStack gap={0}>
+              <Text fontSize={{ base: "xl", md: "lg" }} fontWeight="bold">
+                {submittingPriority === "MEDIUM"
+                  ? "Sending…"
+                  : "When available"}
+              </Text>
+              <Text fontSize="sm" opacity={0.8}>
+                Less urgent — come by when free
+              </Text>
+            </VStack>
+          </BaseButton>
+        </VStack>
       </VStack>
     </Box>
   );

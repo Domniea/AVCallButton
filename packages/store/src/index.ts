@@ -19,5 +19,6 @@ export * from "./api/coverage.api";
 export * from "./api/chat.api";
 export * from "./api/deviceTokens.api";
 export * from "./api/publicCall.api";
+export * from "./api/alerts.api";
 export * from "./permissions";
 

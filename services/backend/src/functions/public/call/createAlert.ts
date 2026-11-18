@@ -1,7 +1,10 @@
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import type { AlertPriority as AlertPriorityType } from "@prisma/client";
 
+import { createRoomAlert } from "../../lib/alerts/createRoomAlert";
 import { isEventAcceptingCalls } from "../../lib/events/eventCallStatus";
 import { prisma } from "../../lib/prisma";
+import { AlertPriority } from "../../lib/prismaClient";
 import { notifyUsers } from "../../lib/push/notifyUsers";
 import { resolveAlertRecipients } from "../../lib/resolvers/alerts/resolveAlertRecipients";
 import {
@@ -25,6 +28,18 @@ function parseMessage(value: unknown): string | null {
   return trimmed;
 }
 
+/** Defaults to HIGH so existing single-button clients keep current urgency. */
+function parsePriority(value: unknown): AlertPriorityType | null {
+  if (value === undefined || value === null || value === "") {
+    return AlertPriority.HIGH;
+  }
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toUpperCase();
+  if (normalized === AlertPriority.HIGH) return AlertPriority.HIGH;
+  if (normalized === AlertPriority.MEDIUM) return AlertPriority.MEDIUM;
+  return null;
+}
+
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
     const callToken = event.pathParameters?.callToken?.trim();
@@ -45,6 +60,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const message = parseMessage(body.message);
     if (body.message != null && body.message !== "" && message === null) {
       return badRequest("Invalid message");
+    }
+
+    const priority = parsePriority(body.priority);
+    if (priority === null) {
+      return badRequest("Invalid priority");
     }
 
     const room = await prisma.eventRoom.findUnique({
@@ -71,13 +91,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       return tooManyRequests("Too many help requests. Please wait a moment.");
     }
 
-    const alert = await prisma.alert.create({
-      data: {
-        eventId: room.eventId,
-        roomId: room.id,
-        kind: "HELP",
-        message,
-      },
+    const { alert, projection } = await createRoomAlert({
+      eventId: room.eventId,
+      roomId: room.id,
+      priority,
+      message,
     });
 
     const recipients = await resolveAlertRecipients({
@@ -87,16 +105,18 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     });
 
     const userIds = [...new Set(recipients.map((recipient) => recipient.userId))];
+    const priorityLabel = priority === AlertPriority.HIGH ? "Urgent help" : "Help when available";
     try {
       await notifyUsers({
         userIds,
         notification: {
-          title: `Help — ${room.name}`,
+          title: `${priorityLabel} — ${room.name}`,
           body: message ?? "A guest requested help",
           data: {
             alertId: alert.id,
             eventId: room.eventId,
             roomId: room.id,
+            priority,
           },
         },
       });
@@ -108,7 +128,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       statusCode: 201,
       body: JSON.stringify({
         alertId: alert.id,
+        priority: alert.priority,
         notifiedCount: recipients.length,
+        room: {
+          currentPriority: projection.currentPriority,
+          currentAlertId: projection.currentAlertId,
+          activeAlertCount: projection.activeAlertCount,
+        },
       }),
     };
   } catch (error) {

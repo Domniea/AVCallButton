@@ -5,6 +5,8 @@ export type PushNotification = {
     alertId?: string;
     eventId?: string;
     roomId?: string;
+    /** Alert urgency when type is an alert push. */
+    priority?: "HIGH" | "MEDIUM";
     url?: string;
     /** Discriminator for clients (`chat` | omit for alerts). */
     type?: string;

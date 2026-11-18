@@ -168,14 +168,26 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 
 ## Status
 
-- [ ] Phase 0 — Inspect existing Alert / QR / coverage / dash; note gaps  
-- [ ] Phase 1 — Prisma: Alert priority/status fields + EventRoom projection + migration/backfill  
-- [ ] Phase 2 — Shared transactional create/resolve + room lock + projection helper  
-- [ ] Phase 3 — Guest QR: HIGH / MEDIUM + optional message  
+- [x] Phase 0 — Inspect existing Alert / QR / coverage / dash; note gaps  
+- [x] Phase 1 — Prisma: Alert priority/status fields + EventRoom projection + migration/backfill  
+- [x] Phase 2 — Shared transactional create/resolve + room lock + projection helper  
+- [x] Phase 3 — Guest QR: HIGH / MEDIUM + optional message  
 - [ ] Phase 4 — Crew Dashboard UI (list + room active alerts + resolve)  
 - [ ] Phase 5 — Post-commit push + dash live/refetch behavior  
 - [ ] Phase 6 — Concurrency / auth / acceptance tests  
 - [ ] Demo milestone: two devices, full green→red/yellow→green loop  
+
+### Phase 0 inspection notes (2026-11)
+
+| Area | Exists today | Gap vs MVP |
+| --- | --- | --- |
+| `Alert` | Room-scoped HELP row; priority + `AlertStatus`; ack/resolve timestamps | ~~schema~~ done (Phase 1) |
+| `EventRoom` | Projection fields + backfill | ~~schema~~ done (Phase 1) |
+| Guest QR | Create + HIGH/MEDIUM buttons + optional message + confirm copy | ~~create/UX~~ done (Phases 2–3) |
+| Coverage + push | Same heavy push; title distinguishes Urgent vs When available | Keep; Phase 5 for dash live/refetch |
+| Resolve API | `POST /events/{eventId}/alerts/{alertId}/resolve` (roster AuthZ, idempotent) | ~~API~~ done (Phase 2) |
+| Crew dash | Mobile/web event home shows coverage zones; `alertSummary` still hardcoded zeros | Room cards / colors / Resolve UI — Phase 4 |
+| Zone status | Not stored (good) | Derive at read time from room projection (Phase 4) |
 
 ### Decisions log
 
@@ -188,3 +200,6 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 | 2026-11 | Highest priority wins; oldest at that priority is driving alert |
 | 2026-11 | MVP = production call-button loop; categories / House / attendee gates later |
 | 2026-11 | Keep urgency, requester class, category, responsible group as separate future concepts |
+| 2026-11 | Reuse existing Postgres `AlertStatus` enum on `Alert.status` (was unused); add `AlertPriority`; backfill existing OPEN/ACKNOWLEDGED as HIGH + room projection |
+| 2026-11 | Create/resolve share room `FOR UPDATE` + projection recompute; push only after commit; resolve AuthZ = event roster; resolve is idempotent |
+| 2026-11 | Guest QR: two actions — “Need help now” (HIGH) / “When available” (MEDIUM); same push strength; confirm after submit |

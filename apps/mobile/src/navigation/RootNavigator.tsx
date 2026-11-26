@@ -41,6 +41,12 @@ const linking = {
               roomDetail: "workspace/:workspaceId/event/:eventId/room/:roomId",
             },
           },
+          alerts: {
+            screens: {
+              alertsHome: "event/alerts",
+              roomDetail: "event/alerts/room/:roomId",
+            },
+          },
           chat: {
             screens: {
               chatHome: "event/chat",

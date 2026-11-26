@@ -12,12 +12,17 @@ export function useViewMode() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    void AsyncStorage.getItem(VIEW_MODE_STORAGE_KEY).then((stored) => {
-      if (stored === "admin" || stored === "crew") {
-        setViewModeState(stored);
-      }
-      setLoaded(true);
-    });
+    void AsyncStorage.getItem(VIEW_MODE_STORAGE_KEY)
+      .then((stored) => {
+        if (stored === "admin" || stored === "crew") {
+          setViewModeState(stored);
+        }
+        setLoaded(true);
+      })
+      .catch((err) => {
+        console.error("Failed to load view mode:", err);
+        setLoaded(true);
+      });
   }, []);
 
   const setViewMode = useCallback(async (mode: ViewMode) => {

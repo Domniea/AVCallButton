@@ -17,7 +17,7 @@ import { clearCrewDashDetail, fetchMyEventDetailThunk } from "@av/store";
 import { BaseButton } from "../../../components/BaseButton";
 import { BaseCard } from "../../../components/BaseCard";
 import { BasePill } from "../../../components/BasePill";
-import { EventAlertBoard } from "../../event/EventAlertBoard";
+import { OpenAlertsRow } from "../../event/OpenAlertsRow";
 import type {
   DashStackParamList,
   MainStackParamList,
@@ -126,11 +126,7 @@ export default function CrewEventDashboard() {
             </BaseCard>
           )}
 
-          <EventAlertBoard
-            workspaceId={workspaceId}
-            eventId={eventId}
-            enabled={authStatus === "authenticated"}
-          />
+          <OpenAlertsRow subtitle="Active requests for this event" />
 
           {detailMatchesRoute && detail && (
             <>

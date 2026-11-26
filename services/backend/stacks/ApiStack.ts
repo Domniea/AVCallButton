@@ -63,6 +63,8 @@ export function ApiStack({ stack }: StackContext) {
       "GET /me/events/{eventId}": "src/functions/me/events/detail.handler",
       "GET /me/events/{eventId}/alert-board":
         "src/functions/me/events/alertBoard.handler",
+      "GET /me/events/{eventId}/alerts":
+        "src/functions/me/events/alerts/list.handler",
       "GET /me/events/{eventId}/rooms/{roomId}/alerts":
         "src/functions/me/events/rooms/alerts.handler",
       "POST /me/device-tokens": "src/functions/me/deviceTokens/upsert.handler",

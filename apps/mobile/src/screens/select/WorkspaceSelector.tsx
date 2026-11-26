@@ -51,17 +51,21 @@ export default function WorkspaceSelector() {
     didBootstrap.current = true;
 
     void (async () => {
-      const inviteToken = await AsyncStorage.getItem("inviteToken");
-      if (inviteToken) {
-        navigation.navigate("invite", { token: inviteToken });
-        return;
+      try {
+        const inviteToken = await AsyncStorage.getItem("inviteToken");
+        if (inviteToken) {
+          navigation.navigate("invite", { token: inviteToken });
+          return;
+        }
+
+        const session = await getLastSession();
+        if (!session) return;
+
+        dispatch(setActiveWorkspace(session.workspaceId));
+        navigateToEventHome(navigation, session.workspaceId, session.eventId);
+      } catch (err) {
+        console.error("Workspace bootstrap failed:", err);
       }
-
-      const session = await getLastSession();
-      if (!session) return;
-
-      dispatch(setActiveWorkspace(session.workspaceId));
-      navigateToEventHome(navigation, session.workspaceId, session.eventId);
     })();
   }, [navigation, dispatch]);
 

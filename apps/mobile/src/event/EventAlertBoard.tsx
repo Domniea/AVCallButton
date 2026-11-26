@@ -13,7 +13,7 @@ import { BasePill } from "../../components/BasePill";
 import { ListRow } from "../../components/ListRow";
 import { HStack, Text, VStack } from "../../components/ui/layout";
 import { useThemeColors } from "../../hooks/useThemeColors";
-import type { DashStackParamList } from "../navigation/types";
+import type { RoomDetailParams } from "../navigation/types";
 import {
   formatAlertAge,
   severityAccent,
@@ -25,7 +25,7 @@ import {
 
 type BoardFilter = "all" | RoomSeverity;
 
-type Nav = NativeStackNavigationProp<DashStackParamList>;
+type Nav = NativeStackNavigationProp<{ roomDetail: RoomDetailParams }>;
 
 /** Quiet poll while the dash is focused (Ably client subscribe deferred — was crashing RN). */
 const BOARD_POLL_MS = 5_000;
@@ -137,7 +137,7 @@ export function EventAlertBoard({
   }, [boardRooms, filter]);
 
   return (
-    <BaseCard title="Crew Dashboard" titleAlign="start" variant="elevated">
+    <BaseCard title="Room board" titleAlign="start" variant="elevated">
       <Text fontSize="sm" color={muted} mb={3}>
         Rooms by alert status. Open a room to resolve requests.
       </Text>

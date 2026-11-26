@@ -175,7 +175,10 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 - [x] Phase 4 — Crew Dashboard UI (list + room active alerts + resolve)  
 - [x] Phase 5 — Post-commit push + dash live/refetch behavior  
 - [x] Phase 6 — Concurrency / auth / acceptance tests  
-- [ ] Demo milestone: two devices, full green→red/yellow→green loop  
+- [x] Demo milestone: two devices, full green→red/yellow→green loop  
+- [x] Alerts tab — dedicated board + urgent badge; Event home keeps setup + link strip  
+- [x] Alert-centric list — `GET /me/events/{id}/alerts`; Active / Pending / All; inline resolve  
+ 
 
 ### Phase 0 inspection notes (2026-11)
 
@@ -186,7 +189,7 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 | Guest QR | Create + HIGH/MEDIUM buttons + optional message + confirm copy | ~~create/UX~~ done (Phases 2–3) |
 | Coverage + push | Same heavy push; title distinguishes Urgent vs When available | Keep |
 | Resolve API | `POST /events/{eventId}/alerts/{alertId}/resolve` (roster AuthZ, idempotent) | ~~API~~ done (Phase 2) |
-| Crew dash | Mobile board + room detail; Ably `event:{id}` invalidation + focus/AppState refetch | Web parity still light; **deploy API** so Vercel guest creates update projection + publish |
+| Crew dash | Alerts tab list (Active/Pending/All) + room detail; 5s poll; Event home link strip | Web parity still light; Ably client subscribe still deferred; room board still available via `alert-board` |
 | Zone status | Not stored (good) | Room board sorted by severity; zone color can derive later if needed |
 
 ### Decisions log
@@ -207,3 +210,5 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 | 2026-11 | Phase 5: server publishes Ably `alert-board.invalidated`; mobile dash uses 5s poll + focus/AppState refetch (Ably client subscribe deferred — was crashing RN) |
 | 2026-11 | Phase 6: Vitest unit + Neon integration — concurrent creates under room lock, partial resolve color, soft-close history, push post-commit isolation, roster AuthZ on resolve/board/room-alerts |
 | 2026-11 | Backend tests live under `services/backend/test/` only (alerts, chat, notifications, events, permissions + shared fixtures) |
+| 2026-11 | Mobile IA: Event · Alerts · Chat · Settings; Alerts hosts room board; crew event pick lands on Alerts; urgent count tab badge |
+| 2026-11 | Alert list: `GET /me/events/{eventId}/alerts` (active + recent resolved); filters Active=all open, Pending=MEDIUM, All=incl. resolved; inline resolve on Alerts tab |

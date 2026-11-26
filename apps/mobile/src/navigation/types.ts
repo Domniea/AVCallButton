@@ -8,12 +8,25 @@ export type AuthStackParamList = {
   invite: { token?: string };
 };
 
+/** Shared room detail params (Dash + Alerts stacks). */
+export type RoomDetailParams = {
+  workspaceId: string;
+  eventId: string;
+  roomId: string;
+};
+
 /** Dash tab stack: event home → zones → zone/room detail (tabs stay visible). */
 export type DashStackParamList = {
   eventHome: { workspaceId: string; eventId: string };
   eventZones: { workspaceId: string; eventId: string };
   zoneDetail: { workspaceId: string; eventId: string; zoneId: string };
-  roomDetail: { workspaceId: string; eventId: string; roomId: string };
+  roomDetail: RoomDetailParams;
+};
+
+/** Alerts tab: live board → room detail (resolve). */
+export type AlertsStackParamList = {
+  alertsHome: undefined;
+  roomDetail: RoomDetailParams;
 };
 
 export type ChatStackParamList = {
@@ -30,6 +43,7 @@ export type SettingsStackParamList = {
 /** Tabs only after an event is selected. */
 export type MainTabParamList = {
   dash: NavigatorScreenParams<DashStackParamList>;
+  alerts: NavigatorScreenParams<AlertsStackParamList>;
   chat: NavigatorScreenParams<ChatStackParamList>;
   settings: NavigatorScreenParams<SettingsStackParamList>;
 };

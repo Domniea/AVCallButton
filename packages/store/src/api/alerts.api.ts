@@ -86,6 +86,26 @@ export type RoomAlertsResponse = {
   alerts: AlertSummary[];
 };
 
+/** Event-wide alert row (Alerts tab list). */
+export type EventAlertListItem = AlertSummary & {
+  roomName: string;
+  zoneId: string | null;
+  zoneName: string | null;
+};
+
+export type EventAlertListCounts = {
+  active: number;
+  pending: number;
+  urgent: number;
+  resolved: number;
+  all: number;
+};
+
+export type EventAlertListResponse = {
+  counts: EventAlertListCounts;
+  alerts: EventAlertListItem[];
+};
+
 export async function resolveEventAlert(
   token: string,
   eventId: string,
@@ -120,6 +140,18 @@ export async function fetchRoomActiveAlerts(
   const api = getApiClient();
   const res = await api.get<RoomAlertsResponse>(
     `/me/events/${encodeURIComponent(eventId)}/rooms/${encodeURIComponent(roomId)}/alerts`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+}
+
+export async function fetchEventAlerts(
+  token: string,
+  eventId: string,
+): Promise<EventAlertListResponse> {
+  const api = getApiClient();
+  const res = await api.get<EventAlertListResponse>(
+    `/me/events/${encodeURIComponent(eventId)}/alerts`,
     { headers: { Authorization: `Bearer ${token}` } },
   );
   return res.data;

@@ -37,10 +37,16 @@ export function subscribeChatNotificationResponses(): () => void {
     },
   );
 
-  void Notifications.getLastNotificationResponseAsync().then((response) => {
-    if (!response) return;
-    openFromData(response.notification.request.content.data);
-  });
+  void Notifications.getLastNotificationResponseAsync()
+    .then((response) => {
+      if (!response) return;
+      openFromData(response.notification.request.content.data);
+    })
+    .catch((err) => {
+      console.error("Failed to read last notification response:", err);
+    });
 
-  return () => sub.remove();
+  return () => {
+    if (sub && typeof sub.remove === "function") sub.remove();
+  };
 }

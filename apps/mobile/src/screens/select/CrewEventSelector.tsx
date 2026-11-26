@@ -199,7 +199,12 @@ export default function CrewEventSelector() {
                     coverageSummary.roomCount,
                   )}
                   onPress={() =>
-                    navigateToEventHome(navigation, workspaceId, event.id)
+                    navigateToEventHome(
+                      navigation,
+                      workspaceId,
+                      event.id,
+                      "alerts",
+                    )
                   }
                 >
                   <HStack space={2} mt={2} flexWrap="wrap">

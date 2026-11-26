@@ -41,7 +41,7 @@ describe("push stays outside the create transaction", () => {
 });
 
 describe("roster AuthZ on crew alert routes", () => {
-  it("resolve / alert-board / room alerts call assertRosterEntry", () => {
+  it("resolve / alert-board / event alerts / room alerts call assertRosterEntry", () => {
     const resolveSrc = readFileSync(
       join(srcRoot, "events/alerts/resolve.ts"),
       "utf8",
@@ -50,12 +50,21 @@ describe("roster AuthZ on crew alert routes", () => {
       join(srcRoot, "me/events/alertBoard.ts"),
       "utf8",
     );
+    const eventAlertsSrc = readFileSync(
+      join(srcRoot, "me/events/alerts/list.ts"),
+      "utf8",
+    );
     const roomAlertsSrc = readFileSync(
       join(srcRoot, "me/events/rooms/alerts.ts"),
       "utf8",
     );
 
-    for (const source of [resolveSrc, boardSrc, roomAlertsSrc]) {
+    for (const source of [
+      resolveSrc,
+      boardSrc,
+      eventAlertsSrc,
+      roomAlertsSrc,
+    ]) {
       expect(source).toMatch(/assertRosterEntry/);
       expect(source).toMatch(/NOT_ON_ROSTER/);
     }

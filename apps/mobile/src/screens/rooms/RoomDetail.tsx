@@ -41,10 +41,11 @@ import {
   shareRoomDocument,
   type RoomDocumentSource,
 } from "../../lib/roomDocuments";
-import type { DashStackParamList } from "../../navigation/types";
+import { refreshAlertBadgeCount } from "../../lib/alerts/alertBadgeCount";
+import type { RoomDetailParams } from "../../navigation/types";
 import { BasePill } from "../../../components/BasePill";
 
-type RoomDetailRoute = RouteProp<DashStackParamList, "roomDetail">;
+type RoomDetailRoute = RouteProp<{ roomDetail: RoomDetailParams }, "roomDetail">;
 
 function documentsErrorMessage(err: unknown): string {
   const msg = apiErrorMessage(err);
@@ -213,6 +214,7 @@ export default function RoomDetailScreen() {
             ? { ...prev, currentPriority: result.room.currentPriority }
             : prev,
         );
+        void refreshAlertBadgeCount(eventId);
       } catch (err) {
         console.error("Failed to resolve alert:", err);
         setActiveAlerts(previousAlerts);

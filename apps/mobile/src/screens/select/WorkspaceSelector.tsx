@@ -95,7 +95,11 @@ export default function WorkspaceSelector() {
   }
 
   return (
-    <ScreenLayout subtitle={subtitleParts.join(" · ") || undefined}>
+    <ScreenLayout
+      title="Workspaces"
+      subtitle={subtitleParts.join(" · ") || undefined}
+      showMenu={false}
+    >
       <HStack space={2} flexWrap="wrap">
         <BaseButton
           title="Settings"

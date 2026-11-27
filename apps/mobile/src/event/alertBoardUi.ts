@@ -45,6 +45,37 @@ export function severityPillVariant(
   return "success";
 }
 
+const SEVERITY_RANK: Record<RoomSeverity, number> = {
+  urgent: 0,
+  pending: 1,
+  clear: 2,
+};
+
+/** Worst severity wins (urgent > pending > clear). */
+export function maxSeverity(
+  severities: Array<RoomSeverity | null | undefined>,
+): RoomSeverity {
+  let best: RoomSeverity = "clear";
+  for (const severity of severities) {
+    if (!severity) continue;
+    if (SEVERITY_RANK[severity] < SEVERITY_RANK[best]) {
+      best = severity;
+    }
+  }
+  return best;
+}
+
+export function severityStatusCountLabel(
+  severity: RoomSeverity,
+  activeCount: number,
+): string {
+  if (severity === "clear" || activeCount <= 0) return "All Clear";
+  if (severity === "urgent") {
+    return `${activeCount} Active`;
+  }
+  return `${activeCount} Pending`;
+}
+
 export function priorityLabel(priority: AlertPriority): string {
   return priority === "HIGH" ? "Need help now" : "When available";
 }

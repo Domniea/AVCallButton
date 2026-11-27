@@ -37,6 +37,7 @@ const linking = {
             screens: {
               eventHome: "workspace/:workspaceId/event/:eventId",
               eventZones: "workspace/:workspaceId/event/:eventId/zones",
+              eventStaff: "workspace/:workspaceId/event/:eventId/staff",
               zoneDetail: "workspace/:workspaceId/event/:eventId/zone/:zoneId",
               roomDetail: "workspace/:workspaceId/event/:eventId/room/:roomId",
             },
@@ -52,12 +53,6 @@ const linking = {
               chatHome: "event/chat",
               chatThread: "event/chat/thread/:threadId",
               newDm: "event/chat/new",
-            },
-          },
-          settings: {
-            screens: {
-              settingsHome: "event/settings",
-              devMenu: "event/dev",
             },
           },
         },

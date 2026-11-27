@@ -110,7 +110,7 @@ export default function CrewEventSelector() {
 
   if (workspaceFetchStatus === "succeeded" && !workspace) {
     return (
-      <ScreenLayout maxW="720">
+      <ScreenLayout title="Events" showMenu={false} maxW="720">
         <BaseButton
           title="Select a Workspace"
           variety="tertiary"
@@ -132,7 +132,11 @@ export default function CrewEventSelector() {
 
   return (
     <ScreenLayout
-      subtitle={workspace ? workspaceDisplayName(workspace) : "Your assigned events"}
+      title="Events"
+      subtitle={
+        workspace ? workspaceDisplayName(workspace) : "Your assigned events"
+      }
+      showMenu={false}
       maxW="720"
     >
       {workspace ? (

@@ -10,7 +10,6 @@ import { useChatUnreadTotal } from "../lib/chat/useChatUnreadTotal";
 import AlertsStackNavigator from "./AlertsStackNavigator";
 import ChatStackNavigator from "./ChatStackNavigator";
 import DashStackNavigator from "./DashStackNavigator";
-import SettingsStackNavigator from "./SettingsStackNavigator";
 import type { MainTabParamList } from "./types";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -78,16 +77,6 @@ export default function MainTabNavigator() {
           tabBarBadge: chatBadge,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubble-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="settings"
-        component={SettingsStackNavigator}
-        options={{
-          title: "More",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="menu-outline" size={size} color={color} />
           ),
         }}
       />

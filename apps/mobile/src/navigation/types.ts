@@ -15,10 +15,11 @@ export type RoomDetailParams = {
   roomId: string;
 };
 
-/** Dash tab stack: event home → zones → zone/room detail (tabs stay visible). */
+/** Dash tab stack: event home → zones/staff setup → zone/room detail (tabs stay visible). */
 export type DashStackParamList = {
   eventHome: { workspaceId: string; eventId: string };
   eventZones: { workspaceId: string; eventId: string };
+  eventStaff: { workspaceId: string; eventId: string };
   zoneDetail: { workspaceId: string; eventId: string; zoneId: string };
   roomDetail: RoomDetailParams;
 };
@@ -35,26 +36,20 @@ export type ChatStackParamList = {
   newDm: undefined;
 };
 
-export type SettingsStackParamList = {
-  settingsHome: undefined;
-  devMenu: undefined;
-};
-
-/** Tabs only after an event is selected. */
+/** Tabs only after an event is selected. Settings live in the drawer → MainStack. */
 export type MainTabParamList = {
   dash: NavigatorScreenParams<DashStackParamList>;
   alerts: NavigatorScreenParams<AlertsStackParamList>;
   chat: NavigatorScreenParams<ChatStackParamList>;
-  settings: NavigatorScreenParams<SettingsStackParamList>;
 };
 
 export type MainStackParamList = {
   workspaceSelector: undefined;
   eventSelector: { workspaceId: string };
   crewEventSelector: { workspaceId: string };
-  /** Pre-event settings (also available as a tab after an event is selected). */
+  /** Settings (pre-event + via event drawer). */
   settings: undefined;
-  /** Pre-event developer tools (also under the Settings tab stack). */
+  /** Developer tools (from Settings). */
   devMenu: undefined;
   /** Optional `token` when opened via deep link while signed in */
   invite: { token?: string };

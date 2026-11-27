@@ -3,7 +3,6 @@ import { Alert, Linking, Platform } from "react-native";
 import { HStack, Text, VStack, useColorMode } from "../../../components/ui/layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import type { CompositeNavigationProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchAuthSession } from "aws-amplify/auth";
@@ -29,16 +28,10 @@ import {
   type LastSession,
 } from "../../lib/lastSession";
 import { canDeleteEvent } from "../../lib/viewMode";
-import type {
-  MainStackParamList,
-  SettingsStackParamList,
-} from "../../navigation/types";
+import type { MainStackParamList } from "../../navigation/types";
 import { navigateToWorkspaceSelector } from "../../navigation/navigateToWorkspaceSelector";
 
-type SettingsNav = CompositeNavigationProp<
-  NativeStackNavigationProp<SettingsStackParamList, "settingsHome">,
-  NativeStackNavigationProp<MainStackParamList>
->;
+type SettingsNav = NativeStackNavigationProp<MainStackParamList, "settings">;
 
 export default function Settings() {
   const dispatch = useDispatch<AppDispatch>();
@@ -257,7 +250,7 @@ export default function Settings() {
     .join("");
 
   return (
-    <ScreenLayout title="More" maxW="640">
+    <ScreenLayout title="Settings" showBack showMenu={false} maxW="640">
       <BaseCard variant="elevated">
         <HStack space={3} alignItems="center">
           <VStack

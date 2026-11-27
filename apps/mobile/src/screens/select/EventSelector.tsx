@@ -17,7 +17,6 @@ import { BasePill } from "../../../components/BasePill";
 import { ListRow } from "../../../components/ListRow";
 import { LoadingScreen } from "../../../components/LoadingScreen";
 import { ScreenLayout } from "../../../components/ScreenLayout";
-import { SectionHeader } from "../../../components/SectionHeader";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { canAccessAdminDash } from "../../lib/viewMode";
 import { workspaceDisplayName } from "../../lib/workspaceDisplayName";
@@ -98,7 +97,7 @@ export default function EventSelector() {
 
   if (workspaceFetchStatus === "succeeded" && !workspace) {
     return (
-      <ScreenLayout maxW="720">
+      <ScreenLayout title="Events" showMenu={false} maxW="720">
         <BaseButton
           title="Select a Workspace"
           variety="tertiary"
@@ -130,7 +129,9 @@ export default function EventSelector() {
         onClose={() => setIsCreateEventOpen(false)}
       />
       <ScreenLayout
+        title="Events"
         subtitle={workspace ? workspaceDisplayName(workspace) : undefined}
+        showMenu={false}
         maxW="720"
       >
         {workspace ? (
@@ -149,8 +150,6 @@ export default function EventSelector() {
         ) : null}
 
         <BaseCard variant="outline">
-          <SectionHeader>Events</SectionHeader>
-
           {canCreateShow && (
             <BaseButton
               title="Create show"

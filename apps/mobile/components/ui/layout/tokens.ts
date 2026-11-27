@@ -45,8 +45,8 @@ export const RADII: Record<string, number> = {
   none: 0,
   sm: 4,
   md: 8,
-  lg: 16,
-  xl: 24,
+  lg: 12,
+  xl: 16,
   full: 9999,
 };
 

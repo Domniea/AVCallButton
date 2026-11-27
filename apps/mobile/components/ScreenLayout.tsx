@@ -89,13 +89,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 32,
   },
   inner: {
     width: "100%",
     alignSelf: "center",
-    gap: 24,
+    gap: 16,
   },
   header: {
     flexDirection: "row",
@@ -108,8 +108,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 14,

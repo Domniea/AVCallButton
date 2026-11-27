@@ -71,7 +71,7 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
       w={btnWidth}
       alignSelf={center ? "center" : undefined}
       shadow={shadow}
-      borderRadius="xl"
+      borderRadius="lg"
     >
       <ChakraButton
         w="100%"
@@ -80,9 +80,9 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
         color={v.fg}
         borderWidth={v.borderWidth}
         borderColor={v.border}
-        borderRadius="xl"
-        py={4}
-        px={6}
+        borderRadius="lg"
+        py={3}
+        px={5}
         m={margin}
         _hover={{ bg: v.hover }}
         _active={{ bg: v.hover }}

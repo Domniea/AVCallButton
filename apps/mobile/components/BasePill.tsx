@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
   pill: {
     borderRadius: 9999,
     paddingHorizontal: 10,
-    paddingVertical: 2,
+    paddingVertical: 4,
     alignSelf: "flex-start",
   },
   label: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "600",
     textTransform: "capitalize",
   },

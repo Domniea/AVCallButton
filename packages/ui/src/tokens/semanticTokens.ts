@@ -58,7 +58,7 @@ export const semanticTokens = {
 
     cardBorder: {
       value: {
-        _light: "{colors.secondary.200}",
+        _light: "{colors.secondary.100}",
         _dark: "{colors.secondary.700}",
       },
     },
@@ -79,15 +79,15 @@ export const semanticTokens = {
 
     inputBorder: {
       value: {
-        _light: "{colors.primary.500}",
-        _dark: "{colors.accent.600}",
+        _light: "{colors.secondary.200}",
+        _dark: "{colors.secondary.700}",
       },
     },
 
     inputFocusBorder: {
       value: {
-        _light: "{colors.primary.400}",
-        _dark: "{colors.accent.600}",
+        _light: "{colors.primary.500}",
+        _dark: "{colors.accent.500}",
       },
     },
 
@@ -107,8 +107,8 @@ export const semanticTokens = {
 
     buttonPrimaryFg: {
       value: {
-        _light: "{colors.tertiary.50}",
-        _dark: "{colors.tertiary.50}",
+        _light: "{colors.light.surface}",
+        _dark: "{colors.light.surface}",
       },
     },
 
@@ -186,71 +186,71 @@ export const semanticTokens = {
   shadows: {
   card: {
     value: {
-      _light: "0 6px 18px {colors.overlay.black.300}",
-      _dark: "0 10px 30px {colors.overlay.black.600}",
+      _light: "0 4px 20px {colors.overlay.black.100}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
 
   cardDark: {
     value: {
-      _light: "0 6px 18px {colors.overlay.black.300}",
-      _dark: "0 10px 30px {colors.overlay.black.600}",
+      _light: "0 4px 20px {colors.overlay.black.100}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
 
   surface: {
     value: {
-      _light: "0 2px 8px {colors.overlay.black.200}",
-      _dark: "0 4px 16px {colors.overlay.black.500}",
+      _light: "0 2px 8px {colors.overlay.black.50}",
+      _dark: "0 4px 12px {colors.overlay.black.400}",
     },
   },
 
   surfaceDark: {
     value: {
-      _light: "0 2px 8px {colors.overlay.black.200}",
-      _dark: "0 4px 16px {colors.overlay.black.500}",
+      _light: "0 2px 8px {colors.overlay.black.50}",
+      _dark: "0 4px 12px {colors.overlay.black.400}",
     },
   },
 
   surfaceElevated: {
     value: {
-      _light: "0 8px 24px {colors.overlay.black.300}",
-      _dark: "0 8px 24px {colors.overlay.black.600}",
+      _light: "0 8px 24px {colors.overlay.black.200}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
 
   surfaceElevatedDark: {
     value: {
-      _light: "0 8px 24px {colors.overlay.black.300}",
-      _dark: "0 8px 24px {colors.overlay.black.600}",
+      _light: "0 8px 24px {colors.overlay.black.200}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
 
   subtle: {
     value: {
-      _light: "0 1px 3px {colors.overlay.black.200}",
-      _dark: "0 1px 3px {colors.overlay.black.500}",
+      _light: "0 1px 2px {colors.overlay.black.50}",
+      _dark: "0 1px 3px {colors.overlay.black.400}",
     },
   },
 
   subtleDark: {
     value: {
-      _light: "0 1px 3px {colors.overlay.black.200}",
-      _dark: "0 1px 3px {colors.overlay.black.500}",
+      _light: "0 1px 2px {colors.overlay.black.50}",
+      _dark: "0 1px 3px {colors.overlay.black.400}",
     },
   },
 
   outer: {
     value: {
-      _light: "0 8px 24px {colors.overlay.black.300}",
-      _dark: "0 8px 24px {colors.overlay.black.600}",
+      _light: "0 8px 24px {colors.overlay.black.200}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
 
   outerDark: {
     value: {
-      _light: "0 8px 24px {colors.overlay.black.300}",
-      _dark: "0 8px 24px {colors.overlay.black.600}",
+      _light: "0 8px 24px {colors.overlay.black.200}",
+      _dark: "0 8px 24px {colors.overlay.black.500}",
     },
   },
   }

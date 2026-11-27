@@ -27,8 +27,8 @@ type BoardFilter = "all" | RoomSeverity;
 
 type Nav = NativeStackNavigationProp<{ roomDetail: RoomDetailParams }>;
 
-/** Quiet poll while the dash is focused (Ably client subscribe deferred — was crashing RN). */
-const BOARD_POLL_MS = 5_000;
+/** Safety-net poll only — prefer Ably invalidation elsewhere for live updates. */
+const BOARD_POLL_MS = 90_000;
 
 function roomCardMeta(room: AlertBoardRoom): string {
   const severity = severityFromPriority(room.currentPriority);

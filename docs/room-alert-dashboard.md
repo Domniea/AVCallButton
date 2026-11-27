@@ -189,7 +189,7 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 | Guest QR | Create + HIGH/MEDIUM buttons + optional message + confirm copy | ~~create/UX~~ done (Phases 2–3) |
 | Coverage + push | Same heavy push; title distinguishes Urgent vs When available | Keep |
 | Resolve API | `POST /events/{eventId}/alerts/{alertId}/resolve` (roster AuthZ, idempotent) | ~~API~~ done (Phase 2) |
-| Crew dash | Alerts tab list (Active/Pending/All) + room detail; 5s poll; Event home link strip | Web parity still light; Ably client subscribe still deferred; room board still available via `alert-board` |
+| Crew dash | Alerts tab list + badge via Ably invalidate→HTTP sync; 90s backup poll; Event home link strip | Web parity still light; room board API still available via `alert-board` |
 | Zone status | Not stored (good) | Room board sorted by severity; zone color can derive later if needed |
 
 ### Decisions log
@@ -208,6 +208,7 @@ See [`vision.md`](./vision.md): request types, presenter vs attendee QR, submiss
 | 2026-11 | Guest QR: two actions — “Need help now” (HIGH) / “When available” (MEDIUM); same push strength; confirm after submit |
 | 2026-11 | Crew phone MVP: `GET …/alert-board` + `GET …/rooms/{roomId}/alerts`; board filters Urgent/Pending/Clear; resolve from room detail; refetch on focus |
 | 2026-11 | Phase 5: server publishes Ably `alert-board.invalidated`; mobile dash uses 5s poll + focus/AppState refetch (Ably client subscribe deferred — was crashing RN) |
+| 2026-11 | Mobile alerts live path: `useAlertBoardRealtime` → `fetchAndSyncEventAlerts`; badge+list share cache; 90s HTTP backup + focus/AppState refetch |
 | 2026-11 | Phase 6: Vitest unit + Neon integration — concurrent creates under room lock, partial resolve color, soft-close history, push post-commit isolation, roster AuthZ on resolve/board/room-alerts |
 | 2026-11 | Backend tests live under `services/backend/test/` only (alerts, chat, notifications, events, permissions + shared fixtures) |
 | 2026-11 | Mobile IA: Event · Alerts · Chat · Settings; Alerts hosts room board; crew event pick lands on Alerts; urgent count tab badge |

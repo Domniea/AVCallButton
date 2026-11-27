@@ -14,7 +14,7 @@ export function useNavColors() {
     contentBg: palette.bg,
     tabBarBg: palette.surface,
     tabActive: theme.primary,
-    tabInactive: colorMode === "dark" ? "#C4D2E3" : "#4E5D6E",
+    tabInactive: colorMode === "dark" ? "#94A3B8" : "#64748B",
     tabBorder: palette.border,
     navThemeColors: {
       background: palette.bg,

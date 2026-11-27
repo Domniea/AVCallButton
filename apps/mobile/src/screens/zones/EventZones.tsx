@@ -65,8 +65,8 @@ export default function EventZonesScreen() {
       <ScreenLayout title="Zones & rooms" subtitle={event.name} maxW="720">
         <HStack space={2} flexWrap="wrap">
           <BaseButton
-            title="Create zone"
-            variety="secondary"
+            title="+ Add zone"
+            variety="primary"
             btnWidth="auto"
             onPress={() => setIsCreateZoneOpen(true)}
           />

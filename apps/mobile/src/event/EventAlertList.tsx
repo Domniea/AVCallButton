@@ -11,6 +11,7 @@ import { BaseButton } from "../../components/BaseButton";
 import { BaseCard } from "../../components/BaseCard";
 import { BasePill } from "../../components/BasePill";
 import { HStack, Text, VStack } from "../../components/ui/layout";
+import { useColorMode } from "../../providers/ColorModeProvider";
 import { useThemeColors } from "../../hooks/useThemeColors";
 import type { RoomDetailParams } from "../navigation/types";
 import {
@@ -25,13 +26,12 @@ import {
   severityAccent,
   severityFromPriority,
   severityPillVariant,
+  severitySoftBg,
 } from "./alertBoardUi";
 
 type ListFilter = "active" | "pending" | "all";
 
 type Nav = NativeStackNavigationProp<{ roomDetail: RoomDetailParams }>;
-
-const LIST_POLL_MS = 5_000;
 
 const EMPTY_COUNTS = {
   active: 0,
@@ -84,7 +84,8 @@ export function EventAlertList({
   enabled?: boolean;
 }) {
   const navigation = useNavigation<Nav>();
-  const { muted, text, border } = useThemeColors();
+  const { colorMode } = useColorMode();
+  const { muted, text, border, primary, surface, bg } = useThemeColors();
 
   const cached = getCachedEventAlerts(eventId);
   const [alerts, setAlerts] = useState<EventAlertListItem[]>(
@@ -129,7 +130,7 @@ export function EventAlertList({
     [eventId],
   );
 
-  // Background badge polls update this list even while another tab is focused.
+  // Ably invalidation (via badge sync) + backup poll update this list in the background.
   useEffect(() => {
     if (!enabled) return;
     return subscribeAlertList((syncedEventId, data) => {
@@ -153,19 +154,15 @@ export function EventAlertList({
     }, [enabled, eventId, loadAlerts]),
   );
 
+  // Refetch when returning to the app while Alerts is focused (Ably may have been suspended).
   useEffect(() => {
     if (!enabled || !isFocused) return;
-
-    const poll = setInterval(() => {
-      void loadAlerts({ quiet: true });
-    }, LIST_POLL_MS);
 
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active") void loadAlerts({ quiet: true });
     });
 
     return () => {
-      clearInterval(poll);
       if (sub && typeof sub.remove === "function") sub.remove();
     };
   }, [enabled, isFocused, loadAlerts]);
@@ -245,29 +242,39 @@ export function EventAlertList({
         Active requests across rooms. Resolve here or open a room for details.
       </Text>
 
-      <HStack space={2} flexWrap="wrap" mb={3}>
+      <HStack space={1} mb={3} p={1} borderRadius="lg" bg={bg}>
         {(
           [
             ["active", `Active (${counts.active})`],
             ["pending", `Pending (${counts.pending})`],
             ["all", `All (${counts.all})`],
           ] as const
-        ).map(([key, label]) => (
-          <Pressable key={key} onPress={() => setFilter(key)}>
-            <BasePill
-              label={label}
-              variant={
-                filter === key
-                  ? key === "pending"
-                    ? "warning"
-                    : key === "active"
-                      ? "danger"
-                      : "primary"
-                  : "outline"
-              }
-            />
-          </Pressable>
-        ))}
+        ).map(([key, label]) => {
+          const selected = filter === key;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => setFilter(key)}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 8,
+                borderRadius: 10,
+                backgroundColor: selected ? surface : "transparent",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                fontSize="xs"
+                fontWeight="semibold"
+                color={selected ? primary : muted}
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </HStack>
 
       {status === "loading" && alerts.length === 0 ? (
@@ -311,10 +318,13 @@ export function EventAlertList({
               space={2}
               borderWidth={1}
               borderColor={border}
-              borderRadius="md"
+              borderRadius="lg"
               px={3}
               py={3}
               style={{
+                backgroundColor: active
+                  ? severitySoftBg(severity, colorMode)
+                  : surface,
                 borderLeftWidth: 4,
                 borderLeftColor: severityAccent(severity),
                 opacity: active ? 1 : 0.72,

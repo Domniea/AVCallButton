@@ -248,15 +248,46 @@ export default function Settings() {
     return null;
   }
 
+  const displayName = user?.email ?? user?.id ?? "Account";
+  const initials = displayName
+    .split(/[@\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
   return (
-    <ScreenLayout
-      title="Settings"
-      subtitle={user?.email ?? user?.id}
-      maxW="640"
-    >
+    <ScreenLayout title="More" maxW="640">
+      <BaseCard variant="elevated">
+        <HStack space={3} alignItems="center">
+          <VStack
+            alignItems="center"
+            justifyContent="center"
+            w={12}
+            h={12}
+            borderRadius="full"
+            bg="primary.100"
+          >
+            <Text fontSize="md" fontWeight="bold" color="primary.700">
+              {initials || "?"}
+            </Text>
+          </VStack>
+          <VStack flex={1} space={0.5}>
+            <Text fontSize="md" fontWeight="semibold" color={text} numberOfLines={1}>
+              {displayName}
+            </Text>
+            <Text fontSize="sm" color={muted}>
+              {activeWorkspace?.name
+                ? `${activeWorkspace.name}${currentEvent?.name ? ` · ${currentEvent.name}` : ""}`
+                : "Account & preferences"}
+            </Text>
+          </VStack>
+        </HStack>
+      </BaseCard>
+
       <HStack space={2} flexWrap="wrap">
         <BaseButton
-          title="Select a Workspace"
+          title="Switch workspace"
           variety="tertiary"
           btnWidth="auto"
           onPress={() => navigateToWorkspaceSelector(navigation)}

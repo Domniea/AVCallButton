@@ -54,7 +54,7 @@ const cardVariants = {
     fg: ["text", "textDark"] as const,
     border: ["cardBorder", "cardBorderDark"] as const,
     borderWidth: 1,
-    shadow: ["subtle", "subtleDark"] as const,
+    shadow: ["card", "cardDark"] as const,
   },
 };
 
@@ -126,8 +126,8 @@ export const BaseCard: React.FC<BaseCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 24,
-    padding: 24,
+    borderRadius: 12,
+    padding: 16,
     overflow: "hidden",
     position: "relative",
   },
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     width: 4,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     marginBottom: 12,
   },

@@ -20,6 +20,7 @@ import { BaseCard } from "../../../components/BaseCard";
 import { LoadingScreen } from "../../../components/LoadingScreen";
 import { RoomCallLinkActions } from "../../../components/RoomCallLinkActions";
 import { ScreenLayout } from "../../../components/ScreenLayout";
+import { useColorMode } from "../../../providers/ColorModeProvider";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import AssignCoverageModal from "../zones/AssignCoverageModal";
 import { CoverageList, DetailRow } from "../../event/EventUi";
@@ -33,6 +34,7 @@ import {
   severityFromPriority,
   severityLabel,
   severityPillVariant,
+  severitySoftBg,
 } from "../../event/alertBoardUi";
 import {
   formatFileSize,
@@ -41,7 +43,10 @@ import {
   shareRoomDocument,
   type RoomDocumentSource,
 } from "../../lib/roomDocuments";
-import { refreshAlertBadgeCount } from "../../lib/alerts/alertBadgeCount";
+import {
+  refreshAlertBadgeCount,
+  subscribeAlertList,
+} from "../../lib/alerts/alertBadgeCount";
 import type { RoomDetailParams } from "../../navigation/types";
 import { BasePill } from "../../../components/BasePill";
 
@@ -59,6 +64,7 @@ function documentsErrorMessage(err: unknown): string {
 export default function RoomDetailScreen() {
   const route = useRoute<RoomDetailRoute>();
   const { workspaceId, eventId, roomId } = route.params;
+  const { colorMode } = useColorMode();
   const { muted, text, border } = useThemeColors();
   const [assignCoverageModalOpen, setAssignCoverageModalOpen] = useState(false);
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
@@ -240,12 +246,17 @@ export default function RoomDetailScreen() {
     }, [authStatus, loadFiles, loadActiveAlerts]),
   );
 
+  // Ably → shared alert sync notifies us; refetch this room's active alerts.
   useEffect(() => {
     if (authStatus !== "authenticated" || !alertsFocused) return;
-
-    const poll = setInterval(() => {
+    return subscribeAlertList((syncedEventId) => {
+      if (syncedEventId !== eventId) return;
       void loadActiveAlerts({ quiet: true });
-    }, 5_000);
+    });
+  }, [authStatus, alertsFocused, eventId, loadActiveAlerts]);
+
+  useEffect(() => {
+    if (authStatus !== "authenticated" || !alertsFocused) return;
 
     const sub = AppState.addEventListener("change", (state) => {
       if (state === "active") {
@@ -253,7 +264,6 @@ export default function RoomDetailScreen() {
       }
     });
     return () => {
-      clearInterval(poll);
       if (sub && typeof sub.remove === "function") {
         sub.remove();
       }
@@ -462,10 +472,11 @@ export default function RoomDetailScreen() {
                   space={2}
                   borderWidth={1}
                   borderColor={border}
-                  borderRadius="md"
+                  borderRadius="lg"
                   px={3}
                   py={3}
                   style={{
+                    backgroundColor: severitySoftBg(severity, colorMode),
                     borderLeftWidth: 4,
                     borderLeftColor: severityAccent(severity),
                   }}

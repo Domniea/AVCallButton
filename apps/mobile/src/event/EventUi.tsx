@@ -41,13 +41,20 @@ export function StaffRow({
   const surface = useColorModeValue("surface", "surfaceDark");
   const textColor = useColorModeValue("text", "textDark");
   const muted = useColorModeValue("muted", "mutedDark");
+  const label = email ?? "—";
+  const initials = label
+    .split(/[@\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 
   return (
     <HStack
       justifyContent="space-between"
       alignItems="center"
       space={3}
-      py={2}
+      py={2.5}
       px={3}
       borderWidth={1}
       borderColor={rowBorder}
@@ -55,16 +62,30 @@ export function StaffRow({
       bg={surface}
       shadow="subtle"
     >
-      <Box flex={1}>
-        <Text fontSize="sm" color={textColor} numberOfLines={1}>
-          {email ?? "—"}
-        </Text>
-        {subtitle ? (
-          <Text fontSize="xs" color={muted}>
-            {subtitle}
+      <HStack flex={1} space={3} alignItems="center">
+        <Box
+          w={9}
+          h={9}
+          borderRadius="full"
+          bg="primary.100"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Text fontSize="xs" fontWeight="bold" color="primary.700">
+            {initials || "?"}
           </Text>
-        ) : null}
-      </Box>
+        </Box>
+        <Box flex={1}>
+          <Text fontSize="sm" fontWeight="semibold" color={textColor} numberOfLines={1}>
+            {label}
+          </Text>
+          {subtitle ? (
+            <Text fontSize="xs" color={muted}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </Box>
+      </HStack>
       <BasePill label={badge} variant="outline" />
     </HStack>
   );

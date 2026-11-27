@@ -22,6 +22,21 @@ export function severityAccent(severity: RoomSeverity): string {
   return "#16A34A";
 }
 
+/** Soft tint behind alert banners / cards (matches AVControl mockups). */
+export function severitySoftBg(
+  severity: RoomSeverity,
+  mode: "light" | "dark" = "light",
+): string {
+  if (mode === "dark") {
+    if (severity === "urgent") return "#3F1515";
+    if (severity === "pending") return "#3B2410";
+    return "#14301F";
+  }
+  if (severity === "urgent") return "#FEF2F2";
+  if (severity === "pending") return "#FFF7ED";
+  return "#F0FDF4";
+}
+
 export function severityPillVariant(
   severity: RoomSeverity,
 ): "danger" | "warning" | "success" {

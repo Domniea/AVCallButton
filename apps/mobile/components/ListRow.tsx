@@ -92,7 +92,7 @@ export function ListRow({
 const styles = StyleSheet.create({
   row: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: "hidden",
   },
   accent: {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   inner: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingRight: 16,
     gap: 12,
   },
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
     marginTop: 2,
   },
   meta: {

@@ -20,12 +20,12 @@ interface BaseButtonProps {
 /**
  * Primary is pinned to brand solids so token path issues can't wash out CTAs.
  * Matches packages/ui semanticTokens buttonPrimary*:
- *   bg #01796F (primary.500), fg #F2F2F2 (tertiary.50), pressed #01685F
+ *   bg #3B82F6 (primary.500), fg #FFFFFF, pressed #2563EB
  */
 const PRIMARY = {
-  bg: "#01796F",
-  fg: "#F2F2F2",
-  pressed: "#01685F",
+  bg: "#3B82F6",
+  fg: "#FFFFFF",
+  pressed: "#2563EB",
   border: "transparent",
   borderWidth: 0,
 } as const;
@@ -133,7 +133,7 @@ export const BaseButton: React.FC<BaseButtonProps> = ({
 
 const styles = StyleSheet.create({
   wrap: {
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: "visible",
   },
   center: {
@@ -141,15 +141,15 @@ const styles = StyleSheet.create({
   },
   button: {
     minHeight: 48,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
   },
 });

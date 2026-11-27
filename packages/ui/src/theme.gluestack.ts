@@ -47,11 +47,11 @@ export function getSemanticPalette(mode: ColorMode) {
       ? resolvedColors.cardBorderDark
       : resolvedColors.cardBorder) as string,
     primary: dark
-      ? shade(resolvedColors.accent, "600", "#45FFD4")
-      : shade(resolvedColors.primary, "500", "#01796F"),
+      ? shade(resolvedColors.accent, "500", "#60A5FA")
+      : shade(resolvedColors.primary, "500", "#3B82F6"),
     primarySoft: dark
-      ? shade(resolvedColors.primary, "900", "#002624")
-      : shade(resolvedColors.primary, "100", "#B3E5DF"),
+      ? shade(resolvedColors.primary, "900", "#101828")
+      : shade(resolvedColors.primary, "100", "#DBEAFE"),
   };
 }
 
@@ -124,63 +124,63 @@ export function buildGluestackCssVars(mode: ColorMode): Record<string, string> {
   const dark = mode === "dark";
   const c = resolvedColors;
   const primary = dark
-    ? (c.accent?.["600"] as string) ?? "#45FFD4"
-    : (c.primary?.["500"] as string) ?? "#01796F";
-  const primaryFg = (c.tertiary?.["50"] as string) ?? "#F2F2F2";
+    ? (c.accent?.["500"] as string) ?? "#60A5FA"
+    : (c.primary?.["500"] as string) ?? "#3B82F6";
+  const primaryFg = "#FFFFFF";
   const bg = dark ? c.bgDark : c.bg;
   const text = dark ? c.textDark : c.text;
   const muted = dark ? c.textMutedDark : c.textMuted;
   const surface = dark ? c.surfaceDark : c.surface;
   const cardBg = dark ? c.cardBgDark : c.cardBg;
   const border = dark ? c.cardBorderDark : c.cardBorder;
-  const accent = (c.accent?.["600"] as string) ?? "#45FFD4";
+  const accent = (c.accent?.["500"] as string) ?? "#60A5FA";
 
   const secondary = dark
-    ? ((c.tertiary as Record<string, string> | undefined)?.["700"] ?? "#3A3A3A")
-    : ((c.secondary as Record<string, string> | undefined)?.["50"] ?? "#F0F4F9");
+    ? ((c.tertiary as Record<string, string> | undefined)?.["700"] ?? "#344054")
+    : ((c.secondary as Record<string, string> | undefined)?.["50"] ?? "#F8FAFC");
   const primarySoft = dark
-    ? ((c.primary as Record<string, string> | undefined)?.["900"] ?? "#002624")
-    : ((c.primary as Record<string, string> | undefined)?.["100"] ?? "#B3E5DF");
+    ? ((c.primary as Record<string, string> | undefined)?.["900"] ?? "#101828")
+    : ((c.primary as Record<string, string> | undefined)?.["100"] ?? "#DBEAFE");
   const accentFg =
-    (c.primary as Record<string, string> | undefined)?.["900"] ?? "#002624";
+    (c.primary as Record<string, string> | undefined)?.["900"] ?? "#101828";
 
   const vars: Record<string, string> = {
     // shadcn-style keys Gluestack components expect
-    "--background": channelsOrFallback(bg ?? "#F2F2F2", "242 242 242"),
-    "--foreground": channelsOrFallback(text ?? "#002624", "0 38 36"),
-    "--primary": channelsOrFallback(primary, "1 121 111"),
-    "--primary-foreground": channelsOrFallback(primaryFg, "242 242 242"),
-    "--secondary": channelsOrFallback(secondary, "240 244 249"),
-    "--secondary-foreground": channelsOrFallback(text ?? "#002624", "0 38 36"),
-    "--accent": channelsOrFallback(accent, "69 255 212"),
-    "--accent-foreground": channelsOrFallback(accentFg, "0 38 36"),
+    "--background": channelsOrFallback(bg ?? "#F8F9FB", "248 249 251"),
+    "--foreground": channelsOrFallback(text ?? "#101828", "16 24 40"),
+    "--primary": channelsOrFallback(primary, "59 130 246"),
+    "--primary-foreground": channelsOrFallback(primaryFg, "255 255 255"),
+    "--secondary": channelsOrFallback(secondary, "248 250 252"),
+    "--secondary-foreground": channelsOrFallback(text ?? "#101828", "16 24 40"),
+    "--accent": channelsOrFallback(accent, "96 165 250"),
+    "--accent-foreground": channelsOrFallback(accentFg, "16 24 40"),
     "--muted": channelsOrFallback(
-      (dark ? c.bgMutedDark : c.bgMuted) ?? "#DCDCDC",
-      "220 220 220",
+      (dark ? c.bgMutedDark : c.bgMuted) ?? "#F1F3F7",
+      "241 243 247",
     ),
-    "--muted-foreground": channelsOrFallback(muted ?? "#5E7083", "94 112 131"),
+    "--muted-foreground": channelsOrFallback(muted ?? "#475569", "71 85 105"),
     "--destructive": channelsOrFallback(
       dark ? dangerColors["red.300"] : dangerColors["red.500"],
       "239 68 68",
     ),
     "--card": channelsOrFallback(cardBg ?? "#FFFFFF", "255 255 255"),
     "--popover": channelsOrFallback(surface ?? "#FFFFFF", "255 255 255"),
-    "--popover-foreground": channelsOrFallback(text ?? "#002624", "0 38 36"),
-    "--border": channelsOrFallback(border ?? "#C4D2E3", "196 210 227"),
+    "--popover-foreground": channelsOrFallback(text ?? "#101828", "16 24 40"),
+    "--border": channelsOrFallback(border ?? "#EEF2F7", "238 242 247"),
     "--input": channelsOrFallback(
-      (dark ? c.inputBorderDark : c.inputBorder) ?? "#01796F",
-      "1 121 111",
+      (dark ? c.inputBorderDark : c.inputBorder) ?? "#E2E8F0",
+      "226 232 240",
     ),
-    "--ring": channelsOrFallback(primary, "1 121 111"),
+    "--ring": channelsOrFallback(primary, "59 130 246"),
 
     // Our semantic aliases (same meanings as packages/ui tokens)
-    "--av-bg": channelsOrFallback(bg ?? "#F2F2F2", "242 242 242"),
+    "--av-bg": channelsOrFallback(bg ?? "#F8F9FB", "248 249 251"),
     "--av-surface": channelsOrFallback(surface ?? "#FFFFFF", "255 255 255"),
-    "--av-text": channelsOrFallback(text ?? "#002624", "0 38 36"),
-    "--av-muted": channelsOrFallback(muted ?? "#5E7083", "94 112 131"),
-    "--av-border": channelsOrFallback(border ?? "#C4D2E3", "196 210 227"),
-    "--av-primary": channelsOrFallback(primary, "1 121 111"),
-    "--av-primary-soft": channelsOrFallback(primarySoft, "179 229 223"),
+    "--av-text": channelsOrFallback(text ?? "#101828", "16 24 40"),
+    "--av-muted": channelsOrFallback(muted ?? "#475569", "71 85 105"),
+    "--av-border": channelsOrFallback(border ?? "#EEF2F7", "238 242 247"),
+    "--av-primary": channelsOrFallback(primary, "59 130 246"),
+    "--av-primary-soft": channelsOrFallback(primarySoft, "219 234 254"),
   };
 
   // Foundation scale as CSS vars for className usage: --av-primary-500 etc.

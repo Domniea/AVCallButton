@@ -34,10 +34,18 @@ export default function MainTabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: tabActive,
         tabBarInactiveTintColor: tabInactive,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginBottom: 2,
+        },
         tabBarStyle: {
           backgroundColor: tabBarBg,
           borderTopColor: tabBorder,
+          borderTopWidth: 1,
+          paddingTop: 4,
+          height: 58,
         },
       }}
     >
@@ -45,9 +53,9 @@ export default function MainTabNavigator() {
         name="dash"
         component={DashStackNavigator}
         options={{
-          title: "Event",
+          title: "Overview",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Ionicons name="grid-outline" size={size} color={color} />
           ),
         }}
       />
@@ -58,7 +66,7 @@ export default function MainTabNavigator() {
           title: "Alerts",
           tabBarBadge: alertsBadge,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="warning-outline" size={size} color={color} />
+            <Ionicons name="notifications-outline" size={size} color={color} />
           ),
         }}
       />
@@ -77,9 +85,9 @@ export default function MainTabNavigator() {
         name="settings"
         component={SettingsStackNavigator}
         options={{
-          title: "Settings",
+          title: "More",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="menu-outline" size={size} color={color} />
           ),
         }}
       />

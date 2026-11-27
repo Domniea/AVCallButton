@@ -52,7 +52,7 @@ export default function AlertsHome() {
 
   if (!session) {
     return (
-      <ScreenLayout maxW="720">
+      <ScreenLayout title="Alerts" maxW="720">
         <Text fontSize="sm" color={muted}>
           No event selected. Pick an event from the Event tab first.
         </Text>
@@ -61,7 +61,7 @@ export default function AlertsHome() {
   }
 
   return (
-    <ScreenLayout maxW="720">
+    <ScreenLayout title="Alerts" maxW="720">
       <EventAlertList
         workspaceId={session.workspaceId}
         eventId={session.eventId}

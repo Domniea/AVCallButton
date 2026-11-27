@@ -9,29 +9,17 @@ const Stack = createNativeStackNavigator<AlertsStackParamList>();
 
 /** Alerts tab: board → room detail (tabs stay visible). */
 export default function AlertsStackNavigator() {
-  const { headerBg, headerTint, contentBg } = useNavColors();
+  const { contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTransparent: false,
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
-        headerShadowVisible: false,
+        headerShown: false,
         contentStyle: { backgroundColor: contentBg },
       }}
     >
-      <Stack.Screen
-        name="alertsHome"
-        component={AlertsHome}
-        options={{ title: "Alerts" }}
-      />
-      <Stack.Screen
-        name="roomDetail"
-        component={RoomDetailScreen}
-        options={{ title: "Room" }}
-      />
+      <Stack.Screen name="alertsHome" component={AlertsHome} />
+      <Stack.Screen name="roomDetail" component={RoomDetailScreen} />
     </Stack.Navigator>
   );
 }

@@ -10,34 +10,18 @@ const Stack = createNativeStackNavigator<ChatStackParamList>();
 
 /** Chat tab: inbox → thread / new DM. */
 export default function ChatStackNavigator() {
-  const { headerBg, headerTint, contentBg } = useNavColors();
+  const { contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTransparent: false,
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
-        headerShadowVisible: false,
+        headerShown: false,
         contentStyle: { backgroundColor: contentBg },
       }}
     >
-      <Stack.Screen
-        name="chatHome"
-        component={ChatHome}
-        options={{ title: "Chat" }}
-      />
-      <Stack.Screen
-        name="chatThread"
-        component={ChatThreadScreen}
-        options={{ title: "Chat" }}
-      />
-      <Stack.Screen
-        name="newDm"
-        component={NewDmScreen}
-        options={{ title: "New message" }}
-      />
+      <Stack.Screen name="chatHome" component={ChatHome} />
+      <Stack.Screen name="chatThread" component={ChatThreadScreen} />
+      <Stack.Screen name="newDm" component={NewDmScreen} />
     </Stack.Navigator>
   );
 }

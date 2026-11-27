@@ -249,7 +249,11 @@ export default function Settings() {
   }
 
   return (
-    <ScreenLayout subtitle={user?.email ?? user?.id} maxW="640">
+    <ScreenLayout
+      title="Settings"
+      subtitle={user?.email ?? user?.id}
+      maxW="640"
+    >
       <HStack space={2} flexWrap="wrap">
         <BaseButton
           title="Select a Workspace"

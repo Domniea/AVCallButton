@@ -4,15 +4,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
+  View,
+  StyleSheet,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Box, HStack, Text } from "../../../components/ui/layout";
 import {
   useFocusEffect,
-  useNavigation,
   useRoute,
   type RouteProp,
 } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSelector } from "react-redux";
 
 import { getIdToken } from "@av/auth-client";
@@ -27,11 +28,11 @@ import {
 import { BaseButton } from "../../../components/BaseButton";
 import { BaseInput } from "../../../components/BaseInput";
 import { LoadingScreen } from "../../../components/LoadingScreen";
+import { ScreenBackButton } from "../../../components/ScreenBackButton";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 import { getLastSession } from "../../lib/lastSession";
 import type { ChatStackParamList } from "../../navigation/types";
 
-type ThreadNav = NativeStackNavigationProp<ChatStackParamList, "chatThread">;
 type ThreadRoute = RouteProp<ChatStackParamList, "chatThread">;
 
 const POLL_MS = 10_000;
@@ -47,10 +48,11 @@ function formatTime(iso: string): string {
 
 /** Messenger for one thread — Ably realtime + poll fallback while focused. */
 export default function ChatThreadScreen() {
-  const navigation = useNavigation<ThreadNav>();
   const route = useRoute<ThreadRoute>();
+  const insets = useSafeAreaInsets();
   const { threadId, title } = route.params;
   const { bg, surface, text, muted, primary, border } = useThemeColors();
+  const threadTitle = title || "Chat";
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
   const myUserId = useSelector((state: RootState) => state.auth.user?.id);
@@ -76,10 +78,6 @@ export default function ChatThreadScreen() {
       listRef.current?.scrollToEnd({ animated });
     });
   }, []);
-
-  useEffect(() => {
-    navigation.setOptions({ title: title || "Chat" });
-  }, [navigation, title]);
 
   const markLatestRead = useCallback(
     async (token: string, list: ChatMessage[]) => {
@@ -248,9 +246,22 @@ export default function ChatThreadScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
     >
-      <Box flex={1} bg={bg}>
+      <Box flex={1} bg={bg} style={{ paddingTop: insets.top }}>
+        <View style={styles.topRow}>
+          <ScreenBackButton />
+          <Text
+            fontSize="xl"
+            fontWeight="700"
+            color={text}
+            numberOfLines={1}
+            style={styles.topTitle}
+          >
+            {threadTitle}
+          </Text>
+        </View>
+
         {error ? (
           <Box px={4} py={2}>
             <Text fontSize="sm" color={muted}>
@@ -359,3 +370,17 @@ export default function ChatThreadScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingBottom: 8,
+    gap: 4,
+  },
+  topTitle: {
+    flex: 1,
+    paddingTop: 2,
+  },
+});

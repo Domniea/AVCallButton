@@ -8,6 +8,7 @@ import {
   eventAlertBoardChannelName,
   parseAlertBoardInvalidation,
 } from "./alertBoardAbly";
+import { subscribeAblyChannel } from "./subscribeAblyChannel";
 import { scheduleAblyTeardown } from "./teardownAbly";
 import type { GetIdToken } from "./types";
 
@@ -65,9 +66,23 @@ export function useAlertBoardRealtime({
     const subscribeWhenReady = (client: Ably.Realtime) => {
       const start = () => {
         if (closed) return;
-        client.channels
-          .get(channelName)
-          .subscribe(ALERT_BOARD_INVALIDATED_EVENT, onMessage);
+        void (async () => {
+          try {
+            await subscribeAblyChannel(
+              client,
+              channelName,
+              ALERT_BOARD_INVALIDATED_EVENT,
+              onMessage,
+            );
+          } catch (err) {
+            if (!closed) {
+              console.error(
+                "Failed to subscribe Ably alert-board channel:",
+                err,
+              );
+            }
+          }
+        })();
       };
 
       if (client.connection.state === "connected") {

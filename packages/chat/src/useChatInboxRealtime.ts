@@ -9,6 +9,7 @@ import {
   normalizeAblyChatMessage,
   parseAblyMessageData,
 } from "./chatAbly";
+import { subscribeAblyChannel } from "./subscribeAblyChannel";
 import { scheduleAblyTeardown } from "./teardownAbly";
 import type { GetIdToken } from "./types";
 
@@ -63,11 +64,23 @@ export function useChatInboxRealtime({
     const subscribeWhenReady = (client: Ably.Realtime, channels: string[]) => {
       const start = () => {
         if (closed) return;
-        for (const name of channels) {
-          client.channels
-            .get(name)
-            .subscribe(CHAT_MESSAGE_CREATED_EVENT, onMessage);
-        }
+        void (async () => {
+          try {
+            for (const name of channels) {
+              if (closed) return;
+              await subscribeAblyChannel(
+                client,
+                name,
+                CHAT_MESSAGE_CREATED_EVENT,
+                onMessage,
+              );
+            }
+          } catch (err) {
+            if (!closed) {
+              console.error("Failed to subscribe Ably inbox channels:", err);
+            }
+          }
+        })();
       };
 
       if (client.connection.state === "connected") {

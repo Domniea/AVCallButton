@@ -6,8 +6,9 @@
   "scripts": {
     "ios": "expo run:ios --device 'iPhone 18 Pro Max'",
     "ios:start": "expo start --dev-client",
-    "android": "expo run:android",
-    "android:start": "expo start --dev-client --android",
+    "android": "expo run:android --device Pixel_10_API_36",
+    "android:emulator": "bash ../../scripts/android-emulator.sh",
+    "android:start": "bash ../../scripts/android-dev.sh",
     "start": "expo start --dev-client",
     "start:clear": "expo start --dev-client --clear",
     "prebuild": "expo prebuild",

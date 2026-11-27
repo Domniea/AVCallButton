@@ -9,9 +9,21 @@ let suppressConnectionClosedDepth = 0;
 let rejectionHandlerInstalled = false;
 
 function installConnectionClosedSuppression() {
-  if (rejectionHandlerInstalled || typeof window === "undefined") return;
+  if (rejectionHandlerInstalled) return;
+
+  const target =
+    typeof globalThis !== "undefined"
+      ? (globalThis as typeof globalThis & {
+          addEventListener?: (
+            type: string,
+            listener: (event: { reason?: unknown; preventDefault?: () => void }) => void,
+          ) => void;
+        })
+      : null;
+  if (!target || typeof target.addEventListener !== "function") return;
+
   rejectionHandlerInstalled = true;
-  window.addEventListener("unhandledrejection", (event) => {
+  target.addEventListener("unhandledrejection", (event) => {
     if (suppressConnectionClosedDepth <= 0) return;
     const reason = event.reason;
     const message =
@@ -19,7 +31,7 @@ function installConnectionClosedSuppression() {
         ? String((reason as { message: unknown }).message)
         : String(reason);
     if (message === "Connection closed") {
-      event.preventDefault();
+      event.preventDefault?.();
     }
   });
 }

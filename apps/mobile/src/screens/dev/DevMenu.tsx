@@ -46,7 +46,7 @@ export default function DevMenu() {
   };
 
   return (
-    <ScreenLayout subtitle="Testing tools" maxW="640">
+    <ScreenLayout title="Developer" subtitle="Testing tools" maxW="640">
       <BaseCard title="View mode" titleAlign="start" variant="outline">
         <Text fontSize="sm" color={muted} mb={4}>
           Prefer lead (admin) or crew when opening a workspace. After switching,

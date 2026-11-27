@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Box,
   VStack,
@@ -60,6 +61,7 @@ export default function CrewEventDashboard() {
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<CrewEventDashboardNav>();
   const route = useRoute<CrewEventDashboardRoute>();
+  const insets = useSafeAreaInsets();
   const { workspaceId, eventId } = route.params;
 
   const authStatus = useSelector((state: RootState) => state.auth.status);
@@ -108,7 +110,13 @@ export default function CrewEventDashboard() {
 
   return (
     <Box flex={1} bg={bg}>
-      <ScrollView px={6} py={6} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        px={6}
+        contentContainerStyle={{
+          paddingTop: insets.top + 16,
+          paddingBottom: 32,
+        }}
+      >
         <VStack space={4} maxW="720" alignSelf="center" w="100%">
           {detailStatus === "loading" && (
             <Text color={muted}>Loading your event coverage…</Text>

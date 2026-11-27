@@ -1,4 +1,5 @@
 import { PropsWithChildren } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AmplifyProvider } from "./AmplifyProvider.native";
 import { ReduxProvider } from "./ReduxProvider.native";
@@ -9,16 +10,18 @@ import { ApiProvider } from "./ApiProvider";
 
 export function ClientProviders({ children }: PropsWithChildren) {
   return (
-    <GluestackProviderWrapper>
-      <AmplifyProvider>
-        <ApiProvider>
-          <ReduxProvider>
-            <AuthBootstrapProvider>
-              <PushRegistrationProvider>{children}</PushRegistrationProvider>
-            </AuthBootstrapProvider>
-          </ReduxProvider>
-        </ApiProvider>
-      </AmplifyProvider>
-    </GluestackProviderWrapper>
+    <SafeAreaProvider>
+      <GluestackProviderWrapper>
+        <AmplifyProvider>
+          <ApiProvider>
+            <ReduxProvider>
+              <AuthBootstrapProvider>
+                <PushRegistrationProvider>{children}</PushRegistrationProvider>
+              </AuthBootstrapProvider>
+            </ReduxProvider>
+          </ApiProvider>
+        </AmplifyProvider>
+      </GluestackProviderWrapper>
+    </SafeAreaProvider>
   );
 }

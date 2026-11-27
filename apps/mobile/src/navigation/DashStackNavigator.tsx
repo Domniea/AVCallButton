@@ -11,39 +11,19 @@ const Stack = createNativeStackNavigator<DashStackParamList>();
 
 /** Event dashboard + zones/rooms drill-down (keeps bottom tabs visible). */
 export default function DashStackNavigator() {
-  const { headerBg, headerTint, contentBg } = useNavColors();
+  const { contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTransparent: false,
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
-        headerShadowVisible: false,
+        headerShown: false,
         contentStyle: { backgroundColor: contentBg },
       }}
     >
-      <Stack.Screen
-        name="eventHome"
-        component={EventHome}
-        options={{ title: "Event Dashboard" }}
-      />
-      <Stack.Screen
-        name="eventZones"
-        component={EventZonesScreen}
-        options={{ title: "Zones & rooms" }}
-      />
-      <Stack.Screen
-        name="zoneDetail"
-        component={ZoneDetailScreen}
-        options={{ title: "Zone" }}
-      />
-      <Stack.Screen
-        name="roomDetail"
-        component={RoomDetailScreen}
-        options={{ title: "Room" }}
-      />
+      <Stack.Screen name="eventHome" component={EventHome} />
+      <Stack.Screen name="eventZones" component={EventZonesScreen} />
+      <Stack.Screen name="zoneDetail" component={ZoneDetailScreen} />
+      <Stack.Screen name="roomDetail" component={RoomDetailScreen} />
     </Stack.Navigator>
   );
 }

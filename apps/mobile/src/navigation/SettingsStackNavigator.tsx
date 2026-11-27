@@ -9,29 +9,17 @@ const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 /** Settings tab stack (developer tools nested under Settings). */
 export default function SettingsStackNavigator() {
-  const { headerBg, headerTint, contentBg } = useNavColors();
+  const { contentBg } = useNavColors();
 
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTransparent: false,
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerTint,
-        headerTitleStyle: { fontWeight: "600", fontSize: 17 },
-        headerShadowVisible: false,
+        headerShown: false,
         contentStyle: { backgroundColor: contentBg },
       }}
     >
-      <Stack.Screen
-        name="settingsHome"
-        component={Settings}
-        options={{ title: "Settings" }}
-      />
-      <Stack.Screen
-        name="devMenu"
-        component={DevMenu}
-        options={{ title: "Developer" }}
-      />
+      <Stack.Screen name="settingsHome" component={Settings} />
+      <Stack.Screen name="devMenu" component={DevMenu} />
     </Stack.Navigator>
   );
 }
